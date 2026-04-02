@@ -1,0 +1,13 @@
+# Aurel3 suggested cron entries
+
+# OpenClaw-first cycle: export -> prepare -> interpret -> signal scan
+30 9,13,17 * * 1-5 bash /root/aurel3/cron.sh openclaw_cycle
+
+# Watchlist review: more frequent than entry scans
+30 10,14,18,20 * * 1-5 bash /root/aurel3/cron.sh watchlist_review
+
+# Review matured recommendations on weekdays
+0 21 * * 1-5 bash /root/aurel3/cron.sh review_signals
+
+# Weekly summary
+0 9 * * 0 bash /root/aurel3/cron.sh review_summary
