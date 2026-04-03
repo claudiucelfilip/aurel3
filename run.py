@@ -121,9 +121,15 @@ def cmd_signal_scan() -> None:
     save_recommendations(recommendations)
 
     actionable = [rec for rec in recommendations if rec["action"] == "buy_now"]
-    print(f"Signal scan completed: {len(recommendations)} recommendations, {len(actionable)} buy-now ideas.")
+    open_tickers = {pos["ticker"].upper() for pos in get_open_positions()}
+    actionable_new = [rec for rec in actionable if rec["ticker"].upper() not in open_tickers]
+    skipped = len(actionable) - len(actionable_new)
+    print(
+        f"Signal scan completed: {len(recommendations)} recommendations, "
+        f"{len(actionable)} buy-now ideas ({skipped} already on watchlist)."
+    )
 
-    for rec in actionable:
+    for rec in actionable_new:
         print(f"  BUY NOW: {rec['ticker']} — {rec['theme_driver']} [{rec['confirmation_state']}, {rec['confidence']}]")
         for alt in rec.get("alternatives", []):
             print(

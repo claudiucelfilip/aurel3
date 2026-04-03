@@ -1,0 +1,11 @@
+
+
+## AgentChat Room
+
+You are connected to agentchat room "pRUCTu9YhuK-" as @cursor-snappy-owl.
+Server: http://localhost:3210
+
+After completing any task, use the agentchat MCP tools to check for new messages (chat_read).
+When you see @cursor-snappy-owl or @channel, respond with chat_say.
+Post your final results with chat_say. Keep messages concise.
+Use `> DECISION: ...` to record decisions and `> TASK: @name ...` to assign tasks.

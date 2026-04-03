@@ -49,6 +49,7 @@ def get_stock_data(ticker: str) -> dict | None:
         ema_20 = None
         ema_50 = None
         avg_daily_move = None
+        change_5d = None
         try:
             hist = stock.history(period="3mo", auto_adjust=True)
             if hist is not None and len(hist) >= 20:
@@ -58,6 +59,10 @@ def get_stock_data(ticker: str) -> dict | None:
                 avg_daily_move = round(float(daily_returns.mean()), 4)
             if hist is not None and len(hist) >= 50:
                 ema_50 = float(hist["Close"].ewm(span=50).mean().iloc[-1])
+            if hist is not None and len(hist) >= 6:
+                close_5d_ago = float(hist["Close"].iloc[-6])
+                if close_5d_ago > 0:
+                    change_5d = round((current_price / close_5d_ago) - 1, 4)
         except Exception:
             pass
 
@@ -87,6 +92,7 @@ def get_stock_data(ticker: str) -> dict | None:
             "ema_20": round(ema_20, 2) if ema_20 else None,
             "ema_50": round(ema_50, 2) if ema_50 else None,
             "avg_daily_move": avg_daily_move,
+            "change_5d": change_5d,
             "trend": trend,
             "sector": None,  # populated lazily by get_sector()
             "is_crypto": is_crypto,

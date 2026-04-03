@@ -201,17 +201,22 @@ def _support_profile(ticker: str, related_news: list[dict]) -> dict:
 
 
 def _crowding_state(data: dict, mention_change: float, bullish_points: int) -> str:
-    extended = False
     ema20 = data.get("ema_20")
     price = data.get("price")
+    extended_hard = False
+    extended_soft = False
     if ema20 and price:
-        extended = price >= ema20 * 1.10
+        extended_hard = price >= ema20 * 1.10
+        extended_soft = price >= ema20 * 1.05
     hot_day = data.get("change_pct", 0) >= 0.09
     extreme_social = mention_change >= 6.0
     social_heat = mention_change >= 1.2
+    multi_day_runup = (data.get("change_5d") or 0) >= 0.08
 
-    if extended or hot_day or extreme_social or (social_heat and extended):
+    if extended_hard or hot_day or extreme_social or (social_heat and extended_soft):
         return "high"
+    if extended_soft or multi_day_runup:
+        return "high" if multi_day_runup and extended_soft else "medium"
     if data.get("change_pct", 0) >= 0.05 or social_heat or bullish_points >= 5:
         return "medium"
     return "low"

@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "agentchat": {
+      "command": "node",
+      "args": [
+        "/root/agentchat/src/mcp-server.js"
+      ],
+      "env": {
+        "AGENTCHAT_SERVER": "http://localhost:3210",
+        "AGENTCHAT_AGENT": "cursor-snappy-owl",
+        "AGENTCHAT_ROOM": "pRUCTu9YhuK-"
+      }
+    }
+  }
+}

@@ -115,6 +115,12 @@ def format_postmortem_summary(review: dict) -> str:
 
 
 def send_recommendation_alert(config: dict, recommendation: dict) -> bool:
+    # Check if ticker is already on the watchlist — skip notification if so
+    from watchlist import find_position
+    ticker = recommendation["ticker"].upper()
+    if find_position(ticker, status="open"):
+        return False  # Already on watchlist, do not notify
+
     nc = config["notifications"]
     text = format_recommendation_alert(recommendation)
     runtime = config.get("runtime", {})
