@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import time
 from pathlib import Path
 
 from openclaw_import import validate_payload
@@ -25,6 +26,8 @@ def load_runtime_config() -> dict:
         "thinking": openclaw.get("thinking", "medium"),
         "timeout_seconds": int(openclaw.get("timeout_seconds", 120)),
         "max_input_items": int(openclaw.get("max_input_items", 40)),
+        "max_retries": int(openclaw.get("max_retries", 3)),
+        "retry_delay_seconds": int(openclaw.get("retry_delay_seconds", 8)),
     }
 
 
@@ -55,13 +58,62 @@ def build_agent_message(task_payload: dict) -> str:
     ])
 
 
+def _describe_provider(envelope: dict) -> str:
+    """Best-effort human-readable provider/model label for error messages."""
+    agent_meta = envelope.get("result", {}).get("meta", {}).get("agentMeta", {})
+    provider = agent_meta.get("provider") or "?"
+    model = agent_meta.get("model") or "?"
+    return f"{provider}/{model}"
+
+
+def check_envelope_for_errors(envelope: dict) -> None:
+    """Raise a descriptive error if the CLI envelope indicates a failure.
+
+    The OpenClaw envelope reports top-level ``status`` and a
+    ``result.meta`` block with ``stopReason`` and ``aborted`` flags.
+    When a provider (e.g. Gemini) returns an error like a 429 quota
+    exhausted, the envelope still comes back with status=ok but empty
+    payloads and stopReason=error. We surface that explicitly instead
+    of failing downstream with a cryptic JSON-parse error.
+    """
+    if envelope.get("status") and envelope.get("status") != "ok":
+        raise RuntimeError(
+            "OpenClaw agent returned non-ok status: "
+            f"{envelope.get('status')} (summary={envelope.get('summary')!r}, "
+            f"model={_describe_provider(envelope)})"
+        )
+    result = envelope.get("result", {})
+    meta = result.get("meta", {})
+    if meta.get("aborted"):
+        raise RuntimeError(
+            f"OpenClaw agent run was aborted (model={_describe_provider(envelope)})."
+        )
+    stop_reason = meta.get("stopReason")
+    if stop_reason and stop_reason not in ("stop", "end_turn", "tool_use"):
+        raise RuntimeError(
+            f"OpenClaw agent returned stopReason={stop_reason!r} "
+            f"(model={_describe_provider(envelope)}). "
+            "This typically indicates a provider-side error (rate limit, "
+            "auth, content filter, etc.)."
+        )
+
+
 def extract_agent_text(payload: dict) -> str:
     result = payload.get("result", {})
-    for item in result.get("payloads", []):
+    payloads = result.get("payloads", [])
+    if not payloads:
+        raise ValueError(
+            "OpenClaw agent returned zero payloads "
+            f"(model={_describe_provider(payload)}). Likely a provider error."
+        )
+    for item in payloads:
         text = item.get("text")
         if text:
             return text
-    raise ValueError("OpenClaw agent response did not include a text payload.")
+    raise ValueError(
+        "OpenClaw agent response had payloads but no text content "
+        f"(model={_describe_provider(payload)})."
+    )
 
 
 def _switch_model(model: str) -> str | None:
@@ -87,13 +139,44 @@ def _switch_model(model: str) -> str | None:
     return None
 
 
-def call_openclaw_agent(runtime: dict, task_payload: dict) -> dict:
-    # Temporarily switch to the interpretation model if configured
-    interpretation_model = runtime.get("model")
-    prev_model = None
-    if interpretation_model:
-        prev_model = _switch_model(interpretation_model)
+def _extract_json_object(text: str, envelope: dict) -> dict:
+    text = text.strip()
+    if text.startswith("```"):
+        text = text.split("\n", 1)[1] if "\n" in text else text[3:]
+    if text.endswith("```"):
+        text = text[:-3]
+    text = text.strip()
 
+    start = text.find("{")
+    if start < 0:
+        excerpt = text[:400].replace("\n", " ")
+        raise ValueError(
+            "No JSON object found in OpenClaw response "
+            f"(model={_describe_provider(envelope)}, text_len={len(text)}). "
+            f"First 400 chars: {excerpt!r}"
+        )
+
+    depth = 0
+    for i, ch in enumerate(text[start:], start):
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                fragment = text[start : i + 1]
+                try:
+                    return json.loads(fragment)
+                except json.JSONDecodeError:
+                    return json.loads(fragment, strict=False)
+
+    excerpt = text[start : start + 400].replace("\n", " ")
+    raise ValueError(
+        "Incomplete JSON object in OpenClaw response "
+        f"(model={_describe_provider(envelope)}). Excerpt: {excerpt!r}"
+    )
+
+
+def _invoke_openclaw_once(runtime: dict, task_payload: dict) -> dict:
     message = build_agent_message(task_payload)
     cmd = [
         "openclaw",
@@ -108,47 +191,59 @@ def call_openclaw_agent(runtime: dict, task_payload: dict) -> dict:
         "--message",
         message,
     ]
-    try:
-        result = subprocess.run(
-            cmd,
-            cwd=str(ROOT),
-            capture_output=True,
-            text=True,
-        )
-    finally:
-        if prev_model:
-            _switch_model(prev_model)
+    result = subprocess.run(
+        cmd,
+        cwd=str(ROOT),
+        capture_output=True,
+        text=True,
+    )
     if result.returncode != 0:
         details = result.stderr.strip() or result.stdout.strip() or "unknown error"
         raise RuntimeError(f"OpenClaw agent invocation failed: {details}")
+    if not result.stdout.strip():
+        raise RuntimeError("OpenClaw agent invocation returned empty stdout.")
 
-    envelope = json.loads(result.stdout)
+    try:
+        envelope = json.loads(result.stdout)
+    except json.JSONDecodeError as exc:
+        excerpt = result.stdout[:400].replace("\n", " ")
+        raise ValueError(
+            f"OpenClaw agent returned invalid CLI JSON envelope: {exc}. First 400 chars: {excerpt!r}"
+        ) from exc
+
+    check_envelope_for_errors(envelope)
     text = extract_agent_text(envelope)
-    # Strip markdown fences if present
-    text = text.strip()
-    if text.startswith("```"):
-        text = text.split("\n", 1)[1] if "\n" in text else text[3:]
-    if text.endswith("```"):
-        text = text[:-3]
-    text = text.strip()
-    # Extract the first complete JSON object (models sometimes append extra text)
-    start = text.find("{")
-    if start < 0:
-        raise ValueError("No JSON object found in OpenClaw response.")
-    depth = 0
-    for i, ch in enumerate(text[start:], start):
-        if ch == "{":
-            depth += 1
-        elif ch == "}":
-            depth -= 1
-            if depth == 0:
-                fragment = text[start : i + 1]
-                try:
-                    return json.loads(fragment)
-                except json.JSONDecodeError:
-                    # Models sometimes emit control characters — try strict=False
-                    return json.loads(fragment, strict=False)
-    raise ValueError("Incomplete JSON object in OpenClaw response.")
+    return _extract_json_object(text, envelope)
+
+
+def call_openclaw_agent(runtime: dict, task_payload: dict) -> dict:
+    interpretation_model = runtime.get("model")
+    prev_model = None
+    if interpretation_model:
+        prev_model = _switch_model(interpretation_model)
+
+    max_retries = max(1, int(runtime.get("max_retries", 3)))
+    retry_delay_seconds = max(0, int(runtime.get("retry_delay_seconds", 8)))
+    last_error: Exception | None = None
+
+    try:
+        for attempt in range(1, max_retries + 1):
+            try:
+                return _invoke_openclaw_once(runtime, task_payload)
+            except Exception as exc:
+                last_error = exc
+                print(f"OpenClaw run attempt {attempt}/{max_retries} failed: {exc}")
+                if attempt >= max_retries:
+                    break
+                if retry_delay_seconds > 0:
+                    time.sleep(retry_delay_seconds)
+    finally:
+        if prev_model:
+            _switch_model(prev_model)
+
+    raise RuntimeError(
+        f"OpenClaw agent failed after {max_retries} attempts: {last_error}"
+    )
 
 
 def main() -> int:
@@ -185,7 +280,11 @@ def main() -> int:
         item.setdefault("direct_beneficiaries", [])
         item.setdefault("secondary_beneficiaries", [])
 
-    errors = validate_payload(interpreted)
+    # Validate against the batch we actually used, not whatever is on disk
+    # right now. Re-reading the batch here would race with a concurrent
+    # openclaw_export (seen 2026-04-08 13:30 & 17:30 in runtime.log where
+    # the on-disk batch ended up ~5s ahead of the one that drove the task).
+    errors = validate_payload(interpreted, batch=trimmed_payload.get("source_batch"))
     if errors:
         print("OpenClaw output validation failed:")
         for error in errors:

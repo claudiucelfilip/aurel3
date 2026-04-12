@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 from state import (
     load_openclaw_interpreted_items,
@@ -10,6 +12,9 @@ from state import (
     save_openclaw_source_batch,
     utc_now_iso,
 )
+
+ROOT = Path(__file__).parent
+TASK_PATH = ROOT / "data" / "openclaw_task_payload.json"
 
 
 def _parse_iso(ts: str | None) -> datetime | None:
@@ -50,16 +55,36 @@ def export_source_batch(source_items: dict) -> dict:
     return payload
 
 
+def _load_prepared_batch_generated_at() -> str | None:
+    if not TASK_PATH.exists():
+        return None
+    try:
+        with open(TASK_PATH) as f:
+            task_payload = json.load(f)
+        return task_payload.get("source_batch", {}).get("generated_at")
+    except Exception:
+        return None
+
+
 def load_fresh_interpreted_items(max_age_hours: int = 12) -> list[dict]:
     payload = load_openclaw_interpreted_items()
     generated_at = _parse_iso(payload.get("generated_at"))
     if not generated_at:
         return []
-    current_batch = load_openclaw_source_batch()
-    current_batch_generated_at = current_batch.get("generated_at")
+
     payload_batch_generated_at = payload.get("source_batch_generated_at")
-    if not current_batch_generated_at or payload_batch_generated_at != current_batch_generated_at:
+    current_batch_generated_at = load_openclaw_source_batch().get("generated_at")
+    prepared_batch_generated_at = _load_prepared_batch_generated_at()
+
+    if not payload_batch_generated_at:
         return []
+    if prepared_batch_generated_at and payload_batch_generated_at == prepared_batch_generated_at:
+        pass
+    elif current_batch_generated_at and payload_batch_generated_at == current_batch_generated_at:
+        pass
+    else:
+        return []
+
     now = datetime.now(timezone.utc)
     if now - generated_at > timedelta(hours=max_age_hours):
         return []

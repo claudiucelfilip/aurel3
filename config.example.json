@@ -23,9 +23,11 @@
     "send_ntfy": true
   },
   "openclaw": {
-    "model": "google-gemini-cli/gemini-2.5-flash",
+    "model": "openai-codex/gpt-5.4",
     "timeout_seconds": 120,
-    "max_input_items": 40
+    "max_input_items": 40,
+    "max_retries": 3,
+    "retry_delay_seconds": 8
   },
   "schedule": {
     "signal_scan_hours_utc": ["09:30", "13:30", "17:30"],
