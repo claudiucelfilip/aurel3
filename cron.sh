@@ -11,6 +11,13 @@ set -uo pipefail
 cd /root/aurel3
 LOGFILE="/root/aurel3/data/runtime.log"
 COMMAND="${1:-signal_scan}"
+LOCKFILE="/root/aurel3/data/${COMMAND}.lock"
+
+exec 9>"$LOCKFILE"
+if ! flock -n 9; then
+    echo "$(date -u '+%Y-%m-%dT%H:%M:%SZ') skipped ${COMMAND}: another run is still active" >> "$LOGFILE"
+    exit 0
+fi
 
 python3 run.py "$COMMAND" >> "$LOGFILE" 2>&1
 EXIT_CODE=$?
