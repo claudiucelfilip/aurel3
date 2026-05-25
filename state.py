@@ -9,6 +9,7 @@ from pathlib import Path
 DATA_DIR = Path(__file__).parent / "data"
 THEMES_PATH = DATA_DIR / "theme_events.json"
 RECOMMENDATIONS_PATH = DATA_DIR / "recommendations.json"
+RECOMMENDATION_HISTORY_PATH = DATA_DIR / "recommendation_history.json"
 CLOSED_REVIEWS_PATH = DATA_DIR / "closed_reviews.json"
 RECOMMENDATION_REVIEWS_PATH = DATA_DIR / "recommendation_reviews.json"
 OPENCLAW_SOURCE_BATCH_PATH = DATA_DIR / "openclaw_source_batch.json"
@@ -58,6 +59,23 @@ def load_recommendations() -> list[dict]:
 
 def save_recommendations(records: list[dict]) -> None:
     _save_json(RECOMMENDATIONS_PATH, records)
+
+
+def load_recommendation_history() -> list[dict]:
+    return _load_json(RECOMMENDATION_HISTORY_PATH)
+
+
+def append_recommendation_snapshot(records: list[dict], metadata: dict | None = None) -> dict:
+    snapshot = {
+        "id": make_id("recsnap"),
+        "generated_at": utc_now_iso(),
+        "metadata": metadata or {},
+        "recommendations": records,
+    }
+    history = load_recommendation_history()
+    history.append(snapshot)
+    _save_json(RECOMMENDATION_HISTORY_PATH, history)
+    return snapshot
 
 
 def append_recommendation(record: dict) -> None:

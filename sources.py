@@ -14,7 +14,10 @@ from scanner import scan_all_sources
 from state import utc_now_iso
 
 GOOGLE_NEWS_RSS = "https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en"
-MAX_NEWS_AGE_DAYS = 14
+# News older than this is skipped at collection time — anything older is almost
+# never actionable for momentum trading because the price move has usually
+# already played out. See signals._news_age_hours for the downstream gate.
+MAX_NEWS_AGE_DAYS = 2
 
 NEWS_QUERIES = [
     ("romania_bvb", "BVB OR \"Bucharest Stock Exchange\" OR Romania IPO stocks"),

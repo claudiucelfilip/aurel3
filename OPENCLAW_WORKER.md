@@ -194,6 +194,10 @@ The company meets at least one condition:
 - It has **primary revenue exposure** to the specific driver (oil major during crude supply shock, fertilizer producer during ag input disruption)
 - The catalyst **directly changes the company's earnings, orders, or regulatory status**
 
+Direct beneficiary means directly affected, not necessarily positively affected.
+For negative or mixed company-specific catalysts, still list the named company as
+direct so downstream review can learn from both bullish and bearish outcomes.
+
 ### Secondary beneficiary
 
 The company benefits but through an indirect path:
@@ -219,16 +223,19 @@ When in doubt between direct and secondary, ask: "Does this catalyst directly ch
 
 ### Earnings / guidance momentum
 
-- The reporting company is always a **direct** beneficiary.
+- The reporting company is always a **direct** beneficiary, even when the
+  earnings update is mixed or negative. Example: "Intel reports revenue in-line,
+  cuts full-year capex guidance" must include `INTC` as a direct beneficiary.
 - Rate as `actionable` when the company beat expectations AND raised guidance. Rate as `potentially_actionable` for a beat without guidance raise, or mixed results.
 - Peers with read-through are **secondary** and at most `potentially_actionable`.
 
 ### M&A / corporate action
 
 - Named target is **direct**, `actionable`.
-- Named acquirer is **direct**, `potentially_actionable` (acquirer impact is less certain).
+- Named acquirer is usually **secondary**, not direct. Only mark the acquirer direct if the catalyst clearly and immediately changes its near-term earnings, orders, or regulatory status. In most cases, keep the acquirer `potentially_actionable` at best.
 - Competitors or sector peers are **secondary**, `interesting_but_early` unless the deal creates clear competitive dynamics.
 - Confidence is `high` only if the report cites named parties and a credible outlet. Unconfirmed rumors = `medium`.
+- Default downstream bias: the target is the primary tradable expression of M&A news. The acquirer should not auto-promote to `buy_now` from deal news alone.
 
 ### Healthcare / commercialization
 

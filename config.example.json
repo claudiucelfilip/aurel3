@@ -20,7 +20,8 @@
     "enable_social": true,
     "require_openclaw_interpretation": true,
     "send_slack": true,
-    "send_ntfy": true
+    "send_ntfy": true,
+    "allowed_markets": ["USA", "BVB", "XETRA", "EURONEXT Paris", "EURONEXT Amsterdam", "EURONEXT Brussels", "Borsa Italiana", "LSE", "WSE", "SIX", "Copenhagen", "Helsinki", "Stockholm", "Oslo"]
   },
   "openclaw": {
     "model": "openai-codex/gpt-5.4",

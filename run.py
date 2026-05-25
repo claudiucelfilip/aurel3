@@ -17,6 +17,7 @@ Usage:
   python3 /root/aurel3/run.py postmortem [TICKER]
   python3 /root/aurel3/run.py review_signals [TICKER]
   python3 /root/aurel3/run.py review_summary
+  python3 /root/aurel3/run.py notify_failure COMMAND EXIT_CODE
 
 Aliases:
   scan -> signal_scan
@@ -32,7 +33,44 @@ import sys
 from pathlib import Path
 
 from market import get_stock_data
+
+
+MAX_PRICE_DEVIATION_PCT = 0.35
+MIN_REASONABLE_PRICE = 0.01
+
+
+def _parse_positive_float(value: str, field_name: str) -> float | None:
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        print(f"Invalid {field_name}: {value}")
+        return None
+    if parsed <= 0:
+        print(f"Invalid {field_name}: must be > 0")
+        return None
+    return parsed
+
+
+def _validate_price_against_market(ticker: str, entered_price: float, market_data: dict | None, side: str) -> bool:
+    if entered_price < MIN_REASONABLE_PRICE:
+        print(f"Rejected {side} for {ticker}: price must be at least ${MIN_REASONABLE_PRICE:.2f}.")
+        return False
+
+    if not market_data or not market_data.get("price"):
+        return True
+
+    market_price = float(market_data["price"])
+    deviation_pct = abs((entered_price / market_price) - 1)
+    if deviation_pct > MAX_PRICE_DEVIATION_PCT:
+        print(
+            f"Rejected {side} for {ticker}: entered price ${entered_price:.2f} looks implausible vs "
+            f"market price ${market_price:.2f} ({deviation_pct:+.1%} deviation)."
+        )
+        return False
+
+    return True
 from notify import (
+    send_failure_alert,
     send_recommendation_alert,
     send_watchlist_action_alert,
     send_postmortem_summary,
@@ -48,9 +86,11 @@ from sources import collect_source_items
 from sentiment import analyze_mention_sentiment
 from state import (
     append_closed_review,
+    append_recommendation_snapshot,
     append_recommendation_review,
     load_closed_reviews,
     load_recommendations,
+    load_recommendation_history,
     load_recommendation_reviews,
     load_theme_events,
     mark_recommendation_promoted,
@@ -119,15 +159,43 @@ def cmd_signal_scan() -> None:
 
     save_theme_events(themes)
     save_recommendations(recommendations)
+    append_recommendation_snapshot(
+        recommendations,
+        metadata={
+            "source": "signal_scan",
+            "source_items": {
+                "social": len(source_items.get("social", [])),
+                "raw_social": len(source_items.get("raw_social", [])),
+                "news": len(source_items.get("news", [])),
+            },
+        },
+    )
 
     actionable = [rec for rec in recommendations if rec["action"] == "buy_now"]
     open_tickers = {pos["ticker"].upper() for pos in get_open_positions()}
     actionable_new = [rec for rec in actionable if rec["ticker"].upper() not in open_tickers]
     skipped = len(actionable) - len(actionable_new)
+    action_counts: dict[str, int] = {}
+    gate_counts: dict[str, int] = {}
+    for rec in recommendations:
+        action_counts[rec["action"]] = action_counts.get(rec["action"], 0) + 1
+        for reason in rec.get("gate_reasons", []):
+            gate_counts[reason] = gate_counts.get(reason, 0) + 1
     print(
         f"Signal scan completed: {len(recommendations)} recommendations, "
         f"{len(actionable)} buy-now ideas ({skipped} already on watchlist)."
     )
+    if action_counts:
+        print("  Actions: " + ", ".join(f"{k}={v}" for k, v in sorted(action_counts.items())))
+    if gate_counts:
+        top_gates = sorted(gate_counts.items(), key=lambda item: (-item[1], item[0]))[:5]
+        print("  Top non-buy gates: " + ", ".join(f"{k}={v}" for k, v in top_gates))
+    for rec in recommendations[:5]:
+        gates = ", ".join(rec.get("gate_reasons", [])[:3]) or "none"
+        print(
+            f"  TOP: {rec['ticker']} -> {rec['action']} "
+            f"[{rec['confirmation_state']}, {rec['confidence']}] gates={gates}"
+        )
 
     for rec in actionable_new:
         print(f"  BUY NOW: {rec['ticker']} — {rec['theme_driver']} [{rec['confirmation_state']}, {rec['confidence']}]")
@@ -285,7 +353,9 @@ def cmd_buy(ticker: str, price: str | None = None, shares: str | None = None) ->
     data = get_stock_data(ticker)
 
     if price:
-        entry_price = float(price)
+        entry_price = _parse_positive_float(price, "price")
+        if entry_price is None:
+            return
     else:
         if data and data["price"] > 0:
             entry_price = data["price"]
@@ -293,7 +363,13 @@ def cmd_buy(ticker: str, price: str | None = None, shares: str | None = None) ->
             print(f"Couldn't get price for {ticker}. Specify: buy TICKER PRICE [SHARES]")
             return
 
-    num_shares = float(shares) if shares else 0
+    if not _validate_price_against_market(ticker, entry_price, data, "buy"):
+        return
+
+    num_shares = _parse_positive_float(shares, "shares") if shares else 0
+    if shares and num_shares is None:
+        return
+
     pos = add_position(
         ticker=ticker,
         entry_price=entry_price,
@@ -312,11 +388,16 @@ def cmd_buy(ticker: str, price: str | None = None, shares: str | None = None) ->
 
 def cmd_sell(ticker: str, price: str | None = None) -> None:
     ticker = ticker.upper()
-    sell_price = float(price) if price else None
+    data = get_stock_data(ticker)
+    sell_price = _parse_positive_float(price, "price") if price else None
+    if price and sell_price is None:
+        return
     if not sell_price:
-        data = get_stock_data(ticker)
         if data and data["price"] > 0:
             sell_price = data["price"]
+
+    if sell_price and not _validate_price_against_market(ticker, sell_price, data, "sell"):
+        return
 
     result = close_position(ticker, sell_price=sell_price)
     if not result:
@@ -351,19 +432,32 @@ def cmd_postmortem(ticker: str | None = None) -> None:
 def cmd_review_signals(ticker: str | None = None) -> None:
     reviewed_ids = {r.get("recommendation_id") for r in load_recommendation_reviews()}
     recommendations = load_recommendations()
+    history = load_recommendation_history()
+    for snapshot in history:
+        for rec in snapshot.get("recommendations", []):
+            if rec.get("id") and not any(existing.get("id") == rec.get("id") for existing in recommendations):
+                recommendations.append(rec)
     if ticker:
         recommendations = [r for r in recommendations if r.get("ticker") == ticker.upper()]
 
     created = 0
+    skipped_reviewed = 0
+    skipped_immature = 0
+    skipped_no_price = 0
+    skipped_no_market_data = 0
     for rec in recommendations:
         if rec.get("id") in reviewed_ids:
+            skipped_reviewed += 1
             continue
         if not recommendation_is_mature(rec):
+            skipped_immature += 1
             continue
         if not rec.get("reference_price"):
+            skipped_no_price += 1
             continue
         data = get_stock_data(rec["ticker"])
         if not data:
+            skipped_no_market_data += 1
             continue
 
         review = build_recommendation_review(rec, data["price"])
@@ -378,6 +472,11 @@ def cmd_review_signals(ticker: str | None = None) -> None:
         print("No matured recommendation reviews created.")
     else:
         print(f"Created {created} recommendation review(s).")
+    print(
+        "Review candidates: "
+        f"total={len(recommendations)}, reviewed={skipped_reviewed}, immature={skipped_immature}, "
+        f"missing_reference_price={skipped_no_price}, missing_market_data={skipped_no_market_data}."
+    )
 
 
 def cmd_review_summary() -> None:
@@ -429,6 +528,26 @@ def cmd_review_summary() -> None:
         review for review in closed_reviews if review.get("spec_change_candidate")
     ]
     print(f"  Spec change candidates: {len(spec_candidates)}")
+
+
+def cmd_notify_failure(command: str, exit_code: str) -> None:
+    """Send a Slack alert when a cron command exits non-zero.
+
+    Called from cron.sh after the wrapped python invocation fails. Reads
+    the tail of runtime.log to give the alert recipient enough context to
+    triage without SSHing to the box.
+    """
+    config = load_config()
+    log_path = Path(__file__).parent / "data" / "runtime.log"
+    excerpt = ""
+    if log_path.exists():
+        try:
+            with open(log_path) as f:
+                excerpt = "".join(f.readlines()[-30:])
+        except Exception as exc:
+            excerpt = f"(could not read runtime.log: {exc})"
+    sent = send_failure_alert(config, command, exit_code, excerpt)
+    print(f"Failure alert {'sent' if sent else 'NOT sent (slack disabled or unconfigured)'}: {command} exit={exit_code}")
 
 
 def cmd_performance() -> None:
@@ -491,6 +610,10 @@ def main() -> None:
             cmd_openclaw_import(path, force=force)
     elif command == "performance":
         cmd_performance()
+    elif command == "notify_failure":
+        failed_cmd = sys.argv[2] if len(sys.argv) >= 3 else "?"
+        exit_code = sys.argv[3] if len(sys.argv) >= 4 else "?"
+        cmd_notify_failure(failed_cmd, exit_code)
     elif command == "buy":
         ticker = sys.argv[2] if len(sys.argv) >= 3 else None
         price = sys.argv[3] if len(sys.argv) >= 4 else None

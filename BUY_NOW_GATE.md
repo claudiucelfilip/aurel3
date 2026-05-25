@@ -189,6 +189,17 @@ Use when:
 - mapping is decent
 - but confirmation, durability, or confidence is not yet strong enough
 
+### `early_accumulation`
+
+Use when:
+- the catalyst is fresh and direct
+- the mapping is strong
+- the setup looks early rather than extended
+- confirmation is starting to form, but the obvious spike has not already happened
+
+This is the anticipatory lane, not the hype lane.
+It exists to catch likely upticks *before* full momentum confirmation, while still rejecting stretched or weakly-mapped setups.
+
 ### `hold`
 
 Use when:

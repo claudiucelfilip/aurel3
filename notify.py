@@ -66,6 +66,19 @@ def format_recommendation_alert(rec: dict) -> str:
     market_line = rec.get("market_exchange", "UNKNOWN")
     if rec.get("market_region"):
         market_line = f"{market_line} / {rec['market_region']}"
+    social = rec.get("social_evidence") or {}
+    social_line = None
+    if social:
+        if social.get("is_trending"):
+            social_line = (
+                f"Social: mentions {social.get('mentions', 0)} ({social.get('mention_change', 0):+.0%}), "
+                f"rank {('#' + str(social.get('rank_24h_ago')) + '→#' + str(social.get('rank'))) if social.get('rank') and social.get('rank_24h_ago') else 'n/a'}, "
+                f"upvotes {social.get('upvotes', 0)}, sources {len(social.get('sources', []))}, "
+                f"momentum {social.get('momentum', 'unknown')}"
+            )
+        else:
+            social_line = "Social: not trending on tracked Reddit sources"
+
     lines = [
         f"*{rec['action'].replace('_', ' ').upper()}* — {rec['ticker']} ({rec['company']})",
         f"Market: {market_line}",
@@ -74,6 +87,8 @@ def format_recommendation_alert(rec: dict) -> str:
         f"Confirmation: {rec['confirmation_state']} | Confidence: {rec['confidence']} | Horizon: {rec['expected_horizon']}",
         f"Invalidation: {rec['invalidation']}",
     ]
+    if social_line:
+        lines.insert(4, social_line)
     if rec.get("alternatives"):
         alt_lines = []
         for alt in rec["alternatives"]:
@@ -111,6 +126,22 @@ def format_postmortem_summary(review: dict) -> str:
         f"Outcome: {review['thesis_outcome']} | Failure point: {review['failure_point']}",
         f"P&L: {pnl.get('pnl_pct', 0):+.1%} ({pnl.get('pnl_amount', 0):+.2f} {pnl.get('currency', '')})",
         f"Lesson: {review['lesson']}",
+    ])
+
+
+def format_failure_alert(command: str, exit_code: str, log_excerpt: str) -> str:
+    from datetime import datetime, timezone
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    excerpt_lines = [line for line in log_excerpt.splitlines() if line.strip()]
+    if len(excerpt_lines) > 20:
+        excerpt_lines = excerpt_lines[-20:]
+    excerpt = "\n".join(excerpt_lines) or "(no log output)"
+    return "\n".join([
+        f"*AUREL3 CRON FAILED* — `{command}` (exit {exit_code})",
+        ts,
+        "",
+        "Last log lines:",
+        f"```\n{excerpt}\n```",
     ])
 
 
@@ -165,6 +196,21 @@ def send_watchlist_action_alert(config: dict, position: dict, market_data: dict)
 def send_postmortem_summary(config: dict, review: dict) -> bool:
     nc = config["notifications"]
     text = format_postmortem_summary(review)
+    runtime = config.get("runtime", {})
+    if runtime.get("send_slack", True) and nc.get("slack_bot_token") and nc.get("slack_user_id"):
+        return send_slack_dm(nc["slack_bot_token"], nc["slack_user_id"], text)
+    return False
+
+
+def send_failure_alert(config: dict, command: str, exit_code: str, log_excerpt: str) -> bool:
+    """Notify Slack when a cron command exits non-zero.
+
+    Mirrors the existing alert path so the failure surfaces in the same DM
+    channel as buy/sell signals — without this, a stalled pipeline (e.g.
+    Gemini quota exhaustion in early April 2026) goes unnoticed for days.
+    """
+    nc = config.get("notifications", {})
+    text = format_failure_alert(command, exit_code, log_excerpt)
     runtime = config.get("runtime", {})
     if runtime.get("send_slack", True) and nc.get("slack_bot_token") and nc.get("slack_user_id"):
         return send_slack_dm(nc["slack_bot_token"], nc["slack_user_id"], text)

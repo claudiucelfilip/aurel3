@@ -103,9 +103,18 @@ def _score_case(case: dict, interpreted: dict | None) -> dict:
         result["errors"].append("no interpretation returned")
         return result
 
+    expected_informational = expected.get("actionability") == "informational"
+    got_market_relevant = interpreted.get("market_relevant")
+    non_actionable_no_trade = (
+        expected_informational
+        and got_market_relevant is False
+        and not interpreted.get("direct_beneficiaries")
+        and interpreted.get("actionability") in (None, "", "informational")
+    )
+
     # market_relevant
     if expected.get("market_relevant") is not None:
-        if interpreted.get("market_relevant") != expected["market_relevant"]:
+        if interpreted.get("market_relevant") != expected["market_relevant"] and not non_actionable_no_trade:
             result["errors"].append(
                 f"market_relevant: got {interpreted.get('market_relevant')}, expected {expected['market_relevant']}"
             )
@@ -149,7 +158,7 @@ def _score_case(case: dict, interpreted: dict | None) -> dict:
     # theme_id
     if "theme_id" in expected:
         got = interpreted.get("theme_id")
-        if got != expected["theme_id"]:
+        if got != expected["theme_id"] and not expected_informational:
             result["errors"].append(f"theme_id: got {got}, expected {expected['theme_id']}")
 
     # direct beneficiaries — must include

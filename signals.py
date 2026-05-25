@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import math
 import re
+from datetime import datetime, timezone
 
 from markets import infer_market_profile
 from market import get_sector, get_stock_data
@@ -16,9 +18,83 @@ BENEFICIARY_SYMBOL_NORMALIZATION = {
     "BVB": "BVB.RO",
 }
 
+# Freshness thresholds (hours). News older than STALE_REJECT_HOURS cannot
+# drive a candidate at all. News older than FRESH_BUY_HOURS cannot drive a
+# buy_now action — only watch_for_confirmation / hold_not_fresh_buy. These
+# values exist because in practice, a momentum setup driven by news that is
+# already a day or two old is almost always late — the move has played out.
+FRESH_BUY_HOURS = 24.0
+STALE_REJECT_HOURS = 48.0
+REDDIT_STALE_HOURS = 12.0
+MIN_SOCIAL_BUY_POINTS = 3
+
+
+def _news_age_hours(news: dict) -> float | None:
+    """Return age of an interpreted news item in hours, or None if unknown.
+
+    The original publication timestamp is preserved inside ``source_item_id``
+    as ``news::{label}::{iso_timestamp}::{title_prefix}``.
+    """
+    source_id = news.get("source_item_id", "")
+    if not source_id:
+        return None
+    parts = source_id.split("::", 3)
+    if len(parts) < 3:
+        return None
+    try:
+        ts = datetime.fromisoformat(parts[2])
+    except ValueError:
+        return None
+    if ts.tzinfo is None:
+        ts = ts.replace(tzinfo=timezone.utc)
+    age = (datetime.now(timezone.utc) - ts).total_seconds() / 3600.0
+    return max(0.0, age)
+
 
 def _normalize_text(text: str) -> str:
     return re.sub(r"\s+", " ", text.lower()).strip()
+
+
+def _social_evidence(item: dict, sentiment: dict) -> dict:
+    mentions = item.get("mentions", 0)
+    mentions_24h = item.get("mentions_24h_ago", 0)
+    return {
+        "mentions": mentions,
+        "mentions_24h_ago": mentions_24h,
+        "mention_change": item.get("mention_change", 0),
+        "rank": item.get("rank"),
+        "rank_24h_ago": item.get("rank_24h_ago"),
+        "upvotes": item.get("upvotes", 0),
+        "sources": list(item.get("sources", [])),
+        "score": item.get("score", 0),
+        "momentum": sentiment.get("momentum"),
+        "sentiment": sentiment.get("sentiment"),
+        "sentiment_confidence": sentiment.get("confidence", 0),
+        "bullish_points": sentiment.get("bullish_points", 0),
+        "bearish_points": sentiment.get("bearish_points", 0),
+        "reason": sentiment.get("reason", "low activity"),
+        "is_trending": mentions > 0 or len(item.get("sources", [])) > 0,
+    }
+
+
+def _format_social_summary(evidence: dict) -> str:
+    if not evidence.get("is_trending"):
+        return "not trending on tracked Reddit sources"
+
+    mention_change = evidence.get("mention_change", 0)
+    rank = evidence.get("rank")
+    rank_24h = evidence.get("rank_24h_ago")
+    rank_text = "rank n/a"
+    if rank and rank_24h:
+        rank_text = f"rank #{rank_24h}→#{rank}"
+    elif rank:
+        rank_text = f"rank #{rank}"
+
+    return (
+        f"mentions {evidence.get('mentions', 0)} ({mention_change:+.0%} vs 24h), "
+        f"{rank_text}, upvotes {evidence.get('upvotes', 0)}, "
+        f"sources {len(evidence.get('sources', []))}, momentum {evidence.get('momentum', 'unknown')}"
+    )
 
 
 def _news_candidate_score(news: dict, direct: bool, beneficiary_index: int = 0) -> float:
@@ -66,6 +142,12 @@ def _candidate_universe(source_items: dict) -> list[dict]:
             continue
         actionability_rank = _actionability_rank(news)
         if actionability_rank < 1:
+            continue
+        # Stale news (> 48h) cannot seed new candidates. It may still appear
+        # as supporting context via _related_news_items for existing
+        # candidates, but it won't create fresh buy candidates.
+        age_hours = _news_age_hours(news)
+        if age_hours is not None and age_hours > STALE_REJECT_HOURS:
             continue
 
         for index, ticker in enumerate(news.get("direct_beneficiaries", [])):
@@ -178,11 +260,16 @@ def _support_profile(ticker: str, related_news: list[dict]) -> dict:
         "high_confidence_count": 0,
         "medium_confidence_count": 0,
         "high_durability_count": 0,
+        "freshest_direct_hours": None,
+        "freshest_any_hours": None,
     }
+    freshest_direct = math.inf
+    freshest_any = math.inf
     for news in related_news:
         directs = {b.lower() for b in news.get("direct_beneficiaries", [])}
         secondaries = {b.lower() for b in news.get("secondary_beneficiaries", [])}
-        if ticker_key in directs:
+        is_direct = ticker_key in directs
+        if is_direct:
             profile["direct_hits"] += 1
         if ticker_key in secondaries:
             profile["secondary_hits"] += 1
@@ -197,6 +284,18 @@ def _support_profile(ticker: str, related_news: list[dict]) -> dict:
             profile["medium_confidence_count"] += 1
         if news.get("durability") == "high":
             profile["high_durability_count"] += 1
+
+        age_hours = _news_age_hours(news)
+        if age_hours is not None:
+            if age_hours < freshest_any:
+                freshest_any = age_hours
+            if is_direct and age_hours < freshest_direct:
+                freshest_direct = age_hours
+
+    if freshest_direct != math.inf:
+        profile["freshest_direct_hours"] = round(freshest_direct, 2)
+    if freshest_any != math.inf:
+        profile["freshest_any_hours"] = round(freshest_any, 2)
     return profile
 
 
@@ -357,6 +456,112 @@ def _allow_unconfirmed_watch(data: dict, support: dict, theme_id: str | None = N
     return False
 
 
+def _social_is_actionable(evidence: dict) -> bool:
+    if not evidence.get("is_trending"):
+        return False
+    if evidence.get("bearish_points", 0) > 0 and evidence.get("bullish_points", 0) < MIN_SOCIAL_BUY_POINTS + 1:
+        return False
+    if evidence.get("bullish_points", 0) < MIN_SOCIAL_BUY_POINTS:
+        return False
+    if evidence.get("momentum") == "fading":
+        return False
+    return True
+
+
+def _has_recent_reddit_confirmation(item: dict) -> bool:
+    mentions = item.get("mentions", 0)
+    mentions_24h = item.get("mentions_24h_ago", 0)
+    if mentions <= 0 and mentions_24h <= 0:
+        return False
+    return True
+
+
+def _freshness_gate_action(action: str, confirmation: str, support: dict) -> str:
+    """Downgrade buy_now actions whose driving news is too stale.
+
+    A fresh buy requires a news catalyst within FRESH_BUY_HOURS. Without
+    that, even a textbook setup is almost always late — the move has
+    already played out by the time we're looking at it. In that case
+    degrade to hold_not_fresh_buy (if already confirmed) or
+    watch_for_confirmation (still developing).
+
+    When no age info is available at all (e.g. historical replay items
+    that use synthetic source_item_ids) the gate is a no-op — we fall
+    back to the legacy rule-driven behavior.
+    """
+    if action != "buy_now":
+        return action
+
+    freshest_direct = support.get("freshest_direct_hours")
+    freshest_any = support.get("freshest_any_hours")
+
+    if freshest_direct is None and freshest_any is None:
+        # No age signal — trust the upstream rules (replay, missing ids, etc.)
+        return action
+
+    if freshest_direct is not None and freshest_direct <= FRESH_BUY_HOURS:
+        return action
+    if support.get("direct_hits", 0) == 0 and freshest_any is not None and freshest_any <= FRESH_BUY_HOURS:
+        return action
+
+    if confirmation in ("confirmed", "overconfirmed"):
+        return "hold_not_fresh_buy"
+    return "watch_for_confirmation"
+
+
+def _early_setup_state(
+    theme_id: str | None,
+    confirmation: str,
+    crowding: str,
+    confidence: str,
+    data: dict,
+    sentiment: dict,
+    support: dict,
+    direct_news_candidate: bool,
+) -> str | None:
+    """Flag fresh, low-extension setups that look early rather than late."""
+    if not direct_news_candidate:
+        return None
+    if confidence not in ("medium", "high"):
+        return None
+    if support.get("potentially_actionable_count", 0) < 1:
+        return None
+    if support.get("high_confidence_count", 0) < 1 and support.get("direct_hits", 0) < 2:
+        return None
+
+    freshest_direct = support.get("freshest_direct_hours")
+    if freshest_direct is None or freshest_direct > FRESH_BUY_HOURS:
+        return None
+
+    change_pct = data.get("change_pct", 0)
+    change_5d = data.get("change_5d", 0) or 0
+    volume_ratio = data.get("volume_ratio", 0)
+    trend = data.get("trend")
+
+    if crowding == "high":
+        return None
+    if change_pct >= 0.05 or change_5d >= 0.10:
+        return None
+    if trend not in ("up", "strong_up"):
+        return None
+    if volume_ratio < 0.7 or volume_ratio > 1.6:
+        return None
+    if confirmation not in ("developing", "confirmed"):
+        return None
+
+    speculative_themes = {
+        "battery_storage_commercialization",
+        "healthcare_commercialization",
+    }
+    if theme_id in speculative_themes and support.get("actionable_count", 0) < 1:
+        return None
+
+    if sentiment.get("bullish_points", 0) < 2:
+        return None
+
+    return "early_accumulation"
+
+
 def _recommendation_action(
     theme_id: str | None,
     confirmation: str,
@@ -367,6 +572,29 @@ def _recommendation_action(
     support: dict,
 ) -> str:
     direct_news_candidate = support["direct_hits"] >= 1
+    action = _recommendation_action_raw(
+        theme_id,
+        confirmation,
+        crowding,
+        confidence,
+        data,
+        sentiment,
+        support,
+        direct_news_candidate,
+    )
+    return _freshness_gate_action(action, confirmation, support)
+
+
+def _recommendation_action_raw(
+    theme_id: str | None,
+    confirmation: str,
+    crowding: str,
+    confidence: str,
+    data: dict,
+    sentiment: dict,
+    support: dict,
+    direct_news_candidate: bool,
+) -> str:
     volume_floor = 1.15
     if direct_news_candidate:
         volume_floor = 0.6
@@ -528,14 +756,21 @@ def _recommendation_action(
         return "watch_for_confirmation"
 
     if theme_id == "m_and_a_corporate_action":
+        # M&A should favor the named target. Acquirers or broad sympathy moves
+        # are too noisy for automatic buy_now promotion.
         if (
-            confirmation in ("developing", "confirmed")
+            direct_news_candidate
+            and confirmation in ("developing", "confirmed")
             and confidence in ("medium", "high")
             and support["direct_hits"] >= 2
             and support["actionable_count"] >= 2
             and data.get("dollar_volume", 0) >= 10_000_000
             and data.get("volume_ratio", 0) >= 0.8
             and data.get("change_pct", 0) >= -0.02
+            and support["high_confidence_count"] >= 1
+            and data.get("change_pct", 0) <= 0.12
+            and sentiment.get("bullish_points", 0) >= 3
+            and support["secondary_hits"] == 0
         ):
             return "buy_now"
         return "watch_for_confirmation"
@@ -545,6 +780,52 @@ def _recommendation_action(
     if confirmation == "overconfirmed":
         return "hold_not_fresh_buy"
     return "watch_for_confirmation"
+
+
+def _non_buy_gate_reasons(
+    action: str,
+    signal_origin: str | None,
+    confirmation: str,
+    crowding: str,
+    confidence: str,
+    data: dict,
+    sentiment: dict,
+    support: dict,
+    social_evidence: dict,
+    contradictory_catalyst: bool,
+    market_accessible: bool,
+) -> list[str]:
+    if action == "buy_now":
+        return []
+
+    reasons: list[str] = []
+    if not market_accessible:
+        reasons.append("market_not_accessible")
+    if contradictory_catalyst:
+        reasons.append("contradictory_catalyst")
+    if confirmation not in ("developing", "confirmed", "overconfirmed"):
+        reasons.append(f"confirmation_{confirmation}")
+    if confirmation == "overconfirmed":
+        reasons.append("overconfirmed")
+    if crowding == "high":
+        reasons.append("crowding_high")
+    if confidence == "low":
+        reasons.append("confidence_low")
+    if support.get("potentially_actionable_count", 0) < 1:
+        reasons.append("insufficient_actionable_news")
+    if support.get("direct_hits", 0) == 0 and support.get("secondary_hits", 0) == 0:
+        reasons.append("no_direct_or_secondary_news_hit")
+    if support.get("freshest_direct_hours") is not None and support["freshest_direct_hours"] > FRESH_BUY_HOURS:
+        reasons.append("direct_catalyst_stale")
+    if data.get("volume_ratio", 0) < 0.75:
+        reasons.append("volume_too_low")
+    if data.get("change_pct", 0) < -0.02:
+        reasons.append("price_reaction_negative")
+    if signal_origin != "interpreted_news" and not _social_is_actionable(social_evidence):
+        reasons.append("social_not_actionable")
+    if not reasons:
+        reasons.append("theme_specific_buy_gate_not_met")
+    return reasons
 
 
 def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
@@ -570,6 +851,8 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
             sentiment = analyze_mention_sentiment(item)
             if sentiment["sentiment"] != "bullish":
                 continue
+
+        social_evidence = _social_evidence(item, sentiment)
 
         data = get_stock_data(ticker)
         if not data:
@@ -608,6 +891,7 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
         crowding = _crowding_state(data, item.get("mention_change", 0), sentiment.get("bullish_points", 0))
         expected_horizon = _expected_horizon(theme_meta, sentiment, data)
         confidence = _merged_confidence_label(sentiment, confirmation, crowding, support)
+        direct_news_candidate = support["direct_hits"] >= 1
         action = _recommendation_action(
             theme_meta.get("theme_id"),
             confirmation,
@@ -617,14 +901,70 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
             sentiment,
             support,
         )
+        early_setup = _early_setup_state(
+            theme_meta.get("theme_id"),
+            confirmation,
+            crowding,
+            confidence,
+            data,
+            sentiment,
+            support,
+            direct_news_candidate,
+        )
+        if action == "watch_for_confirmation" and early_setup:
+            action = early_setup
+        if not market_profile["accessible"] and action in ("buy_now", "early_accumulation"):
+            action = "watch_for_confirmation"
 
+        contradictory_catalyst = False
+        if related_news:
+            first_news = related_news[0]
+            summary_blob = " ".join(
+                str(first_news.get(k, "")).lower() for k in ("summary", "title", "reasoning_notes")
+            )
+            contradiction_terms = (
+                "weak guidance",
+                "weak revenue",
+                "cuts guidance",
+                "missed earnings",
+                "miss",
+                "downgrade",
+                "lower demand",
+                "pressure in diagnostics demand",
+            )
+            contradictory_catalyst = any(term in summary_blob for term in contradiction_terms)
+
+        if action == "buy_now":
+            if contradictory_catalyst:
+                action = "watch_for_confirmation"
+            elif item.get("signal_origin") != "interpreted_news" and not _social_is_actionable(social_evidence):
+                action = "watch_for_confirmation"
+
+        gate_reasons = _non_buy_gate_reasons(
+            action,
+            item.get("signal_origin"),
+            confirmation,
+            crowding,
+            confidence,
+            data,
+            sentiment,
+            support,
+            social_evidence,
+            contradictory_catalyst,
+            market_profile["accessible"],
+        )
+
+        social_summary = _format_social_summary(social_evidence)
         why_now = (
-            f"{ticker} is seeing bullish social momentum, {data['trend']} price confirmation, "
-            f"and volume at {data['volume_ratio']:.1f}x average."
+            f"Social: {social_summary}. Market: {data['trend']} trend, volume at {data['volume_ratio']:.1f}x average"
         )
         if related_news:
             catalyst_text = related_news[0].get("summary") or related_news[0].get("title") or theme_label
-            why_now += f" Related catalyst: {catalyst_text}."
+            why_now += f". Catalyst: {catalyst_text}"
+        if contradictory_catalyst:
+            why_now += ". Warning: catalyst text reads bearish/contradictory, so this is not a clean fresh buy"
+        else:
+            why_now += "."
         invalidation = (
             "Exit if price/volume confirmation weakens materially or the ticker starts lagging its peer group."
         )
@@ -653,7 +993,7 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
                 "url": "internal://source/apewisdom",
                 "publisher": "Aurel3",
                 "timestamp": utc_now_iso(),
-                "relevance_note": sentiment.get("reason", "Bullish momentum"),
+                "relevance_note": _format_social_summary(social_evidence),
             }] + [
                 {
                     "type": "news",
@@ -684,9 +1024,11 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
             "confidence": confidence,
             "interpreted_support": support,
             "expected_horizon": expected_horizon,
+            "social_evidence": social_evidence,
             "reference_price": data.get("price"),
             "invalidation": invalidation,
             "alternatives": [],
+            "gate_reasons": gate_reasons,
             "source_refs": [{
                 "type": "theme",
                 "title": theme_label,
@@ -711,7 +1053,8 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
             "beneficiary_rank": item.get("beneficiary_rank", 0),
             "theme_record_id": theme_id,
         }
-        candidate_records.append(candidate_record)
+        if candidate_record["market_accessible"]:
+            candidate_records.append(candidate_record)
 
     grouped: dict[str, list[dict]] = {}
     latest_theme_record: dict[str, dict] = {}
@@ -724,7 +1067,8 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
 
     def ranking_key(rec: dict) -> tuple:
         action_rank = {
-            "buy_now": 4,
+            "buy_now": 5,
+            "early_accumulation": 4,
             "hold_not_fresh_buy": 3,
             "watch_for_confirmation": 2,
             "hold": 0,
@@ -758,7 +1102,7 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
         for alt in recs[1:]:
             if len(alternatives) >= 1:
                 break
-            if alt["action"] not in ("buy_now", "watch_for_confirmation", "hold_not_fresh_buy"):
+            if alt["action"] not in ("buy_now", "early_accumulation", "watch_for_confirmation", "hold_not_fresh_buy"):
                 continue
             alternatives.append({
                 "ticker": alt["ticker"],

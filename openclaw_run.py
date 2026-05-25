@@ -22,10 +22,13 @@ def load_runtime_config() -> dict:
     openclaw = config.setdefault("openclaw", {})
     return {
         "agent_id": openclaw.get("agent_id", "main"),
+        "session_id": openclaw.get("session_id"),
+        "use_isolated_run": bool(openclaw.get("use_isolated_run", True)),
         "model": openclaw.get("model"),
-        "thinking": openclaw.get("thinking", "medium"),
+        "thinking": openclaw.get("thinking", "low"),
         "timeout_seconds": int(openclaw.get("timeout_seconds", 120)),
         "max_input_items": int(openclaw.get("max_input_items", 40)),
+        "chunk_size": int(openclaw.get("chunk_size", 5)),
         "max_retries": int(openclaw.get("max_retries", 3)),
         "retry_delay_seconds": int(openclaw.get("retry_delay_seconds", 8)),
     }
@@ -50,10 +53,18 @@ def trim_task_payload(payload: dict, max_input_items: int) -> dict:
 
 
 def build_agent_message(task_payload: dict) -> str:
-    return "\n\n".join([
+    return "\n".join([
         "You are the OpenClaw worker for Aurel3.",
-        "Read the task payload below and return only valid JSON matching the required output schema.",
-        "Do not wrap the JSON in markdown fences.",
+        "Return JSON only. No markdown. No explanation.",
+        "Output exactly one JSON object with keys: generated_at, source_batch_generated_at, items.",
+        "For each input item, output one item with these keys only:",
+        "source_item_id, market_relevant, event_type, theme_id, theme_label, summary, beneficiary_sectors, hurt_sectors, direct_beneficiaries, secondary_beneficiaries, time_horizon, durability, confidence, actionability, reasoning_notes",
+        "Allowed time_horizon: 1-3 days | 1-2 weeks | 1-3 months | 3+ months / structural",
+        "Allowed durability: low | medium | high",
+        "Allowed confidence: low | medium | high",
+        "Allowed actionability: informational | interesting_but_early | potentially_actionable | actionable",
+        "Include every source item exactly once, even if market_relevant=false.",
+        "Keep summary and reasoning_notes brief.",
         json.dumps(task_payload, ensure_ascii=True),
     ])
 
@@ -188,9 +199,17 @@ def _invoke_openclaw_once(runtime: dict, task_payload: dict) -> dict:
         runtime["thinking"],
         "--timeout",
         str(runtime["timeout_seconds"]),
+    ]
+    # OpenClaw 5.x: omit --session-id for isolated runs (the 4.x "-" placeholder
+    # is no longer accepted; the new convention is no flag = new isolated session).
+    if not runtime.get("use_isolated_run", True):
+        session_id = runtime.get("session_id") or "aurel3-openclaw-worker"
+        if session_id:
+            cmd.extend(["--session-id", session_id])
+    cmd.extend([
         "--message",
         message,
-    ]
+    ])
     result = subprocess.run(
         cmd,
         cwd=str(ROOT),
@@ -224,26 +243,48 @@ def call_openclaw_agent(runtime: dict, task_payload: dict) -> dict:
 
     max_retries = max(1, int(runtime.get("max_retries", 3)))
     retry_delay_seconds = max(0, int(runtime.get("retry_delay_seconds", 8)))
-    last_error: Exception | None = None
+    chunk_size = max(1, int(runtime.get("chunk_size", 5)))
+    source_batch = dict(task_payload.get("source_batch", {}))
+    items = list(source_batch.get("items", []))
+    merged_items: list[dict] = []
 
     try:
-        for attempt in range(1, max_retries + 1):
-            try:
-                return _invoke_openclaw_once(runtime, task_payload)
-            except Exception as exc:
-                last_error = exc
-                print(f"OpenClaw run attempt {attempt}/{max_retries} failed: {exc}")
-                if attempt >= max_retries:
+        for chunk_index in range(0, len(items), chunk_size):
+            chunk_items = items[chunk_index : chunk_index + chunk_size]
+            chunk_payload = dict(task_payload)
+            chunk_source_batch = dict(source_batch)
+            chunk_source_batch["items"] = chunk_items
+            chunk_payload["source_batch"] = chunk_source_batch
+
+            last_error: Exception | None = None
+            for attempt in range(1, max_retries + 1):
+                try:
+                    chunk_result = _invoke_openclaw_once(runtime, chunk_payload)
+                    merged_items.extend(chunk_result.get("items", []))
+                    print(
+                        "OpenClaw chunk complete: "
+                        f"{len(chunk_items)} input items -> {len(chunk_result.get('items', []))} interpreted items."
+                    )
                     break
-                if retry_delay_seconds > 0:
-                    time.sleep(retry_delay_seconds)
+                except Exception as exc:
+                    last_error = exc
+                    print(f"OpenClaw chunk attempt {attempt}/{max_retries} failed: {exc}")
+                    if attempt >= max_retries:
+                        raise RuntimeError(
+                            f"OpenClaw agent failed for chunk starting at index {chunk_index} "
+                            f"after {max_retries} attempts: {last_error}"
+                        )
+                    if retry_delay_seconds > 0:
+                        time.sleep(retry_delay_seconds)
     finally:
         if prev_model:
             _switch_model(prev_model)
 
-    raise RuntimeError(
-        f"OpenClaw agent failed after {max_retries} attempts: {last_error}"
-    )
+    return {
+        "generated_at": task_payload.get("generated_at"),
+        "source_batch_generated_at": source_batch.get("generated_at"),
+        "items": merged_items,
+    }
 
 
 def main() -> int:
@@ -253,17 +294,20 @@ def main() -> int:
     interpreted = call_openclaw_agent(runtime, trimmed_payload)
 
     interpreted["generated_at"] = utc_now_iso()
-    interpreted["source_batch_generated_at"] = (
-        trimmed_payload.get("source_batch", {}).get("generated_at")
-    )
 
-    # Filter to items that match the current source batch
+    # Filter to items that match the batch actually sent to OpenClaw.
     batch_ids = {item.get("id") for item in trimmed_payload.get("source_batch", {}).get("items", [])}
     if batch_ids:
         interpreted["items"] = [
             item for item in interpreted.get("items", [])
             if item.get("source_item_id") in batch_ids
         ]
+
+    # Stamp the interpreted payload to the exact prepared subset if the worker
+    # drifted or echoed a stale batch timestamp.
+    interpreted["source_batch_generated_at"] = (
+        trimmed_payload.get("source_batch", {}).get("generated_at")
+    )
 
     # Backfill missing optional fields with safe defaults
     for item in interpreted.get("items", []):

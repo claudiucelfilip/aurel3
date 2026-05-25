@@ -66,6 +66,21 @@ def _load_prepared_batch_generated_at() -> str | None:
         return None
 
 
+def _load_prepared_batch_ids() -> set[str]:
+    if not TASK_PATH.exists():
+        return set()
+    try:
+        with open(TASK_PATH) as f:
+            task_payload = json.load(f)
+        return {
+            item.get("id")
+            for item in task_payload.get("source_batch", {}).get("items", [])
+            if item.get("id")
+        }
+    except Exception:
+        return set()
+
+
 def load_fresh_interpreted_items(max_age_hours: int = 12) -> list[dict]:
     payload = load_openclaw_interpreted_items()
     generated_at = _parse_iso(payload.get("generated_at"))
@@ -73,14 +88,23 @@ def load_fresh_interpreted_items(max_age_hours: int = 12) -> list[dict]:
         return []
 
     payload_batch_generated_at = payload.get("source_batch_generated_at")
-    current_batch_generated_at = load_openclaw_source_batch().get("generated_at")
+    current_batch = load_openclaw_source_batch()
+    current_batch_generated_at = current_batch.get("generated_at")
     prepared_batch_generated_at = _load_prepared_batch_generated_at()
+    prepared_batch_ids = _load_prepared_batch_ids()
+    payload_item_ids = {
+        item.get("source_item_id")
+        for item in payload.get("items", [])
+        if item.get("source_item_id")
+    }
 
     if not payload_batch_generated_at:
         return []
     if prepared_batch_generated_at and payload_batch_generated_at == prepared_batch_generated_at:
         pass
     elif current_batch_generated_at and payload_batch_generated_at == current_batch_generated_at:
+        pass
+    elif prepared_batch_ids and payload_item_ids and payload_item_ids.issubset(prepared_batch_ids):
         pass
     else:
         return []

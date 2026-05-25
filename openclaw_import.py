@@ -34,7 +34,14 @@ def _load_json(path: Path) -> dict:
         return json.load(f)
 
 
-def validate_payload(payload: dict) -> list[str]:
+def validate_payload(payload: dict, batch: dict | None = None) -> list[str]:
+    """Validate an interpreted payload against the source batch it came from.
+
+    ``batch`` can be passed explicitly (e.g. from the task payload used to
+    invoke the agent) to avoid a TOCTOU race against the on-disk batch file.
+    When not provided, the current batch is loaded from disk — which is the
+    right behavior for standalone imports via ``openclaw_import.py``.
+    """
     errors: list[str] = []
     missing_top = REQUIRED_TOP_LEVEL - payload.keys()
     if missing_top:
@@ -45,7 +52,8 @@ def validate_payload(payload: dict) -> list[str]:
         errors.append("Top-level 'items' must be a list.")
         return errors
 
-    batch = load_openclaw_source_batch()
+    if batch is None:
+        batch = load_openclaw_source_batch()
     batch_ids = {item.get("id") for item in batch.get("items", [])}
     batch_generated_at = batch.get("generated_at")
     payload_batch_generated_at = payload.get("source_batch_generated_at")
