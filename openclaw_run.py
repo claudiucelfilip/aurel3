@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import subprocess
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 from openclaw_import import validate_payload
@@ -14,6 +15,8 @@ from state import save_openclaw_interpreted_items, utc_now_iso
 ROOT = Path(__file__).parent
 CONFIG_PATH = ROOT / "config.json"
 TASK_PATH = ROOT / "data" / "openclaw_task_payload.json"
+INTERPRETED_PATH = ROOT / "data" / "openclaw_interpreted_items.json"
+FRESH_FALLBACK_SECONDS = 45 * 60
 
 
 def load_runtime_config() -> dict:
@@ -41,6 +44,56 @@ def load_task_payload() -> dict:
         )
     with open(TASK_PATH) as f:
         return json.load(f)
+
+
+def _parse_iso_datetime(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        if value.endswith("Z"):
+            value = value[:-1] + "+00:00"
+        parsed = datetime.fromisoformat(value)
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        return parsed.astimezone(timezone.utc)
+    except Exception:
+        return None
+
+
+def load_existing_interpreted_payload(task_payload: dict) -> dict | None:
+    """Return a fresh valid interpreted payload when OpenClaw has a transient failure."""
+    if not INTERPRETED_PATH.exists():
+        return None
+
+    try:
+        with open(INTERPRETED_PATH) as f:
+            existing = json.load(f)
+    except Exception as exc:
+        print(f"Existing interpreted payload could not be read: {exc}")
+        return None
+
+    items = existing.get("items", [])
+    if not isinstance(items, list) or not items:
+        return None
+
+    errors = validate_payload(existing, batch=task_payload.get("source_batch"))
+    batch_generated_at = task_payload.get("source_batch", {}).get("generated_at")
+    if not errors and existing.get("source_batch_generated_at") == batch_generated_at:
+        return existing
+
+    generated_at = _parse_iso_datetime(existing.get("generated_at"))
+    if generated_at is None:
+        return None
+
+    age_seconds = (datetime.now(timezone.utc) - generated_at).total_seconds()
+    if 0 <= age_seconds <= FRESH_FALLBACK_SECONDS:
+        print(
+            "Existing interpreted payload is fresh but not an exact batch match; "
+            f"preserving it after provider failure (age_seconds={age_seconds:.0f})."
+        )
+        return existing
+
+    return None
 
 
 def trim_task_payload(payload: dict, max_input_items: int) -> dict:
@@ -291,7 +344,17 @@ def main() -> int:
     runtime = load_runtime_config()
     task_payload = load_task_payload()
     trimmed_payload = trim_task_payload(task_payload, runtime["max_input_items"])
-    interpreted = call_openclaw_agent(runtime, trimmed_payload)
+    try:
+        interpreted = call_openclaw_agent(runtime, trimmed_payload)
+    except Exception as exc:
+        existing = load_existing_interpreted_payload(trimmed_payload)
+        if existing is not None:
+            print(
+                "OpenClaw provider failed, but a fresh valid interpreted payload "
+                f"already exists; preserving current recommendations. Error: {exc}"
+            )
+            return 0
+        raise
 
     interpreted["generated_at"] = utc_now_iso()
 
