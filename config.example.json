@@ -1,0 +1,71 @@
+{
+  "reddit": {
+    "client_id": "",
+    "client_secret": "",
+    "username": "",
+    "password": "",
+    "user_agent": "aurel3:v1.0 (by /u/YOUR_USERNAME)"
+  },
+  "subreddits": ["wallstreetbets", "stocks", "investing", "options"],
+  "scan": {
+    "min_mentions": 3,
+    "min_sentiment": 0.65,
+    "min_volume_ratio": 1.5,
+    "max_market_cap_billions": null,
+    "lookback_hours": 4,
+    "max_alerts_per_scan": 5
+  },
+  "runtime": {
+    "enable_news": true,
+    "enable_social": true,
+    "require_openclaw_interpretation": true,
+    "send_slack": true,
+    "send_ntfy": true
+  },
+  "openclaw": {
+    "model": "google-gemini-cli/gemini-2.5-flash",
+    "timeout_seconds": 120,
+    "max_input_items": 40
+  },
+  "schedule": {
+    "signal_scan_hours_utc": ["09:30", "13:30", "17:30"],
+    "watchlist_review_hours_utc": ["10:30", "14:30", "18:30", "20:30"],
+    "review_summary_day_utc": "sunday"
+  },
+  "watchlist": {
+    "stop_loss_pct": -0.05,
+    "profit_target_pct": 0.10,
+    "trailing_activation_pct": 0.02,
+    "trailing_pct": 0.03,
+    "quick_profit_pct": 0.03,
+    "quick_profit_hours": 48,
+    "max_hold_days": 5,
+    "max_per_sector": 2,
+    "sentiment_exit_threshold": 0.40
+  },
+  "sizing": {
+    "budget": 100,
+    "max_positions": 5,
+    "conviction_weights": {
+      "strong": 0.30,
+      "moderate": 0.20,
+      "speculative": 0.10
+    }
+  },
+  "notifications": {
+    "slack_bot_token": "",
+    "slack_bot_token_env": "AUREL3_SLACK_BOT_TOKEN",
+    "slack_user_id": "",
+    "slack_user_id_env": "AUREL3_SLACK_USER_ID",
+    "ntfy_topic": "",
+    "ntfy_topic_env": "AUREL3_NTFY_TOPIC",
+    "ntfy_server": "https://ntfy.sh",
+    "ntfy_server_env": "AUREL3_NTFY_SERVER",
+    "escalation_intervals_min": [0, 15, 30, 60, 60, 60, 60]
+  },
+  "alpaca": {
+    "key_env": "APCA_API_KEY_ID",
+    "secret_env": "APCA_API_SECRET_KEY",
+    "paper": true
+  }
+}
