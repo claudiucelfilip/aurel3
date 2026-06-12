@@ -1,5 +1,11 @@
 # Aurel3
 
+[![Python](https://img.shields.io/badge/Python-scripts-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![AI Assisted](https://img.shields.io/badge/AI-assisted-111827)](#operating-model)
+[![Signals](https://img.shields.io/badge/signals-thesis%20tracking-2563EB)](#core-concepts)
+[![Workflow](https://img.shields.io/badge/workflow-watchlist%20review-7C3AED)](#operating-model)
+[![Execution](https://img.shields.io/badge/no-broker%20execution-555555)](#what-it-does-not-do)
+
 Aurel3 is a market signal engine and thesis manager. It is designed to turn noisy source inputs into structured candidate ideas, watchlist reviews, and exit/trim guidance without directly executing trades.
 
 Where Aurel2 focuses on automated systematic execution, Aurel3 focuses on the earlier and messier part of the workflow: finding market-relevant themes, mapping them to tradable tickers, judging signal quality, and tracking whether an original investment thesis is strengthening or breaking.
