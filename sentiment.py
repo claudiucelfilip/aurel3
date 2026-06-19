@@ -9,6 +9,8 @@ Combined with market technicals (uptrend confirmation), this filters to
 tickers that Reddit is actively recommending AND the market confirms.
 """
 
+from __future__ import annotations
+
 
 def analyze_mention_sentiment(ticker_data: dict) -> dict:
     """Analyze sentiment from ApeWisdom mention data.

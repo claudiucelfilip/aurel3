@@ -2,12 +2,22 @@
 
 from __future__ import annotations
 
-import httpx
+try:
+    import httpx
+except ImportError:  # Python 3.9 shell on this host has requests but not httpx
+    httpx = None
+    import requests
+
+
+def _post_json(url: str, *, headers: dict | None = None, json: dict | None = None, timeout: int = 20):
+    if httpx is not None:
+        return httpx.post(url, headers=headers, json=json, timeout=timeout)
+    return requests.post(url, headers=headers, json=json, timeout=timeout)
 
 
 def send_slack_dm(bot_token: str, user_id: str, text: str) -> bool:
     try:
-        resp = httpx.post(
+        resp = _post_json(
             "https://slack.com/api/conversations.open",
             headers={"Authorization": f"Bearer {bot_token}"},
             json={"users": user_id},
@@ -19,7 +29,7 @@ def send_slack_dm(bot_token: str, user_id: str, text: str) -> bool:
             return False
 
         channel = data["channel"]["id"]
-        resp = httpx.post(
+        resp = _post_json(
             "https://slack.com/api/chat.postMessage",
             headers={"Authorization": f"Bearer {bot_token}"},
             json={"channel": channel, "text": text},
@@ -55,7 +65,7 @@ def send_ntfy(
             payload["priority"] = _ntfy_priority_int(priority)
         if tags:
             payload["tags"] = tags
-        resp = httpx.post(server, json=payload, timeout=20)
+        resp = _post_json(server, json=payload, timeout=20)
         return resp.status_code == 200
     except Exception as e:
         print(f"  ntfy error: {e}")

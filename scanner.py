@@ -4,7 +4,17 @@ ApeWisdom aggregates Reddit mentions across WSB, stocks, investing, etc.
 Free, no API key needed, updated in near real-time.
 """
 
-import httpx
+try:
+    import httpx
+except ImportError:
+    httpx = None
+    import requests
+
+
+def _get(url: str, *, timeout: int = 15):
+    if httpx is not None:
+        return httpx.get(url, timeout=timeout)
+    return requests.get(url, timeout=timeout)
 
 APEWISDOM_BASE = "https://apewisdom.io/api/v1.0"
 
@@ -58,7 +68,7 @@ def fetch_trending_tickers(
 
     for page in range(1, pages + 1):
         try:
-            resp = httpx.get(
+            resp = _get(
                 f"{APEWISDOM_BASE}/filter/{subreddit}/page/{page}",
                 timeout=15,
             )

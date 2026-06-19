@@ -7,7 +7,11 @@ from email.utils import parsedate_to_datetime
 from urllib.parse import quote
 from xml.etree import ElementTree as ET
 
-import httpx
+try:
+    import httpx
+except ImportError:
+    httpx = None
+    import requests
 
 from openclaw_bridge import export_source_batch, load_fresh_interpreted_items
 from scanner import scan_all_sources
@@ -64,26 +68,48 @@ def _parse_google_news_feed(xml_text: str, label: str) -> list[dict]:
 def collect_news_items() -> list[dict]:
     items: list[dict] = []
     now = datetime.now(timezone.utc)
-    with httpx.Client(timeout=20, follow_redirects=True) as client:
-        for label, query in NEWS_QUERIES:
-            try:
-                url = GOOGLE_NEWS_RSS.format(query=quote(query))
-                resp = client.get(url)
-                if resp.status_code != 200:
+    if httpx is not None:
+        with httpx.Client(timeout=20, follow_redirects=True) as client:
+            for label, query in NEWS_QUERIES:
+                try:
+                    url = GOOGLE_NEWS_RSS.format(query=quote(query))
+                    resp = client.get(url)
+                    if resp.status_code != 200:
+                        continue
+                    parsed_items = _parse_google_news_feed(resp.text, label)
+                    for item in parsed_items:
+                        try:
+                            ts = datetime.fromisoformat(item["timestamp"])
+                        except Exception:
+                            continue
+                        if now - ts > timedelta(days=MAX_NEWS_AGE_DAYS):
+                            continue
+                        if ts > now + timedelta(days=1):
+                            continue
+                        items.append(item)
+                except Exception:
                     continue
-                parsed_items = _parse_google_news_feed(resp.text, label)
-                for item in parsed_items:
-                    try:
-                        ts = datetime.fromisoformat(item["timestamp"])
-                    except Exception:
-                        continue
-                    if now - ts > timedelta(days=MAX_NEWS_AGE_DAYS):
-                        continue
-                    if ts > now + timedelta(days=1):
-                        continue
-                    items.append(item)
-            except Exception:
+        return items
+
+    for label, query in NEWS_QUERIES:
+        try:
+            url = GOOGLE_NEWS_RSS.format(query=quote(query))
+            resp = requests.get(url, timeout=20, allow_redirects=True)
+            if resp.status_code != 200:
                 continue
+            parsed_items = _parse_google_news_feed(resp.text, label)
+            for item in parsed_items:
+                try:
+                    ts = datetime.fromisoformat(item["timestamp"])
+                except Exception:
+                    continue
+                if now - ts > timedelta(days=MAX_NEWS_AGE_DAYS):
+                    continue
+                if ts > now + timedelta(days=1):
+                    continue
+                items.append(item)
+        except Exception:
+            continue
     return items
 
 

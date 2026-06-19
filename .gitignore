@@ -3,3 +3,4 @@ __pycache__/
 data/
 .codex
 config.json
+.claude/

@@ -1,5 +1,7 @@
 """Market data — price, volume, trend, and quality filters via Yahoo Finance."""
 
+from __future__ import annotations
+
 import yfinance as yf
 
 
@@ -21,6 +23,22 @@ MAX_DAILY_CHANGE = 0.25      # reject >25% single-day moves (likely pump)
 CRYPTO_MIN_AVG_VOLUME = 50_000_000  # $50M daily dollar volume for crypto
 
 
+def _info_get(info, *keys):
+    """Read a value from either yfinance's mapping-style info or object attrs."""
+    if info is None:
+        return None
+    if isinstance(info, dict):
+        for key in keys:
+            if key in info and info[key] is not None:
+                return info[key]
+        return None
+    for key in keys:
+        value = getattr(info, key, None)
+        if value is not None:
+            return value
+    return None
+
+
 def get_stock_data(ticker: str) -> dict | None:
     """Get price, volume, trend, and quality data for a ticker.
 
@@ -30,20 +48,54 @@ def get_stock_data(ticker: str) -> dict | None:
     try:
         yahoo_sym = _yahoo_symbol(ticker)
         stock = yf.Ticker(yahoo_sym)
-        info = stock.fast_info
         is_crypto = ticker.endswith(".X")
+        info = getattr(stock, "fast_info", None)
+        info_fallback = None
+        hist = None
 
-        current_price = getattr(info, "last_price", None)
+        if info is None:
+            try:
+                info_fallback = stock.info
+            except Exception:
+                info_fallback = {}
+
+        current_price = _info_get(info, "last_price", "regularMarketPrice", "currentPrice", "navPrice")
+        today_volume = _info_get(info, "last_volume", "regularMarketVolume", "volume")
+        avg_volume = _info_get(info, "three_month_average_volume", "averageVolume", "averageDailyVolume3Month")
+        market_cap = _info_get(info, "market_cap", "marketCap")
+        prev_close = _info_get(info, "previous_close", "previousClose", "regularMarketPreviousClose")
+
+        if current_price is None or today_volume is None or avg_volume is None or prev_close is None:
+            try:
+                hist = stock.history(period="3mo", auto_adjust=True)
+            except Exception:
+                hist = None
+
+        if current_price is None:
+            current_price = _info_get(info_fallback, "regularMarketPrice", "currentPrice", "navPrice")
+        if current_price is None and hist is not None and len(hist) >= 1:
+            current_price = float(hist["Close"].iloc[-1])
         if not current_price or current_price <= 0:
             return None
 
-        prev_close = getattr(info, "previous_close", current_price)
+        if prev_close is None:
+            prev_close = _info_get(info_fallback, "previousClose", "regularMarketPreviousClose")
+        if prev_close is None and hist is not None and len(hist) >= 2:
+            prev_close = float(hist["Close"].iloc[-2])
+        prev_close = prev_close or current_price
         change_pct = (current_price / prev_close) - 1 if prev_close > 0 else 0
 
-        today_volume = getattr(info, "last_volume", 0) or 0
-        avg_volume = getattr(info, "three_month_average_volume", 0) or 0
+        if today_volume is None and hist is not None and len(hist) >= 1 and "Volume" in hist:
+            today_volume = float(hist["Volume"].iloc[-1])
+        if avg_volume is None and hist is not None and len(hist) >= 20 and "Volume" in hist:
+            avg_volume = float(hist["Volume"].tail(20).mean())
+        if market_cap is None:
+            market_cap = _info_get(info_fallback, "marketCap")
+
+        today_volume = today_volume or 0
+        avg_volume = avg_volume or 0
         volume_ratio = round(today_volume / avg_volume, 2) if avg_volume > 0 else 0
-        market_cap = getattr(info, "market_cap", None) or 0
+        market_cap = market_cap or 0
 
         # Calculate EMAs and volatility from recent history
         ema_20 = None
@@ -51,7 +103,8 @@ def get_stock_data(ticker: str) -> dict | None:
         avg_daily_move = None
         change_5d = None
         try:
-            hist = stock.history(period="3mo", auto_adjust=True)
+            if hist is None:
+                hist = stock.history(period="3mo", auto_adjust=True)
             if hist is not None and len(hist) >= 20:
                 ema_20 = float(hist["Close"].ewm(span=20).mean().iloc[-1])
                 # Average daily move (absolute % change) over last 20 days
