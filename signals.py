@@ -66,7 +66,7 @@ def _dedup_news_items(news_items: list[dict]) -> list[dict]:
     best: dict[tuple, dict] = {}
     for news in news_items:
         directs = ",".join(sorted(b.upper() for b in news.get("direct_beneficiaries", [])))
-        summary_key = _normalize_text(news.get("summary", ""))[:120]
+        summary_key = _normalize_text(news.get("summary", ""))
         key = (news.get("theme_id"), directs, summary_key)
         existing = best.get(key)
         if existing is None:

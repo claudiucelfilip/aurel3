@@ -351,13 +351,17 @@ def _build_interpreted_items(case: dict, profile: dict[str, Any]) -> list[dict]:
         confidence = profile.get("confidence", "medium")
         if idx > 0 and confidence == "high":
             confidence = "medium"
+        # Distinct summaries per support item: these model independent
+        # articles, and identical summaries would (correctly) be collapsed
+        # by the engine's syndication dedup.
+        summary = profile["summary"] if idx == 0 else f"{profile['summary']} (independent source {idx+1})"
         items.append({
             "source_item_id": f"replay::{case['id']}::{idx+1}",
             "market_relevant": True,
             "event_type": profile["event_type"],
             "theme_id": profile["theme_id"],
             "theme_label": profile["theme_label"],
-            "summary": profile["summary"],
+            "summary": summary,
             "beneficiary_sectors": profile["beneficiary_sectors"],
             "hurt_sectors": profile["hurt_sectors"],
             "direct_beneficiaries": directs,
@@ -454,7 +458,11 @@ def _engine_case_result(case: dict) -> dict:
         "expected_horizon": case["expected_horizon"],
         "reference_price": reference_price,
     }
-    review = build_recommendation_review(review_recommendation, review_price)
+    review = build_recommendation_review(
+        review_recommendation,
+        review_price,
+        avg_daily_move=market_snapshots[ticker].get("avg_daily_move"),
+    )
 
     top_ticker = theme_top["ticker"] if theme_top else None
     top_review = None
@@ -472,7 +480,11 @@ def _engine_case_result(case: dict) -> dict:
                 "expected_horizon": case["expected_horizon"],
                 "reference_price": top_reference_price,
             }
-            top_review = build_recommendation_review(top_recommendation, top_review_price)
+            top_review = build_recommendation_review(
+                top_recommendation,
+                top_review_price,
+                avg_daily_move=market_snapshots.get(top_ticker, {}).get("avg_daily_move"),
+            )
 
     return {
         **case,
