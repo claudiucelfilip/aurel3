@@ -6,6 +6,7 @@ import math
 import re
 from datetime import datetime, timezone
 
+from confirmation import confirmation_state
 from markets import infer_market_profile
 from market import get_sector, get_stock_data
 from sentiment import analyze_mention_sentiment
@@ -53,6 +54,29 @@ def _news_age_hours(news: dict) -> float | None:
 
 def _normalize_text(text: str) -> str:
     return re.sub(r"\s+", " ", text.lower()).strip()
+
+
+def _dedup_news_items(news_items: list[dict]) -> list[dict]:
+    """Collapse syndicated duplicates of the same story.
+
+    The same headline often arrives via several outlets and gets interpreted
+    into near-identical items; counting each copy would fake the multi-signal
+    support that the buy-now gate requires. Keeps the freshest copy.
+    """
+    best: dict[tuple, dict] = {}
+    for news in news_items:
+        directs = ",".join(sorted(b.upper() for b in news.get("direct_beneficiaries", [])))
+        summary_key = _normalize_text(news.get("summary", ""))[:120]
+        key = (news.get("theme_id"), directs, summary_key)
+        existing = best.get(key)
+        if existing is None:
+            best[key] = news
+            continue
+        age_new = _news_age_hours(news)
+        age_old = _news_age_hours(existing)
+        if age_new is not None and (age_old is None or age_new < age_old):
+            best[key] = news
+    return list(best.values())
 
 
 def _social_evidence(item: dict, sentiment: dict) -> dict:
@@ -137,7 +161,7 @@ def _candidate_universe(source_items: dict) -> list[dict]:
 
     merged: dict[str, dict] = {item["ticker"].upper(): dict(item) for item in social_items}
 
-    for news in source_items.get("news", []):
+    for news in _dedup_news_items(source_items.get("news", [])):
         if not news.get("market_relevant"):
             continue
         actionability_rank = _actionability_rank(news)
@@ -361,50 +385,9 @@ def _merged_confidence_label(
     return baseline
 
 
-def _confirmation_state(data: dict) -> str:
-    trend = data.get("trend")
-    change_pct = data.get("change_pct", 0)
-    volume_ratio = data.get("volume_ratio", 0)
-    ema20 = data.get("ema_20")
-    price = data.get("price")
-    avg_daily_move = data.get("avg_daily_move")
-
-    if trend in ("down", "weak", "unknown"):
-        # Allow "developing" if price is only slightly below EMA20 relative
-        # to the stock's normal daily volatility — catches temporary dips
-        # on catalyst days rather than structural downtrends.
-        if (
-            trend != "unknown"
-            and ema20 and price and avg_daily_move and avg_daily_move > 0
-            and volume_ratio >= 1.2
-        ):
-            ema20_gap = (ema20 - price) / ema20
-            if ema20_gap <= avg_daily_move * 2.5:
-                return "developing"
-        return "unconfirmed"
-
-    is_extended = bool(ema20 and price and price >= ema20 * 1.10)
-    if trend == "strong_up" and change_pct > 0 and volume_ratio >= 1.5:
-        return "overconfirmed" if is_extended or change_pct >= 0.09 else "confirmed"
-
-    if trend in ("strong_up", "up") and change_pct >= -0.01 and volume_ratio >= 1.0:
-        return "confirmed" if trend == "strong_up" and change_pct >= 0.01 else "developing"
-
-    if trend in ("strong_up", "up") and change_pct >= -0.02 and volume_ratio >= 0.85:
-        return "developing"
-
-    # Allow developing for strong uptrend with quiet volume if the daily
-    # move is within normal range — catches steady accumulation days.
-    if (
-        trend == "strong_up"
-        and change_pct >= 0
-        and volume_ratio >= 0.6
-        and avg_daily_move and avg_daily_move > 0
-        and change_pct <= avg_daily_move * 1.5
-    ):
-        return "developing"
-
-    return "unconfirmed"
+# Shared with watchlist reviews — see confirmation.py. Alias kept because the
+# replay harness diagnose path references signals._confirmation_state.
+_confirmation_state = confirmation_state
 
 
 def _allow_unconfirmed_watch(data: dict, support: dict, theme_id: str | None = None) -> bool:
@@ -833,12 +816,14 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
     theme_records: list[dict] = []
     candidate_records: list[dict] = []
 
-    news_items = source_items.get("news", [])
+    news_items = _dedup_news_items(source_items.get("news", []))
     candidates = _candidate_universe(source_items)
 
     for item in candidates:
         ticker = item["ticker"]
         if item.get("signal_origin") == "interpreted_news":
+            # Synthetic sentiment: news candidates have no social data, so
+            # bullish_points here auto-satisfies the base_buy sentiment check.
             sentiment = {
                 "sentiment": "bullish",
                 "confidence": 0.7 if item.get("signal_direct") else 0.5,
@@ -922,17 +907,18 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
             summary_blob = " ".join(
                 str(first_news.get(k, "")).lower() for k in ("summary", "title", "reasoning_notes")
             )
-            contradiction_terms = (
-                "weak guidance",
-                "weak revenue",
-                "cuts guidance",
-                "missed earnings",
-                "miss",
-                "downgrade",
-                "lower demand",
-                "pressure in diagnostics demand",
+            # Word-boundary patterns: bare substring "miss" used to match
+            # "missile"/"commission" and falsely block defense buys.
+            contradiction_patterns = (
+                r"weak guidance",
+                r"weak revenue",
+                r"cuts guidance",
+                r"\bmiss(?:es|ed)?\b",
+                r"\bdowngrades?\b",
+                r"lower demand",
+                r"pressure in diagnostics demand",
             )
-            contradictory_catalyst = any(term in summary_blob for term in contradiction_terms)
+            contradictory_catalyst = any(re.search(p, summary_blob) for p in contradiction_patterns)
 
         if action == "buy_now":
             if contradictory_catalyst:
@@ -965,9 +951,27 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
             why_now += ". Warning: catalyst text reads bearish/contradictory, so this is not a clean fresh buy"
         else:
             why_now += "."
-        invalidation = (
-            "Exit if price/volume confirmation weakens materially or the ticker starts lagging its peer group."
-        )
+        # Machine-checkable invalidation conditions: watchlist reviews evaluate
+        # these structurally instead of substring-matching prose (which never
+        # matched the old boilerplate and left invalidation dead).
+        adm = data.get("avg_daily_move") or 0.02
+        drawdown_limit = round(max(0.04, adm * 3), 4)
+        invalidation_conditions = [
+            {
+                "type": "confirmation_loss",
+                "detail": "market confirmation drops back to unconfirmed",
+            },
+            {
+                "type": "trend_break",
+                "detail": "price loses both key EMAs (trend turns down/weak)",
+            },
+            {
+                "type": "adaptive_drawdown",
+                "threshold_pct": drawdown_limit,
+                "detail": f"position falls more than {drawdown_limit:.1%} from entry (~3x normal daily move)",
+            },
+        ]
+        invalidation = "; ".join(c["detail"] for c in invalidation_conditions)
 
         theme_id = make_id("theme", ticker)
         rec_id = make_id("rec", ticker)
@@ -1027,6 +1031,7 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
             "social_evidence": social_evidence,
             "reference_price": data.get("price"),
             "invalidation": invalidation,
+            "invalidation_conditions": invalidation_conditions,
             "alternatives": [],
             "gate_reasons": gate_reasons,
             "source_refs": [{
@@ -1054,11 +1059,13 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
             "theme_record_id": theme_id,
         }
         if candidate_record["market_accessible"]:
-            candidate_records.append(candidate_record)
+            # Pair rec with its own theme record; a positional zip drifted
+            # whenever an inaccessible candidate was skipped.
+            candidate_records.append((candidate_record, theme_record))
 
     grouped: dict[str, list[dict]] = {}
     latest_theme_record: dict[str, dict] = {}
-    for rec, theme in zip(candidate_records, theme_records):
+    for rec, theme in candidate_records:
         grouped.setdefault(rec["theme_driver"], []).append(rec)
         latest_theme_record[rec["theme_driver"]] = theme
 

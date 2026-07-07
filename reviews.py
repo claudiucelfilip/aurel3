@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from datetime import datetime, timezone
 
 from state import make_id, utc_now_iso
@@ -79,26 +80,39 @@ def recommendation_is_mature(recommendation: dict, now: datetime | None = None) 
     return age_days >= _required_age_days(recommendation.get("expected_horizon"))
 
 
-def build_recommendation_review(recommendation: dict, current_price: float) -> dict:
+def build_recommendation_review(
+    recommendation: dict,
+    current_price: float,
+    benchmark_return: float | None = None,
+    avg_daily_move: float | None = None,
+) -> dict:
     reference_price = recommendation.get("reference_price") or 0
     pnl_pct = ((current_price / reference_price) - 1) if reference_price else 0
     original_action = recommendation.get("action")
 
-    if original_action == "buy_now":
-        if pnl_pct >= 0.05:
+    # Judge excess return over the benchmark, scaled to the name's own
+    # volatility and the stated horizon — raw fixed thresholds called every
+    # buy a win in a rising tape and ignored horizon entirely.
+    excess_pct = pnl_pct - benchmark_return if benchmark_return is not None else pnl_pct
+    horizon_days = _required_age_days(recommendation.get("expected_horizon"))
+    adm = avg_daily_move or 0.02
+    meaningful_move = max(0.03, adm * math.sqrt(horizon_days))
+
+    if original_action in ("buy_now", "early_accumulation"):
+        if excess_pct >= meaningful_move:
             outcome = "worked"
-            note = "The buy-now recommendation delivered a meaningful upward move."
-        elif pnl_pct >= 0:
+            note = "The buy recommendation beat the benchmark by a meaningful margin for this name and horizon."
+        elif excess_pct >= 0:
             outcome = "partial"
-            note = "The signal was directionally positive but weaker than intended."
+            note = "The signal edged out the benchmark but the move was weaker than intended."
         else:
             outcome = "failed"
-            note = "The buy-now recommendation did not hold up over the intended horizon."
+            note = "The buy recommendation did not beat the benchmark over the intended horizon."
     else:
-        if pnl_pct >= 0.08:
+        if excess_pct >= meaningful_move * 1.5:
             outcome = "late"
-            note = "The signal moved strongly later, suggesting the action may have been too conservative."
-        elif pnl_pct >= 0:
+            note = "The signal outran the benchmark strongly later, suggesting the action was too conservative."
+        elif excess_pct >= 0:
             outcome = "partial"
             note = "The watch-style signal was directionally fine but not strong enough to justify upgrading with confidence."
         else:
@@ -117,6 +131,9 @@ def build_recommendation_review(recommendation: dict, current_price: float) -> d
         "reference_price": reference_price,
         "review_price": current_price,
         "forward_return_pct": round(pnl_pct, 4),
+        "benchmark_return_pct": round(benchmark_return, 4) if benchmark_return is not None else None,
+        "excess_return_pct": round(excess_pct, 4),
+        "meaningful_move_threshold": round(meaningful_move, 4),
         "outcome": outcome,
         "summary": note,
         "spec_change_candidate": outcome in ("failed", "late"),

@@ -32,7 +32,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from market import get_stock_data
+from market import get_benchmark_return, get_stock_data
 
 
 MAX_PRICE_DEVIATION_PCT = 0.35
@@ -460,12 +460,19 @@ def cmd_review_signals(ticker: str | None = None) -> None:
             skipped_no_market_data += 1
             continue
 
-        review = build_recommendation_review(rec, data["price"])
+        review = build_recommendation_review(
+            rec,
+            data["price"],
+            benchmark_return=get_benchmark_return(rec.get("timestamp")),
+            avg_daily_move=data.get("avg_daily_move"),
+        )
         append_recommendation_review(review)
         created += 1
+        excess = review.get("excess_return_pct")
+        excess_str = f", excess {excess:+.1%}" if excess is not None else ""
         print(
             f"  SIGNAL REVIEW: {review['ticker']} -> {review['outcome']} "
-            f"({review['forward_return_pct']:+.1%}) | {review['summary']}"
+            f"({review['forward_return_pct']:+.1%}{excess_str}) | {review['summary']}"
         )
 
     if created == 0:
@@ -508,6 +515,24 @@ def cmd_review_summary() -> None:
             outcome_counts[outcome] = outcome_counts.get(outcome, 0) + 1
         print(f"  Signal reviews: {len(signal_reviews)}")
         print("  Signal outcomes: " + ", ".join(f"{k}={v}" for k, v in sorted(outcome_counts.items())))
+
+        # Per-theme scorecard — the evidence base for future gate tuning.
+        theme_stats: dict[str, dict] = {}
+        for review in signal_reviews:
+            theme = review.get("theme_driver") or "unknown"
+            stats = theme_stats.setdefault(theme, {"n": 0, "outcomes": {}, "excess_sum": 0.0, "excess_n": 0})
+            stats["n"] += 1
+            outcome = review.get("outcome", "unknown")
+            stats["outcomes"][outcome] = stats["outcomes"].get(outcome, 0) + 1
+            excess = review.get("excess_return_pct", review.get("forward_return_pct"))
+            if isinstance(excess, (int, float)):
+                stats["excess_sum"] += excess
+                stats["excess_n"] += 1
+        print("  Theme scorecard:")
+        for theme, stats in sorted(theme_stats.items(), key=lambda kv: -kv[1]["n"]):
+            avg_excess = stats["excess_sum"] / stats["excess_n"] if stats["excess_n"] else 0
+            outcome_str = ", ".join(f"{k}={v}" for k, v in sorted(stats["outcomes"].items()))
+            print(f"    {theme}: n={stats['n']}, avg_excess={avg_excess:+.1%} [{outcome_str}]")
     else:
         print("  Signal reviews: none")
 
@@ -562,7 +587,7 @@ def cmd_performance() -> None:
     print(f"  Avg return: {summary['avg_pnl_pct']:+.1%}")
     print(f"  Avg hold: {summary['avg_hold_days']:.1f} days")
 
-    history = load_history()
+    history = [t for t in load_history() if not t.get("excluded")]
     if history:
         print("\nRecent trades:")
         for t in history[-10:]:

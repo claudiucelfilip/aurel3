@@ -6,6 +6,8 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+from confirmation import confirmation_state
+
 WATCHLIST_PATH = Path(__file__).parent / "data" / "watchlist.json"
 HISTORY_PATH = Path(__file__).parent / "data" / "trade_history.json"
 
@@ -141,7 +143,10 @@ def add_position(
         "current_confirmation_state": recommendation.get("confirmation_state", "developing"),
         "current_action": "hold",
         "exit_urgency": "low",
-        "invalidation_conditions": [recommendation.get("invalidation")] if recommendation.get("invalidation") else [],
+        "invalidation_conditions": (
+            recommendation.get("invalidation_conditions")
+            or ([recommendation.get("invalidation")] if recommendation.get("invalidation") else [])
+        ),
         "next_relevant_catalyst": None,
         "last_reviewed_at": None,
         "linked_recommendation_id": recommendation.get("id"),
@@ -255,7 +260,8 @@ def find_position(ticker: str, status: str = "open") -> dict | None:
 
 
 def get_performance_summary() -> dict:
-    history = load_history()
+    # Records marked excluded (e.g. corrupted fills) must not skew stats.
+    history = [t for t in load_history() if not t.get("excluded")]
     if not history:
         return {"total_trades": 0}
 
@@ -291,11 +297,9 @@ def review_position(position: dict, market_data: dict, social_lookup: dict | Non
     if price > updated.get("high_water_mark", position["entry_price"]):
         updated["high_water_mark"] = price
 
-    confirmation = "unconfirmed"
-    if trend == "strong_up" and volume_ratio >= 1.5 and change_pct > 0:
-        confirmation = "overconfirmed" if ema20 and price >= ema20 * 1.08 else "confirmed"
-    elif trend in ("strong_up", "up") and volume_ratio >= 0.9:
-        confirmation = "developing"
+    # Same judgment as entry scoring — a position must not flip states just
+    # because the review path graded identical market data differently.
+    confirmation = confirmation_state(market_data)
 
     sentiment = social_lookup.get(position["ticker"])
     sentiment_label = sentiment.get("sentiment") if sentiment else None
@@ -308,25 +312,54 @@ def review_position(position: dict, market_data: dict, social_lookup: dict | Non
 
     pnl_pct = (price / position["entry_price"]) - 1 if position["entry_price"] > 0 else 0
     entry_confirmation = position.get("confirmation_at_entry", "developing")
+
+    # Exit drawdown scales with the name's own volatility — a fixed -3% was a
+    # single ordinary red day for higher-vol names, against the thesis-first
+    # sell philosophy.
+    adm = market_data.get("avg_daily_move") or 0.02
+    drawdown_limit = max(0.04, adm * 3)
+
     invalidations = position.get("invalidation_conditions", [])
-    invalidation_hit = False
+    hit_conditions: list[str] = []
     for item in invalidations:
+        if isinstance(item, dict):
+            kind = item.get("type")
+            if kind == "confirmation_loss" and confirmation == "unconfirmed":
+                hit_conditions.append(kind)
+            elif kind == "trend_break" and trend in ("down", "weak"):
+                hit_conditions.append(kind)
+            elif kind == "adaptive_drawdown" and pnl_pct < -(item.get("threshold_pct") or drawdown_limit):
+                hit_conditions.append(kind)
+            continue
+        # Legacy prose conditions from older positions.
         text = str(item).lower()
         if "relative strength" in text and confirmation == "unconfirmed":
-            invalidation_hit = True
+            hit_conditions.append("legacy_relative_strength")
         if "price trend fails" in text and trend in ("down", "weak"):
-            invalidation_hit = True
+            hit_conditions.append("legacy_trend")
+    # Thesis-first with price confirmation: two independent hits invalidate,
+    # or one *material* hit (trend break / drawdown) with confirmation broken.
+    # confirmation_loss alone never sells — a soft day is not a broken thesis.
+    distinct_hits = set(hit_conditions)
+    material_hits = distinct_hits - {"confirmation_loss"}
+    invalidation_hit = len(distinct_hits) >= 2 or (
+        bool(material_hits) and confirmation == "unconfirmed"
+    )
 
-    if invalidation_hit and confirmation == "unconfirmed":
+    if invalidation_hit:
         thesis_state = "broken"
         action = "sell"
         exit_urgency = "high"
-        reason = "A stated invalidation condition was hit and market confirmation is now broken."
-    elif confirmation == "unconfirmed" and pnl_pct < -0.03:
+        reason = (
+            "Stated invalidation conditions were hit ("
+            + ", ".join(sorted(set(hit_conditions)))
+            + ") and market confirmation no longer supports the thesis."
+        )
+    elif confirmation == "unconfirmed" and pnl_pct < -drawdown_limit:
         thesis_state = "broken"
         action = "sell"
         exit_urgency = "high"
-        reason = "Market confirmation failed and the position is now working against the original thesis."
+        reason = "Market confirmation failed and the drawdown exceeds the position's normal volatility."
     elif sentiment_label == "bearish" and sentiment_confidence >= 0.4 and pnl_pct <= 0:
         thesis_state = "broken"
         action = "sell"
@@ -373,9 +406,20 @@ def review_position(position: dict, market_data: dict, social_lookup: dict | Non
         )
     else:
         thesis_state = "weakening"
-        action = "trim_de_risk" if pnl_pct > 0 else "sell"
-        exit_urgency = "medium" if pnl_pct > 0 else "high"
-        reason = "Thesis quality has weakened materially."
+        if pnl_pct > 0:
+            action = "trim_de_risk"
+            exit_urgency = "medium"
+            reason = "Confirmation has faded while the position is still up — protect gains."
+        elif pnl_pct < -drawdown_limit:
+            action = "sell"
+            exit_urgency = "high"
+            reason = "Confirmation has failed and the drawdown exceeds normal volatility."
+        else:
+            # Down, but within the name's normal volatility: no fresh buying,
+            # watch closely — don't sell on noise per the thesis-first policy.
+            action = "hold_not_fresh_buy"
+            exit_urgency = "medium"
+            reason = "Confirmation has faded but the drawdown is within normal volatility; watching closely."
 
     updated["current_confirmation_state"] = confirmation
     updated["current_thesis_state"] = thesis_state

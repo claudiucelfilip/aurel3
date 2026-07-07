@@ -2,6 +2,12 @@
 
 Date: 2026-04-08
 
+> **2026-07-07 update:** interpretation now runs inside the OpenClaw cron
+> agent-turn (`aurel3-signal-cycle`, model `codex/gpt-5.5`) — the agent
+> interprets the batch itself and calls `openclaw_import` + `signal_scan`.
+> The `run.py openclaw_cycle` / `openclaw_run.py` subprocess path below is
+> legacy and no longer scheduled. Model references to `gpt-5.4` are stale.
+
 ## Current State
 
 Aurel3 is wired to the real OpenClaw runtime for interpretation.

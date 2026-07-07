@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
+
 import yfinance as yf
 
 
@@ -37,6 +40,39 @@ def _info_get(info, *keys):
         if value is not None:
             return value
     return None
+
+
+def _session_elapsed_fraction(info) -> float:
+    """Fraction of the trading session elapsed, for projecting partial-day
+    volume to a full-day figure. Returns 1.0 when the session is over,
+    unknown, or the instrument trades around the clock."""
+    tz_name = _info_get(info, "timezone")
+    if not tz_name:
+        return 1.0
+    tz_name = str(tz_name)
+    try:
+        now_local = datetime.now(ZoneInfo(tz_name))
+    except Exception:
+        return 1.0
+    # Rough session bounds by region; exact minutes matter less than not
+    # comparing a 10:00 volume against a full-day average.
+    if tz_name.startswith("America"):
+        open_min, close_min = 9 * 60 + 30, 16 * 60
+    elif tz_name.startswith("Europe"):
+        open_min, close_min = 9 * 60, 17 * 60 + 30
+    elif tz_name.startswith(("Asia", "Australia")):
+        open_min, close_min = 9 * 60, 15 * 60
+    else:
+        return 1.0
+    if now_local.weekday() >= 5:
+        return 1.0
+    minutes = now_local.hour * 60 + now_local.minute
+    if minutes <= open_min or minutes >= close_min:
+        return 1.0
+    elapsed = (minutes - open_min) / (close_min - open_min)
+    # Floor early-session projection: the first minutes are volume-heavy
+    # and would otherwise inflate the projected ratio wildly.
+    return max(0.25, elapsed)
 
 
 def get_stock_data(ticker: str) -> dict | None:
@@ -95,6 +131,13 @@ def get_stock_data(ticker: str) -> dict | None:
         today_volume = today_volume or 0
         avg_volume = avg_volume or 0
         volume_ratio = round(today_volume / avg_volume, 2) if avg_volume > 0 else 0
+        volume_ratio_raw = volume_ratio
+        # Mid-session, partial-day volume vs a full-day average structurally
+        # fails volume gates on morning scans — project to full-day instead.
+        if not is_crypto and avg_volume > 0 and today_volume > 0:
+            fraction = _session_elapsed_fraction(info)
+            if fraction < 1.0:
+                volume_ratio = round((today_volume / fraction) / avg_volume, 2)
         market_cap = market_cap or 0
 
         # Calculate EMAs and volatility from recent history
@@ -140,6 +183,7 @@ def get_stock_data(ticker: str) -> dict | None:
             "volume": int(today_volume),
             "avg_volume": int(avg_volume),
             "volume_ratio": volume_ratio,
+            "volume_ratio_raw": volume_ratio_raw,
             "market_cap": market_cap,
             "dollar_volume": round(avg_volume * current_price, 0) if avg_volume else 0,
             "ema_20": round(ema_20, 2) if ema_20 else None,
@@ -153,6 +197,43 @@ def get_stock_data(ticker: str) -> dict | None:
 
     except Exception as e:
         print(f"  Warning: failed to get market data for {ticker}: {e}")
+        return None
+
+
+_BENCHMARK_CACHE: dict[str, object] = {}
+
+
+def get_benchmark_return(start_iso: str | None, benchmark: str = "SPY") -> float | None:
+    """Benchmark return from start_iso to the latest close.
+
+    Used by signal reviews to judge excess return instead of raw return —
+    in a rising tape every buy 'works' otherwise.
+    """
+    if not start_iso:
+        return None
+    try:
+        start = datetime.fromisoformat(start_iso)
+    except Exception:
+        return None
+    if start.tzinfo is None:
+        start = start.replace(tzinfo=timezone.utc)
+    try:
+        hist = _BENCHMARK_CACHE.get(benchmark)
+        if hist is None:
+            hist = yf.Ticker(benchmark).history(period="6mo", auto_adjust=True)
+            _BENCHMARK_CACHE[benchmark] = hist
+        if hist is None or len(hist) == 0:
+            return None
+        closes = hist["Close"]
+        sub = closes[closes.index >= start]
+        if len(sub) == 0:
+            return None
+        base = float(sub.iloc[0])
+        last = float(closes.iloc[-1])
+        if base <= 0:
+            return None
+        return round(last / base - 1, 4)
+    except Exception:
         return None
 
 
