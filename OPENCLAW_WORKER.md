@@ -37,6 +37,7 @@ For each source item:
 - map it to a controlled Aurel3 theme
 - identify beneficiary and hurt sectors
 - identify direct and secondary beneficiary tickers when justified
+- classify the ticker-specific impact as bullish, bearish, mixed, or neutral
 - estimate durability, horizon, confidence, and actionability
 
 Do not produce generic summaries. Produce structured market interpretation.
@@ -198,6 +199,19 @@ Direct beneficiary means directly affected, not necessarily positively affected.
 For negative or mixed company-specific catalysts, still list the named company as
 direct so downstream review can learn from both bullish and bearish outcomes.
 
+For every ticker in `direct_beneficiaries` or `secondary_beneficiaries`, also
+emit one `ticker_impacts` object with:
+
+- `ticker`: the same ticker symbol
+- `direction`: `bullish`, `bearish`, `mixed`, or `neutral`
+- `rationale`: one concise causal sentence
+
+Directness and direction are independent. Never label a ticker bullish merely
+because it is named or directly affected. A lawsuit seeking to block a merger
+is bearish for the target's deal-completion thesis; a sector selloff caused by
+rates or oil is bearish for the falling companies; a guidance change with no
+known direction is mixed or neutral until the direction is established.
+
 ### Secondary beneficiary
 
 The company benefits but through an indirect path:
@@ -236,6 +250,10 @@ When in doubt between direct and secondary, ask: "Does this catalyst directly ch
 - Competitors or sector peers are **secondary**, `interesting_but_early` unless the deal creates clear competitive dynamics.
 - Confidence is `high` only if the report cites named parties and a credible outlet. Unconfirmed rumors = `medium`.
 - Default downstream bias: the target is the primary tradable expression of M&A news. The acquirer should not auto-promote to `buy_now` from deal news alone.
+- Deal approval, a higher bid, or improved completion probability is normally
+  bullish for the target. A lawsuit, antitrust challenge, blocked vote, or
+  other reduction in completion probability is bearish for the target even
+  though the target remains a direct affected ticker.
 
 ### Healthcare / commercialization
 

@@ -21,12 +21,14 @@ REQUIRED_ITEM_FIELDS = {
     "hurt_sectors",
     "direct_beneficiaries",
     "secondary_beneficiaries",
+    "ticker_impacts",
     "time_horizon",
     "durability",
     "confidence",
     "actionability",
     "reasoning_notes",
 }
+IMPACT_DIRECTIONS = {"bullish", "bearish", "mixed", "neutral"}
 
 
 def _load_json(path: Path) -> dict:
@@ -73,6 +75,21 @@ def validate_payload(payload: dict, batch: dict | None = None) -> list[str]:
         source_item_id = item.get("source_item_id")
         if batch_ids and source_item_id not in batch_ids:
             errors.append(f"Item {idx} source_item_id not found in current source batch: {source_item_id}")
+        ticker_impacts = item.get("ticker_impacts", [])
+        if not isinstance(ticker_impacts, list):
+            errors.append(f"Item {idx} 'ticker_impacts' must be a list.")
+        else:
+            for impact_idx, impact in enumerate(ticker_impacts):
+                if not isinstance(impact, dict):
+                    errors.append(f"Item {idx} ticker impact {impact_idx} is not an object.")
+                    continue
+                if not impact.get("ticker"):
+                    errors.append(f"Item {idx} ticker impact {impact_idx} missing ticker.")
+                if impact.get("direction") not in IMPACT_DIRECTIONS:
+                    errors.append(
+                        f"Item {idx} ticker impact {impact_idx} has invalid direction: "
+                        f"{impact.get('direction')}"
+                    )
 
     return errors
 

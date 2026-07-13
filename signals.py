@@ -61,6 +61,60 @@ def _normalize_text(text: str) -> str:
     return re.sub(r"\s+", " ", text.lower()).strip()
 
 
+IMPACT_DIRECTIONS = {"bullish", "bearish", "mixed", "neutral"}
+BEARISH_CATALYST_PATTERNS = (
+    r"\bsued?\b.*\bblock",
+    r"\blawsuit\b.*\bblock",
+    r"\bantitrust\b",
+    r"\bcompletion risk\b",
+    r"\bregulatory (?:and |or )?(?:timing )?risk\b",
+    r"\bheadline risk\b",
+    r"\bheadwind\b",
+    r"\bpressur(?:e|es|ed|ing)\b",
+    r"\bstocks? fall",
+    r"\bshares? fall",
+    r"\bdeclin(?:e|es|ed|ing)\b",
+    r"\bcuts? (?:full-year )?(?:guidance|forecast|outlook)\b",
+    r"\bweak (?:guidance|revenue|demand)\b",
+    r"\bmiss(?:es|ed)?\b",
+    r"\bdowngrades?\b",
+    r"\binvestigation\b",
+    r"\brecall\b",
+    r"\bbankrupt(?:cy)?\b",
+    r"\bfraud\b",
+)
+
+
+def _ticker_impact_direction(news: dict, ticker: str) -> str:
+    """Return ticker-specific catalyst direction, independent of directness."""
+    ticker_key = ticker.upper()
+    for impact in news.get("ticker_impacts", []):
+        if not isinstance(impact, dict):
+            continue
+        if str(impact.get("ticker", "")).upper() != ticker_key:
+            continue
+        direction = str(impact.get("direction", "")).lower()
+        if direction in IMPACT_DIRECTIONS:
+            return direction
+
+    # Backward-compatible safety for interpreted payloads created before
+    # ticker_impacts existed. Negative language must never default to bullish.
+    text = _normalize_text(
+        " ".join(
+            str(news.get(field, ""))
+            for field in ("summary", "reasoning_notes", "title", "event_type")
+        )
+    )
+    if any(re.search(pattern, text) for pattern in BEARISH_CATALYST_PATTERNS):
+        return "bearish"
+
+    directs = {str(value).upper() for value in news.get("direct_beneficiaries", [])}
+    secondaries = {str(value).upper() for value in news.get("secondary_beneficiaries", [])}
+    if ticker_key in directs or ticker_key in secondaries:
+        return "bullish"
+    return "neutral"
+
+
 def _dedup_news_items(news_items: list[dict]) -> list[dict]:
     """Collapse syndicated duplicates of the same story.
 
@@ -153,6 +207,7 @@ def _build_news_candidate(ticker: str, news: dict, direct: bool, beneficiary_ind
         "signal_direct": direct,
         "signal_theme_id": news.get("theme_id"),
         "signal_summary": news.get("summary", ""),
+        "signal_direction": _ticker_impact_direction(news, ticker),
         "beneficiary_rank": max(0, 3 - beneficiary_index),
     }
 
@@ -182,6 +237,8 @@ def _candidate_universe(source_items: dict) -> list[dict]:
         for index, ticker in enumerate(news.get("direct_beneficiaries", [])):
             key = ticker.upper()
             candidate = _build_news_candidate(key, news, direct=True, beneficiary_index=index)
+            if candidate["signal_direction"] in {"bearish", "neutral"}:
+                continue
             existing = merged.get(key)
             if (
                 not existing
@@ -199,6 +256,8 @@ def _candidate_universe(source_items: dict) -> list[dict]:
         for index, ticker in enumerate(news.get("secondary_beneficiaries", [])):
             key = ticker.upper()
             candidate = _build_news_candidate(key, news, direct=False, beneficiary_index=index)
+            if candidate["signal_direction"] in {"bearish", "neutral"}:
+                continue
             existing = merged.get(key)
             if (
                 not existing
@@ -289,6 +348,8 @@ def _support_profile(ticker: str, related_news: list[dict]) -> dict:
         "high_confidence_count": 0,
         "medium_confidence_count": 0,
         "high_durability_count": 0,
+        "bearish_hits": 0,
+        "mixed_hits": 0,
         "freshest_direct_hours": None,
         "freshest_any_hours": None,
     }
@@ -298,27 +359,34 @@ def _support_profile(ticker: str, related_news: list[dict]) -> dict:
         directs = {b.lower() for b in news.get("direct_beneficiaries", [])}
         secondaries = {b.lower() for b in news.get("secondary_beneficiaries", [])}
         is_direct = ticker_key in directs
-        if is_direct:
+        is_secondary = ticker_key in secondaries
+        direction = _ticker_impact_direction(news, ticker)
+        is_bullish = direction == "bullish"
+        if is_direct and is_bullish:
             profile["direct_hits"] += 1
-        if ticker_key in secondaries:
+        if is_secondary and is_bullish:
             profile["secondary_hits"] += 1
+        if (is_direct or is_secondary) and direction == "bearish":
+            profile["bearish_hits"] += 1
+        if (is_direct or is_secondary) and direction == "mixed":
+            profile["mixed_hits"] += 1
         actionability_rank = _actionability_rank(news)
-        if actionability_rank >= 3:
+        if is_bullish and actionability_rank >= 3:
             profile["actionable_count"] += 1
-        if actionability_rank >= 2:
+        if is_bullish and actionability_rank >= 2:
             profile["potentially_actionable_count"] += 1
-        if news.get("confidence") == "high":
+        if is_bullish and news.get("confidence") == "high":
             profile["high_confidence_count"] += 1
-        elif news.get("confidence") == "medium":
+        elif is_bullish and news.get("confidence") == "medium":
             profile["medium_confidence_count"] += 1
-        if news.get("durability") == "high":
+        if is_bullish and news.get("durability") == "high":
             profile["high_durability_count"] += 1
 
         age_hours = _news_age_hours(news)
         if age_hours is not None:
             if age_hours < freshest_any:
                 freshest_any = age_hours
-            if is_direct and age_hours < freshest_direct:
+            if is_direct and is_bullish and age_hours < freshest_direct:
                 freshest_direct = age_hours
 
     if freshest_direct != math.inf:
@@ -829,15 +897,19 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
     for item in candidates:
         ticker = item["ticker"]
         if item.get("signal_origin") == "interpreted_news":
-            # Synthetic sentiment: news candidates have no social data, so
-            # bullish_points here auto-satisfies the base_buy sentiment check.
+            direction = item.get("signal_direction", "neutral")
+            bullish_points = 0
+            if direction == "bullish":
+                bullish_points = 3 if item.get("signal_direct") else 2
+            elif direction == "mixed":
+                bullish_points = 1
             sentiment = {
-                "sentiment": "bullish",
+                "sentiment": direction,
                 "confidence": 0.7 if item.get("signal_direct") else 0.5,
                 "reason": item.get("signal_summary") or "Interpreted market catalyst",
                 "momentum": "steady",
-                "bullish_points": 3 if item.get("signal_direct") else 2,
-                "bearish_points": 0,
+                "bullish_points": bullish_points,
+                "bearish_points": 3 if direction == "bearish" else 1 if direction == "mixed" else 0,
             }
         else:
             sentiment = analyze_mention_sentiment(item)
@@ -910,7 +982,7 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
         if not market_profile["accessible"] and action in ("buy_now", "early_accumulation"):
             action = "watch_for_confirmation"
 
-        contradictory_catalyst = False
+        contradictory_catalyst = support.get("bearish_hits", 0) > 0 or support.get("mixed_hits", 0) > 0
         if related_news:
             first_news = related_news[0]
             summary_blob = " ".join(
@@ -927,7 +999,9 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
                 r"lower demand",
                 r"pressure in diagnostics demand",
             )
-            contradictory_catalyst = any(re.search(p, summary_blob) for p in contradiction_patterns)
+            contradictory_catalyst = contradictory_catalyst or any(
+                re.search(p, summary_blob) for p in contradiction_patterns
+            )
 
         if action == "buy_now":
             if contradictory_catalyst:

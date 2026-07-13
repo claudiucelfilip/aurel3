@@ -28,6 +28,9 @@ OpenClaw should read that file, interpret the items, then write:
       "hurt_sectors": ["airlines", "transportation"],
       "direct_beneficiaries": ["XOM", "CVX", "SHEL"],
       "secondary_beneficiaries": ["SLB", "HAL"],
+      "ticker_impacts": [
+        {"ticker": "XOM", "direction": "bullish", "rationale": "Higher crude prices improve upstream economics."}
+      ],
       "time_horizon": "1-2 weeks",
       "durability": "medium",
       "confidence": "high",
@@ -56,6 +59,7 @@ OpenClaw should read that file, interpret the items, then write:
 - `hurt_sectors`
 - `direct_beneficiaries`
 - `secondary_beneficiaries`
+- `ticker_impacts`
 - `time_horizon`
 - `durability`
 - `confidence`
@@ -90,12 +94,22 @@ OpenClaw should read that file, interpret the items, then write:
 - `1-3 months`
 - `3+ months / structural`
 
+### `ticker_impacts[].direction`
+- `bullish`
+- `bearish`
+- `mixed`
+- `neutral`
+
 ## Notes
 
 - `source_item_id` must match an item in the exported source batch.
 - `source_batch_generated_at` must exactly match the current `/root/aurel3/data/openclaw_source_batch.json` `generated_at` value.
 - `theme_id` should align with Aurel3 taxonomy where possible.
 - `direct_beneficiaries` and `secondary_beneficiaries` may be empty arrays when the source is market-relevant but not ticker-specific.
+- Directness describes causal proximity, not direction. `ticker_impacts` must
+  state whether the catalyst is bullish, bearish, mixed, or neutral for every
+  named ticker. A named company facing a lawsuit or deal-blocking action is
+  direct but normally bearish or mixed.
 - `beneficiary_sectors` and `hurt_sectors` should use plain lowercase sector strings where possible.
 - `reasoning_notes` should remain concise and decision-oriented.
 

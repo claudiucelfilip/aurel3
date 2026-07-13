@@ -363,7 +363,10 @@ def cmd_buy(ticker: str, price: str | None = None, shares: str | None = None) ->
         if data and data["price"] > 0:
             entry_price = data["price"]
         else:
-            print(f"Couldn't get price for {ticker}. Specify: buy TICKER PRICE [SHARES]")
+            print(
+                f"Yahoo market quote unavailable for {ticker}. "
+                "Specify a user-supplied execution price: buy TICKER PRICE [SHARES]"
+            )
             return
 
     if not _validate_price_against_market(ticker, entry_price, data, "buy"):
@@ -378,14 +381,30 @@ def cmd_buy(ticker: str, price: str | None = None, shares: str | None = None) ->
         entry_price=entry_price,
         shares=num_shares,
         recommendation=recommendation,
+        entry_price_source="user_supplied" if price else "market_quote",
+        entry_price_verification=("verified" if data else "unverified") if price else "market_quote",
+        market_data_source=data.get("data_source") if data else None,
+        market_data_as_of=data.get("as_of") if data else None,
     )
     if recommendation:
         mark_recommendation_promoted(recommendation["id"])
 
     invested = f" (${entry_price * num_shares:.2f} invested)" if num_shares > 0 else ""
+    if price and data:
+        quote_time = f" at {data['as_of']}" if data.get("as_of") else ""
+        verification = (
+            f"Price verified against {data.get('data_source', 'Yahoo')} market data{quote_time}."
+        )
+    elif price:
+        verification = "Yahoo quote unavailable; user-supplied entry price was not verified."
+    else:
+        quote_time = f" at {data['as_of']}" if data.get("as_of") else ""
+        verification = (
+            f"Entry price sourced from {data.get('data_source', 'Yahoo')} market data{quote_time}."
+        )
     print(
-        f"Added {ticker} to watchlist at ${entry_price:.2f}{invested} | "
-        f"Theme: {pos.get('original_theme_driver')}"
+        f"Aurel3 simulated buy: added {ticker} to watchlist at ${entry_price:.2f}{invested} | "
+        f"Theme: {pos.get('original_theme_driver')} | {verification}"
     )
 
 

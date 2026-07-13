@@ -47,7 +47,7 @@ def export_source_batch(source_items: dict) -> dict:
             "Interpret each source item into a structured market event with fields: "
             "market_relevant, event_type, theme_id, theme_label, summary, beneficiary_sectors, "
             "hurt_sectors, direct_beneficiaries, secondary_beneficiaries, time_horizon, durability, "
-            "confidence, actionability, reasoning_notes."
+            "ticker_impacts, confidence, actionability, reasoning_notes."
         ),
         "items": items,
     }

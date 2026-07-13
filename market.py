@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
+from urllib.parse import quote, urlencode
+from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
 import yfinance as yf
@@ -75,6 +78,110 @@ def _session_elapsed_fraction(info) -> float:
     return max(0.25, elapsed)
 
 
+def _iso_from_epoch(value) -> str | None:
+    try:
+        return datetime.fromtimestamp(float(value), tz=timezone.utc).isoformat()
+    except (TypeError, ValueError, OSError):
+        return None
+
+
+def _yahoo_chart_fallback(ticker: str) -> dict | None:
+    """Fetch Yahoo's public chart payload when yfinance's client path fails.
+
+    This stays inside Aurel3's market-data boundary; it does not use Alpaca or
+    touch the live-trader account.
+    """
+    yahoo_sym = _yahoo_symbol(ticker)
+    params = urlencode({"range": "3mo", "interval": "1d", "events": "div,splits"})
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(yahoo_sym)}?{params}"
+    request = Request(url, headers={"User-Agent": "Mozilla/5.0 Aurel3/1.0"})
+    try:
+        with urlopen(request, timeout=10) as response:
+            payload = json.load(response)
+        result = payload.get("chart", {}).get("result", [None])[0]
+        if not result:
+            return None
+
+        meta = result.get("meta", {})
+        quote_data = (result.get("indicators", {}).get("quote") or [{}])[0]
+        closes = [float(value) for value in quote_data.get("close", []) if value is not None]
+        volumes = [float(value) for value in quote_data.get("volume", []) if value is not None]
+        current_price = meta.get("regularMarketPrice") or (closes[-1] if closes else None)
+        if not current_price or float(current_price) <= 0:
+            return None
+        current_price = float(current_price)
+
+        prev_close = meta.get("chartPreviousClose") or meta.get("previousClose")
+        if not prev_close and len(closes) >= 2:
+            prev_close = closes[-2]
+        prev_close = float(prev_close or current_price)
+        today_volume = float(meta.get("regularMarketVolume") or (volumes[-1] if volumes else 0))
+        avg_sample = volumes[-20:] if volumes else []
+        avg_volume = sum(avg_sample) / len(avg_sample) if avg_sample else 0
+        is_crypto = ticker.endswith(".X")
+
+        ema_20 = None
+        ema_50 = None
+        avg_daily_move = None
+        change_5d = None
+        if len(closes) >= 20:
+            alpha = 2 / 21
+            ema_20 = closes[0]
+            for close in closes[1:]:
+                ema_20 = (close * alpha) + (ema_20 * (1 - alpha))
+            returns = [abs((cur / prev) - 1) for prev, cur in zip(closes[-21:-1], closes[-20:]) if prev > 0]
+            avg_daily_move = round(sum(returns) / len(returns), 4) if returns else None
+        if len(closes) >= 50:
+            alpha = 2 / 51
+            ema_50 = closes[0]
+            for close in closes[1:]:
+                ema_50 = (close * alpha) + (ema_50 * (1 - alpha))
+        if len(closes) >= 6 and closes[-6] > 0:
+            change_5d = round((current_price / closes[-6]) - 1, 4)
+
+        above_ema20 = current_price > ema_20 if ema_20 else None
+        above_ema50 = current_price > ema_50 if ema_50 else None
+        if above_ema20 and above_ema50:
+            trend = "strong_up"
+        elif above_ema20:
+            trend = "up"
+        elif above_ema20 is False and above_ema50 is False:
+            trend = "down"
+        elif above_ema50 is False:
+            trend = "weak"
+        else:
+            trend = "unknown"
+
+        volume_ratio = round(today_volume / avg_volume, 2) if avg_volume > 0 else 0
+        volume_ratio_raw = volume_ratio
+        if not is_crypto and avg_volume > 0 and today_volume > 0:
+            fraction = _session_elapsed_fraction(meta)
+            if fraction < 1.0:
+                volume_ratio = round((today_volume / fraction) / avg_volume, 2)
+
+        return {
+            "price": round(current_price, 2),
+            "change_pct": round((current_price / prev_close) - 1, 4) if prev_close > 0 else 0,
+            "volume": int(today_volume),
+            "avg_volume": int(avg_volume),
+            "volume_ratio": volume_ratio,
+            "volume_ratio_raw": volume_ratio_raw,
+            "market_cap": 0,
+            "dollar_volume": round(avg_volume * current_price, 0) if avg_volume else 0,
+            "ema_20": round(ema_20, 2) if ema_20 else None,
+            "ema_50": round(ema_50, 2) if ema_50 else None,
+            "avg_daily_move": avg_daily_move,
+            "change_5d": change_5d,
+            "trend": trend,
+            "sector": None,
+            "is_crypto": is_crypto,
+            "data_source": "yahoo_chart",
+            "as_of": _iso_from_epoch(meta.get("regularMarketTime")),
+        }
+    except Exception:
+        return None
+
+
 def get_stock_data(ticker: str) -> dict | None:
     """Get price, volume, trend, and quality data for a ticker.
 
@@ -112,7 +219,7 @@ def get_stock_data(ticker: str) -> dict | None:
         if current_price is None and hist is not None and len(hist) >= 1:
             current_price = float(hist["Close"].iloc[-1])
         if not current_price or current_price <= 0:
-            return None
+            return _yahoo_chart_fallback(ticker)
 
         if prev_close is None:
             prev_close = _info_get(info_fallback, "previousClose", "regularMarketPreviousClose")
@@ -193,10 +300,18 @@ def get_stock_data(ticker: str) -> dict | None:
             "trend": trend,
             "sector": None,  # populated lazily by get_sector()
             "is_crypto": is_crypto,
+            "data_source": "yahoo",
+            "as_of": _iso_from_epoch(
+                _info_get(info, "regular_market_time", "regularMarketTime")
+                or _info_get(getattr(stock, "history_metadata", {}), "regularMarketTime")
+            ),
         }
 
     except Exception as e:
-        print(f"  Warning: failed to get market data for {ticker}: {e}")
+        fallback = _yahoo_chart_fallback(ticker)
+        if fallback is not None:
+            return fallback
+        print(f"  Warning: Yahoo market-data lookup failed for {ticker}: {e}")
         return None
 
 

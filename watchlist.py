@@ -58,6 +58,10 @@ def _migrate_position(pos: dict) -> dict:
     pos.setdefault("close_reason", None)
     pos.setdefault("current_action_reason", None)
     pos.setdefault("notes", "")
+    pos.setdefault("entry_price_source", "legacy")
+    pos.setdefault("entry_price_verification", "unknown")
+    pos.setdefault("market_data_source", None)
+    pos.setdefault("market_data_as_of", None)
     pos.setdefault("status", "open")
     pos.setdefault("high_water_mark", pos.get("entry_price"))
     pos.setdefault("trailing_stop", None)
@@ -100,6 +104,10 @@ def add_position(
     shares: float = 0,
     notes: str = "",
     recommendation: dict | None = None,
+    entry_price_source: str = "user_supplied",
+    entry_price_verification: str = "unverified",
+    market_data_source: str | None = None,
+    market_data_as_of: str | None = None,
 ) -> dict:
     watchlist = load_watchlist()
     ticker = ticker.upper()
@@ -151,6 +159,10 @@ def add_position(
         "last_reviewed_at": None,
         "linked_recommendation_id": recommendation.get("id"),
         "notes": notes,
+        "entry_price_source": entry_price_source,
+        "entry_price_verification": entry_price_verification,
+        "market_data_source": market_data_source,
+        "market_data_as_of": market_data_as_of,
         "high_water_mark": entry_price,
         "trailing_stop": None,
         "last_alert": None,
