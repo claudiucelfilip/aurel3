@@ -77,8 +77,10 @@ from notify import (
 )
 from openclaw_bridge import load_fresh_interpreted_items
 from reviews import (
+    active_spec_change_candidates,
     build_closed_position_review,
     build_recommendation_review,
+    refresh_spec_candidate_lifecycle,
     recommendation_is_mature,
 )
 from signals import generate_signal_scan
@@ -99,6 +101,7 @@ from state import (
     find_latest_active_recommendation,
     load_openclaw_interpreted_items,
     load_openclaw_source_batch,
+    save_recommendation_reviews,
 )
 from watchlist import (
     add_position,
@@ -475,6 +478,10 @@ def cmd_review_signals(ticker: str | None = None) -> None:
             f"({review['forward_return_pct']:+.1%}{excess_str}) | {review['summary']}"
         )
 
+    all_reviews = load_recommendation_reviews()
+    if refresh_spec_candidate_lifecycle(all_reviews):
+        save_recommendation_reviews(all_reviews)
+
     if created == 0:
         print("No matured recommendation reviews created.")
     else:
@@ -489,6 +496,8 @@ def cmd_review_signals(ticker: str | None = None) -> None:
 def cmd_review_summary() -> None:
     closed_reviews = load_closed_reviews()
     signal_reviews = load_recommendation_reviews()
+    if refresh_spec_candidate_lifecycle(signal_reviews):
+        save_recommendation_reviews(signal_reviews)
     recommendations = load_recommendations()
 
     print("Review Summary:")
@@ -547,11 +556,7 @@ def cmd_review_summary() -> None:
     else:
         print("  Active themes: none")
 
-    spec_candidates = [
-        review for review in signal_reviews if review.get("spec_change_candidate")
-    ] + [
-        review for review in closed_reviews if review.get("spec_change_candidate")
-    ]
+    spec_candidates = active_spec_change_candidates(signal_reviews)
     print(f"  Spec change candidates: {len(spec_candidates)}")
 
 

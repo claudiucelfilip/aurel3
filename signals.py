@@ -17,7 +17,12 @@ BENEFICIARY_SYMBOL_NORMALIZATION = {
     "RHM": "RHM.DE",
     "BAE.L": "BAESY",
     "BVB": "BVB.RO",
+    "HXSCF": "SKHY",
 }
+
+
+class MarketDataCoverageError(RuntimeError):
+    pass
 
 # Freshness thresholds (hours). News older than STALE_REJECT_HOURS cannot
 # drive a candidate at all. News older than FRESH_BUY_HOURS cannot drive a
@@ -818,6 +823,8 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
 
     news_items = _dedup_news_items(source_items.get("news", []))
     candidates = _candidate_universe(source_items)
+    market_data_attempts = 0
+    market_data_failures: list[str] = []
 
     for item in candidates:
         ticker = item["ticker"]
@@ -839,8 +846,10 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
 
         social_evidence = _social_evidence(item, sentiment)
 
+        market_data_attempts += 1
         data = get_stock_data(ticker)
         if not data:
+            market_data_failures.append(ticker)
             continue
 
         sector = get_sector(ticker)
@@ -1062,6 +1071,12 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
             # Pair rec with its own theme record; a positional zip drifted
             # whenever an inaccessible candidate was skipped.
             candidate_records.append((candidate_record, theme_record))
+
+    if market_data_attempts >= 3 and len(market_data_failures) / market_data_attempts >= 0.75:
+        failed = ", ".join(sorted(set(market_data_failures)))
+        raise MarketDataCoverageError(
+            f"Market data unavailable for {len(market_data_failures)}/{market_data_attempts} candidates: {failed}"
+        )
 
     grouped: dict[str, list[dict]] = {}
     latest_theme_record: dict[str, dict] = {}

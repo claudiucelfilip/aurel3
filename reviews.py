@@ -8,6 +8,10 @@ from datetime import datetime, timezone
 from state import make_id, utc_now_iso
 
 
+REVIEW_MODEL_VERSION = 2
+ACTIVE_CANDIDATE_STATUSES = {"open", "queued", "awaiting_approval"}
+
+
 def build_closed_position_review(position: dict) -> dict:
     pnl_pct = position.get("pnl_pct", 0)
     outcome = "worked" if pnl_pct > 0.03 else "partial" if pnl_pct >= 0 else "failed"
@@ -136,6 +140,62 @@ def build_recommendation_review(
         "meaningful_move_threshold": round(meaningful_move, 4),
         "outcome": outcome,
         "summary": note,
-        "spec_change_candidate": outcome in ("failed", "late"),
+        "review_model_version": REVIEW_MODEL_VERSION,
+        "spec_change_candidate": False,
+        "candidate_status": "observation",
+        "candidate_decision_reason": "A single review is evidence, not a structural pattern.",
+        "candidate_last_alerted_at": None,
         "reviewed_at": utc_now_iso(),
     }
+
+
+def refresh_spec_candidate_lifecycle(reviews: list[dict]) -> bool:
+    """Promote repeated current-model misses and supersede legacy candidates."""
+    changed = False
+    cohorts: dict[tuple, list[dict]] = {}
+    for review in reviews:
+        if review.get("review_model_version") != REVIEW_MODEL_VERSION:
+            if review.get("spec_change_candidate") or review.get("candidate_status") not in (None, "superseded"):
+                review["spec_change_candidate"] = False
+                review["candidate_status"] = "superseded"
+                review["candidate_decision_reason"] = "Legacy review predates benchmark-aware scoring."
+                changed = True
+            continue
+        if review.get("outcome") not in ("failed", "late"):
+            continue
+        key = (
+            review.get("theme_driver"),
+            review.get("original_action"),
+            review.get("original_confirmation_state"),
+            review.get("expected_horizon"),
+        )
+        cohorts.setdefault(key, []).append(review)
+
+    for cohort in cohorts.values():
+        repeated = len({review.get("recommendation_id") for review in cohort}) >= 2
+        for review in cohort:
+            status = review.get("candidate_status")
+            if status in {"accepted", "rejected", "superseded"}:
+                continue
+            desired_status = "open" if repeated else "observation"
+            desired_candidate = repeated
+            if status != desired_status or review.get("spec_change_candidate") != desired_candidate:
+                review["candidate_status"] = desired_status
+                review["spec_change_candidate"] = desired_candidate
+                review["candidate_decision_reason"] = (
+                    "Repeated independent misses in the same gate cohort."
+                    if repeated
+                    else "A single review is evidence, not a structural pattern."
+                )
+                changed = True
+    return changed
+
+
+def active_spec_change_candidates(reviews: list[dict]) -> list[dict]:
+    return [
+        review
+        for review in reviews
+        if review.get("review_model_version") == REVIEW_MODEL_VERSION
+        and review.get("spec_change_candidate")
+        and review.get("candidate_status") in ACTIVE_CANDIDATE_STATUSES
+    ]
