@@ -1,57 +1,41 @@
 # Aurel3 Session Handoff
 
-Date: 2026-04-08
-
-> **2026-07-07 update:** interpretation now runs inside the OpenClaw cron
-> agent-turn (`aurel3-signal-cycle`, model `codex/gpt-5.5`) — the agent
-> interprets the batch itself and calls `openclaw_import` + `signal_scan`.
-> The `run.py openclaw_cycle` / `openclaw_run.py` subprocess path below is
-> legacy and no longer scheduled. Model references to `gpt-5.4` are stale.
+Original: 2026-04-08 · Updated: 2026-07-21 (removed the legacy
+`openclaw_cycle`/`openclaw_run` subprocess path; interpretation now runs in the
+OpenClaw agent-turn).
 
 ## Current State
 
 Aurel3 is wired to the real OpenClaw runtime for interpretation.
 
-The live path is:
-
-```text
-python3 run.py openclaw_cycle
-  -> export source batch
-  -> prepare OpenClaw task payload
-  -> run OpenClaw agent
-  -> save interpreted items
-  -> run signal scan
-```
+The live path is the OpenClaw cron agent-turn (`aurel3-signal-cycle`): the
+agent interprets the source batch itself, then calls `openclaw_import` and
+`signal_scan`. The old `run.py openclaw_cycle` subprocess path has been removed.
 
 Important:
-- Aurel3 interpretation uses `openclaw agent --agent main --json`
 - OpenClaw provides the model/runtime/auth layer
-- Current Aurel3 interpretation model: `openai-codex/gpt-5.4`
+- Current Aurel3 interpretation model: `openai-codex/gpt-5.5`
 - Do not rewire back to a direct API flow — use OpenClaw for model routing
 - Gemini is no longer part of the intended Aurel3 runtime path
 
 ## Current model policy
 
-### Keep on `openai-codex/gpt-5.4`
-- Aurel3 signal interpretation
-- Aurel3 event-driven analysis
-- Aurel3 watchlist thesis review when model judgment matters
-- Aurel3 weekly review / postmortem / learning loop
+Aurel3 is the decision-quality layer, so its judgment jobs run on the strong
+model — model quality directly affects recommendation, exit, and learning
+quality. Lower-stakes ops/reporting jobs outside the Aurel3 judgment loop use a
+cheaper model.
 
-Reason:
-Aurel3 is part of the decision-quality layer. Model quality can directly affect recommendation quality, exit quality, and learning quality.
+The authoritative, up-to-date model policy lives on Dumbo:
+- `/root/.openclaw/workspace/MODEL-POLICY.md`
+- `/root/.openclaw/workspace/AUREL3-OPERATIONS.md`
 
-### Use `openai-codex/gpt-5.1` only for lower-stakes ops/reporting jobs outside the Aurel3 judgment loop
-
-Examples outside Aurel3 core judgment:
-- `aurel2-daily-ops-check`
-- `session-cleanup`
-- `aurel2-crypto-daily-check`
-- `aurel2-crypto-monday-rebalance-report`
+Consult those files rather than pinning a version here — model versions move,
+and this handoff will go stale again if it hardcodes one.
 
 ## Current cron-related expectation
 
-Aurel3 jobs that affect signal quality should stay on `openai-codex/gpt-5.4`:
+These Aurel3 jobs are part of the judgment loop and follow the judgment-layer
+model policy above:
 - `aurel3-signal-cycle`
 - `aurel3-watchlist-review`
 - `aurel3-review-signals`
@@ -66,10 +50,8 @@ Aurel3 jobs that affect signal quality should stay on `openai-codex/gpt-5.4`:
 ## Useful commands
 
 ```bash
-python3 run.py openclaw_cycle
 python3 run.py watchlist_review
 python3 run.py review_signals
 python3 run.py review_summary
 python3 run.py status
-python3 interpretation_test.py
 ```

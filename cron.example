@@ -1,7 +1,8 @@
 # Aurel3 suggested cron entries
 
-# OpenClaw-first cycle: export -> prepare -> interpret -> signal scan
-30 9,13,17 * * 1-5 bash /root/aurel3/cron.sh openclaw_cycle
+# Entry-scan cycle is driven by the OpenClaw agent-turn (aurel3-signal-cycle),
+# which interprets the batch and calls openclaw_import + signal_scan itself.
+# The old `openclaw_cycle` subprocess command has been removed.
 
 # Watchlist review: more frequent than entry scans
 30 10,14,18,20 * * 1-5 bash /root/aurel3/cron.sh watchlist_review

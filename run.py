@@ -2,8 +2,6 @@
 """Aurel3 — signal engine + watchlist thesis manager.
 
 Usage:
-  python3 /root/aurel3/run.py openclaw_cycle
-  python3 /root/aurel3/run.py openclaw_run
   python3 /root/aurel3/run.py signal_scan
   python3 /root/aurel3/run.py watchlist_review
   python3 /root/aurel3/run.py openclaw_status
@@ -320,36 +318,6 @@ def cmd_openclaw_import(path: str, force: bool = False) -> None:
         raise SystemExit(result.returncode)
 
 
-def cmd_openclaw_run() -> None:
-    result = subprocess.run(
-        ["python3", "openclaw_run.py"],
-        cwd=str(Path(__file__).parent),
-        capture_output=True,
-        text=True,
-    )
-    if result.stdout:
-        print(result.stdout.strip())
-    if result.stderr:
-        print(result.stderr.strip())
-    if result.returncode != 0:
-        raise SystemExit(result.returncode)
-
-
-def cmd_openclaw_cycle() -> None:
-    result = subprocess.run(
-        ["python3", "openclaw_cycle.py"],
-        cwd=str(Path(__file__).parent),
-        capture_output=True,
-        text=True,
-    )
-    if result.stdout:
-        print(result.stdout.strip())
-    if result.stderr:
-        print(result.stderr.strip())
-    if result.returncode != 0:
-        raise SystemExit(result.returncode)
-
-
 def cmd_buy(ticker: str, price: str | None = None, shares: str | None = None) -> None:
     ticker = ticker.upper()
     recommendation = find_latest_active_recommendation(ticker)
@@ -642,14 +610,10 @@ def main() -> None:
         cmd_status()
     elif command == "openclaw_status":
         cmd_openclaw_status()
-    elif command == "openclaw_cycle":
-        cmd_openclaw_cycle()
     elif command == "openclaw_export":
         cmd_openclaw_export()
     elif command == "openclaw_prepare":
         cmd_openclaw_prepare()
-    elif command == "openclaw_run":
-        cmd_openclaw_run()
     elif command == "openclaw_import":
         path = sys.argv[2] if len(sys.argv) >= 3 else None
         force = len(sys.argv) >= 4 and sys.argv[3] == "--force"

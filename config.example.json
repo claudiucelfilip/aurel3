@@ -23,13 +23,6 @@
     "send_ntfy": true,
     "allowed_markets": ["USA", "BVB", "XETRA", "EURONEXT Paris", "EURONEXT Amsterdam", "EURONEXT Brussels", "Borsa Italiana", "LSE", "WSE", "SIX", "Copenhagen", "Helsinki", "Stockholm", "Oslo"]
   },
-  "openclaw": {
-    "model": "openai-codex/gpt-5.4",
-    "timeout_seconds": 120,
-    "max_input_items": 40,
-    "max_retries": 3,
-    "retry_delay_seconds": 8
-  },
   "schedule": {
     "signal_scan_hours_utc": ["09:30", "13:30", "17:30"],
     "watchlist_review_hours_utc": ["10:30", "14:30", "18:30", "20:30"],

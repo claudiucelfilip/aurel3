@@ -12,16 +12,14 @@ The current recommendation is:
 
 ## Current Runtime Shape
 
-The live interpretation path is now:
-
-```text
-Aurel3 export -> Aurel3 prepare -> OpenClaw agent runtime -> Aurel3 signal scan
-```
+The live interpretation path runs inside the OpenClaw cron agent-turn
+(`aurel3-signal-cycle`): the agent interprets the source batch itself, then
+calls `openclaw_import` and `signal_scan`.
 
 That means:
 - Aurel3 does not need a direct `OPENAI_API_KEY` for interpretation anymore
 - OpenClaw handles the interpretation step through its own configured runtime
-- `python3 run.py openclaw_cycle` is the correct live entrypoint
+- The old `run.py openclaw_cycle` subprocess entrypoint has been removed
 
 ## Environment Variables
 
@@ -41,10 +39,10 @@ Notes:
 
 ## Commands
 
-Main runtime commands:
+Main runtime commands (entry-scan interpretation runs in the OpenClaw
+agent-turn, not a `run.py` command):
 
 ```bash
-python3 run.py openclaw_cycle
 python3 run.py watchlist_review
 python3 run.py review_signals
 python3 run.py review_summary
@@ -62,7 +60,7 @@ python3 run.py postmortem [TICKER]
 ## Recommended Live Cadence
 
 Recommended schedule:
-- `openclaw_cycle`
+- entry-scan cycle (OpenClaw agent-turn `aurel3-signal-cycle`)
   - 09:30 UTC
   - 13:30 UTC
   - 17:30 UTC
@@ -83,7 +81,6 @@ This is intentionally simple. Adjust later if live behavior suggests a better ca
 Use `cron.sh` as the wrapper:
 
 ```bash
-bash /root/aurel3/cron.sh openclaw_cycle
 bash /root/aurel3/cron.sh watchlist_review
 bash /root/aurel3/cron.sh review_signals
 bash /root/aurel3/cron.sh review_summary
