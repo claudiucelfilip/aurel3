@@ -64,6 +64,44 @@ Raw rows: `data/interpreter_bakeoff_results_thin_gpt56.json` and
   shows the win is in inputs, not weights. Revisit only with hundreds of resolved live
   cases and enriched inputs — and the paid-deployment bar still applies.
 
+## Engine-level before/after (2026-07-23)
+
+`scripts/replay_with_model_judgments.py` feeds each model's saved thin vs enriched
+judgments through the real A3 signal engine (`signals.py` + gates) instead of the
+canned THEME_DEFAULTS. Same 63 cases, no new LLM calls.
+
+| Model | buy_now | exact action matches | missed ≥10% | failed | late |
+|---|---|---|---|---|---|
+| Fable 5 | 3 → 7 | 9 → 13 | 11 → 10 | 1 → 3 | 12 → 12 |
+| gpt-5.6-sol | 3 → 5 | 10 → 12 | 11 → 11 | 1 → 2 | 12 → 13 |
+| Inkling | 7 → 11 | 14 → 18 | 7 → 7 | 1 → 3 | 9 → 8 |
+
+Consistent across all three models: enriched judgment makes the engine more decisive
+(buy_now roughly doubles) and better aligned with benchmark labels (+~30-40% exact
+matches) at the cost of 1-2 extra failures — directly attacking the engine's
+documented too-conservative/late-miss weakness (REPLAY_64_FINDINGS.md).
+
+Note: Inkling's engine-level lead (18 vs 13 exact matches, 7 vs 10 missed ≥10% against
+Fable-enriched; Inkling-thin already beats Fable-enriched) is larger than its
+calibration lead. If any evidence justifies revisiting the paid-adoption decision,
+it is this — but it remains one 64-case authored-input experiment.
+
+## Where enrichment does NOT help: Aurel2's advisor (2026-07-23)
+
+The same enrichment was A/B-tested on Aurel2's AIAdvisor (backtest 2015→2026, monthly,
+haiku + amnesia, `--ai-enrich`): portfolio outcomes identical (0 overrides fired in
+either arm across 20 non-hold reviews), and on the 4 decisions where the enriched arm
+judged differently, its pick was worse on 3-month forward return all 4 times.
+
+Synthesis: **market-context enrichment helps narrative-judgment layers** (A3's
+interpreter — input is news, so market state is new information) **and does not help
+decision-review layers** (A2's advisor — the deterministic engine already consumed the
+market signal; re-feeding it invites re-ranking with redundant data). A2's
+`--ai-enrich` stays off. live-trader's news tilt is a narrative layer (headline
+lexicon, no market-state check), so the A3 finding plausibly transfers — but its
+history isn't replayable (headlines/tilts unarchived); only a forward shadow A/B can
+produce its after-figure.
+
 ## Caveats
 
 - Catalysts are authored, not archived headlines — fair across models, but a decisive
