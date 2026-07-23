@@ -33,8 +33,21 @@ def test_single_current_review_remains_observation():
 
 def test_two_independent_reviews_open_one_cohort():
     reviews = [review("one"), review("two")]
+    reviews[0]["ticker"] = "ONE"
+    reviews[1]["ticker"] = "TWO"
 
     refresh_spec_candidate_lifecycle(reviews)
 
     assert len(active_spec_change_candidates(reviews)) == 2
     assert {item["candidate_status"] for item in reviews} == {"open"}
+
+
+def test_duplicate_ticker_reviews_remain_observations():
+    reviews = [review("one"), review("two")]
+    reviews[0]["ticker"] = "LTC"
+    reviews[1]["ticker"] = "LTC"
+
+    refresh_spec_candidate_lifecycle(reviews)
+
+    assert active_spec_change_candidates(reviews) == []
+    assert {item["candidate_status"] for item in reviews} == {"observation"}

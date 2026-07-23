@@ -172,7 +172,9 @@ def refresh_spec_candidate_lifecycle(reviews: list[dict]) -> bool:
         cohorts.setdefault(key, []).append(review)
 
     for cohort in cohorts.values():
-        repeated = len({review.get("recommendation_id") for review in cohort}) >= 2
+        # A repeated spec-change candidate should represent a structural gate
+        # pattern, not duplicate snapshots of the same ticker/catalyst episode.
+        repeated = len({review.get("ticker") for review in cohort}) >= 2
         for review in cohort:
             status = review.get("candidate_status")
             if status in {"accepted", "rejected", "superseded"}:
