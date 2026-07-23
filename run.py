@@ -263,6 +263,31 @@ def cmd_status() -> None:
         )
 
 
+def cmd_market_context(tickers: list[str]) -> None:
+    """Print at-date market state for tickers as JSON — for the interpreter.
+
+    Bake-off finding (BAKEOFF_FINDINGS.md): interpreter confidence is
+    anti-calibrated on narrative alone; showing the asset's own market state
+    fixes it. The OpenClaw worker calls this after mapping beneficiaries.
+    """
+    out = {}
+    for ticker in tickers:
+        data = get_stock_data(ticker.upper())
+        if not data:
+            out[ticker.upper()] = None
+            continue
+        out[ticker.upper()] = {
+            "trend": data.get("trend"),
+            "change_pct": data.get("change_pct"),
+            "change_5d": data.get("change_5d"),
+            "volume_ratio": data.get("volume_ratio"),
+            "above_ema_20": (data["price"] > data["ema_20"]) if data.get("ema_20") else None,
+            "above_ema_50": (data["price"] > data["ema_50"]) if data.get("ema_50") else None,
+            "as_of": data.get("as_of"),
+        }
+    print(json.dumps(out, indent=2))
+
+
 def cmd_openclaw_status() -> None:
     batch = load_openclaw_source_batch()
     interpreted = load_openclaw_interpreted_items()
@@ -610,6 +635,11 @@ def main() -> None:
         cmd_status()
     elif command == "openclaw_status":
         cmd_openclaw_status()
+    elif command == "market_context":
+        if len(sys.argv) < 3:
+            print("Usage: market_context TICKER [TICKER...]")
+        else:
+            cmd_market_context(sys.argv[2:])
     elif command == "openclaw_export":
         cmd_openclaw_export()
     elif command == "openclaw_prepare":

@@ -63,6 +63,28 @@ Prefer these theme ids when appropriate:
 If none fits clearly, use:
 - `null` for `theme_id`
 
+## Market-Confirmation Step (required)
+
+After mapping an item's direct beneficiaries, fetch their current market state:
+
+```bash
+python3 run.py market_context TICKER [TICKER...]
+```
+
+Batch all direct-beneficiary tickers from the whole batch into ONE call. Use the
+returned trend / volume_ratio / EMA position to set confirmation-aware fields:
+
+- Market confirms the thesis (uptrend, elevated volume in the thesis direction):
+  confidence and actionability may stand at what the catalyst merits.
+- Market does not confirm (downtrend/weak trend, no volume): cap actionability at
+  `potentially_actionable` and reduce confidence one level below what the
+  narrative alone suggests.
+- No data returned for a ticker: judge on the narrative alone, as before.
+
+Why: benchmarked on 64 resolved cases (BAKEOFF_FINDINGS.md), narrative-only
+confidence is anti-calibrated; adding the asset's own market state fixed
+calibration for every model tested and roughly doubled correct buy signals.
+
 ## Interpretation Rules
 
 1. Ignore items that are not investable or market-relevant.
