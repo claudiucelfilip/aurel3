@@ -1,5 +1,6 @@
 import io
 import json
+from datetime import datetime, timedelta, timezone
 
 import market
 import openclaw_import
@@ -7,9 +8,15 @@ import run
 import signals
 
 
+def _fresh_iso() -> str:
+    # Must stay inside STALE_REJECT_HOURS or the item is dropped before
+    # candidate seeding (time-bomb otherwise).
+    return (datetime.now(timezone.utc) - timedelta(hours=2)).strftime("%Y-%m-%dT%H:%M:%S+00:00")
+
+
 def wbd_lawsuit_item(**overrides):
     item = {
-        "source_item_id": "news::ma::2026-07-13T16:48:05+03:00::Paramount WBD lawsuit",
+        "source_item_id": f"news::ma::{_fresh_iso()}::Paramount WBD lawsuit",
         "market_relevant": True,
         "event_type": "merger_litigation",
         "theme_id": "m_and_a_corporate_action",

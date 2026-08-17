@@ -34,6 +34,10 @@ STALE_REJECT_HOURS = 48.0
 REDDIT_STALE_HOURS = 12.0
 MIN_SOCIAL_BUY_POINTS = 3
 
+# Max day-of move an earnings/guidance fresh buy may already have. Entries made
+# deeper into the pop mean-reverted vs SPY in the Jul-Aug 2026 live sample.
+EARNINGS_FRESH_BUY_MAX_CHANGE = 0.04
+
 
 def _news_age_hours(news: dict) -> float | None:
     """Return age of an interpreted news item in hours, or None if unknown.
@@ -775,6 +779,9 @@ def _recommendation_action_raw(
         return "watch_for_confirmation"
 
     if theme_id == "earnings_guidance_momentum":
+        # EARNINGS_FRESH_BUY_MAX_CHANGE: live Jul-Aug 2026 buys entered >4% into
+        # the day's pop all lagged SPY over the horizon (KO/IDXX/NOMD/EAT).
+        change_pct = data.get("change_pct", 0)
         if (
             confirmation in ("developing", "confirmed")
             and crowding != "high"
@@ -783,7 +790,7 @@ def _recommendation_action_raw(
             and support["actionable_count"] >= 1
             and support["high_confidence_count"] >= 1
             and data.get("volume_ratio", 0) >= 1.5
-            and data.get("change_pct", 0) >= -0.01
+            and -0.01 <= change_pct <= EARNINGS_FRESH_BUY_MAX_CHANGE
         ):
             return "buy_now"
         # Post-earnings dip path: strong support + massive volume + moderate dip.
@@ -797,17 +804,18 @@ def _recommendation_action_raw(
             and support["actionable_count"] >= 1
             and support["high_confidence_count"] >= 1
             and data.get("volume_ratio", 0) >= 3.0
-            and data.get("change_pct", 0) >= -0.12
+            and -0.12 <= change_pct <= EARNINGS_FRESH_BUY_MAX_CHANGE
         ):
             return "buy_now"
         if (
             confirmation == "overconfirmed"
+            and crowding != "high"
             and support["direct_hits"] >= 1
             and support["actionable_count"] >= 1
-            and data.get("change_pct", 0) <= 0.12
+            and change_pct <= EARNINGS_FRESH_BUY_MAX_CHANGE
         ):
             return "buy_now"
-        if confirmation == "overconfirmed":
+        if confirmation == "overconfirmed" or crowding == "high":
             return "hold_not_fresh_buy"
         return "watch_for_confirmation"
 
