@@ -12,3 +12,11 @@
 
 # Weekly summary
 0 9 * * 0 bash /root/aurel3/cron.sh review_summary
+
+# Manual trading desk (broker-agnostic; see DESK.md)
+# Core DCA proposal — runs daily, self-gates to the first trading day of the month
+15 7 * * 1-5 bash /root/aurel3/cron.sh core_dca
+# Anti-panic guard — drawdown pre-commitment messages
+45 20 * * 1-5 bash /root/aurel3/cron.sh core_guard
+# Notify + nag unconfirmed orders, ingest external proposals from data/desk/inbox/
+0 8 * * * bash /root/aurel3/cron.sh desk_notify

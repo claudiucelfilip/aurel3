@@ -6,7 +6,12 @@
     "password": "",
     "user_agent": "aurel3:v1.0 (by /u/YOUR_USERNAME)"
   },
-  "subreddits": ["wallstreetbets", "stocks", "investing", "options"],
+  "subreddits": [
+    "wallstreetbets",
+    "stocks",
+    "investing",
+    "options"
+  ],
   "scan": {
     "min_mentions": 3,
     "min_sentiment": 0.65,
@@ -21,31 +26,55 @@
     "require_openclaw_interpretation": true,
     "send_slack": true,
     "send_ntfy": true,
-    "allowed_markets": ["USA", "BVB", "XETRA", "EURONEXT Paris", "EURONEXT Amsterdam", "EURONEXT Brussels", "Borsa Italiana", "LSE", "WSE", "SIX", "Copenhagen", "Helsinki", "Stockholm", "Oslo"]
+    "allowed_markets": [
+      "USA",
+      "BVB",
+      "XETRA",
+      "EURONEXT Paris",
+      "EURONEXT Amsterdam",
+      "EURONEXT Brussels",
+      "Borsa Italiana",
+      "LSE",
+      "WSE",
+      "SIX",
+      "Copenhagen",
+      "Helsinki",
+      "Stockholm",
+      "Oslo"
+    ]
   },
   "schedule": {
-    "signal_scan_hours_utc": ["09:30", "13:30", "17:30"],
-    "watchlist_review_hours_utc": ["10:30", "14:30", "18:30", "20:30"],
+    "signal_scan_hours_utc": [
+      "09:30",
+      "13:30",
+      "17:30"
+    ],
+    "watchlist_review_hours_utc": [
+      "10:30",
+      "14:30",
+      "18:30",
+      "20:30"
+    ],
     "review_summary_day_utc": "sunday"
   },
   "watchlist": {
     "stop_loss_pct": -0.05,
-    "profit_target_pct": 0.10,
+    "profit_target_pct": 0.1,
     "trailing_activation_pct": 0.02,
     "trailing_pct": 0.03,
     "quick_profit_pct": 0.03,
     "quick_profit_hours": 48,
     "max_hold_days": 5,
     "max_per_sector": 2,
-    "sentiment_exit_threshold": 0.40
+    "sentiment_exit_threshold": 0.4
   },
   "sizing": {
     "budget": 100,
     "max_positions": 5,
     "conviction_weights": {
-      "strong": 0.30,
-      "moderate": 0.20,
-      "speculative": 0.10
+      "strong": 0.3,
+      "moderate": 0.2,
+      "speculative": 0.1
     }
   },
   "notifications": {
@@ -57,11 +86,28 @@
     "ntfy_topic_env": "AUREL3_NTFY_TOPIC",
     "ntfy_server": "https://ntfy.sh",
     "ntfy_server_env": "AUREL3_NTFY_SERVER",
-    "escalation_intervals_min": [0, 15, 30, 60, 60, 60, 60]
+    "escalation_intervals_min": [
+      0,
+      15,
+      30,
+      60,
+      60,
+      60,
+      60
+    ]
   },
   "alpaca": {
     "key_env": "APCA_API_KEY_ID",
     "secret_env": "APCA_API_SECRET_KEY",
     "paper": true
+  },
+  "core": {
+    "symbol": "SXR8.DE",
+    "name": "iShares Core S&P 500 UCITS ETF (Acc)",
+    "exchange": "XETRA",
+    "currency": "EUR",
+    "monthly_amount": 0,
+    "min_ticket": 700,
+    "index_proxy": "SPY"
   }
 }

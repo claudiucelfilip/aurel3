@@ -695,6 +695,41 @@ def main() -> None:
         cmd_review_signals(ticker)
     elif command == "review_summary":
         cmd_review_summary()
+    elif command == "core_dca":
+        import desk
+        order = desk.run_core_dca(load_config())
+        if order:
+            desk.notify_pending(load_config())
+            print(f"core_dca: proposed {order['id']}")
+        else:
+            print("core_dca: nothing to do")
+    elif command == "core_guard":
+        import desk
+        fired = desk.run_core_guard(load_config())
+        print(f"core_guard: {'sent ' + ', '.join(fired) if fired else 'quiet'}")
+    elif command == "desk_notify":
+        import desk
+        sent = desk.notify_pending(load_config())
+        print(f"desk_notify: {sent} notification(s)")
+    elif command == "desk_confirm":
+        import desk
+        if len(sys.argv) < 5:
+            print("usage: run.py desk_confirm <order_id|symbol> <price> <quantity> [fees]")
+            sys.exit(1)
+        fees = float(sys.argv[5]) if len(sys.argv) >= 6 else 0.0
+        order = desk.confirm_order(sys.argv[2], float(sys.argv[3]), float(sys.argv[4]), fees)
+        print(f"confirmed {order['id']}: {order['action']} {order['symbol']} "
+              f"{sys.argv[4]} @ {sys.argv[3]}")
+    elif command == "desk_skip":
+        import desk
+        if len(sys.argv) < 3:
+            print("usage: run.py desk_skip <order_id|symbol> [reason]")
+            sys.exit(1)
+        order = desk.skip_order(sys.argv[2], " ".join(sys.argv[3:]))
+        print(f"skipped {order['id']} ({order['skip_reason']})")
+    elif command == "desk_status":
+        import desk
+        print(desk.format_status())
     else:
         print(__doc__)
 
