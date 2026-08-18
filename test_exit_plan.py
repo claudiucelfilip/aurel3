@@ -34,7 +34,7 @@ def test_buy_lane_actions_carry_exit_plan():
         plan = signals._exit_plan(action)
         assert plan["take_profit_pct"] == signals.EXIT_TAKE_PROFIT_PCT
         assert plan["max_hold_trading_days"] == signals.EXIT_MAX_HOLD_TRADING_DAYS
-        assert "SPY" in plan["policy"]
+        assert "S&P 500" in plan["policy"]
 
 
 def test_non_buy_actions_have_no_exit_plan():

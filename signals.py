@@ -54,7 +54,10 @@ def _exit_plan(action: str) -> dict | None:
         "policy": (
             f"Sell at +{EXIT_TAKE_PROFIT_PCT:.0%} above entry or after "
             f"{EXIT_MAX_HOLD_TRADING_DAYS} trading days, whichever comes first; "
-            "park capital in SPY between signals."
+            "park capital in an S&P 500 index fund (EU retail: a UCITS ETF such "
+            "as CSPX/SXR8, not SPY) between signals. Fund signals from new "
+            "contributions or a USD sleeve — full ETF round trips per signal "
+            "are not viable at Romanian-broker fee/tax levels."
         ),
     }
 
