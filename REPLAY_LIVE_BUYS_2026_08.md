@@ -90,10 +90,69 @@ confounder. The cap is kept conservative (+4%, matching the winners' range)
 and is consistent with the pre-existing gate doc rather than fit to this
 sample alone.
 
+## Part 2 (2026-08-18): Exit Plan — Can It Beat SPY?
+
+Follow-up question: can following the buys beat holding SPY? Expanded replay
+over the full live history (170 unique episodes, all actions, May 25 → Aug 14;
+tuning split before Jul 23, validation after).
+
+Findings:
+
+- **The signal universe has negative drift vs SPY.** Mean 10-trading-day
+  excess is −2.6% across all 130 scoreable episodes, negative in both splits
+  and in nearly every slice (theme, confirmation, freshness, confidence).
+  Post-news names systematically lag SPY after selection; hold-to-21-days is
+  worse (−7%). Delayed and pullback entries stay negative.
+- **But the names spike before they fade.** With honest fills (take-profit
+  only fillable from the session *after* the rec — same-day daily highs are
+  look-ahead), a +4% take-profit with a 10-trading-day time stop on the
+  buy lane (`buy_now` + `early_accumulation`) is positive in BOTH eras:
+  tuning +1.70%/trade excess vs SPY (9/14 win), validation +1.62%/trade
+  (4/6 win). The same exits on the whole universe (incl. watch) stay
+  negative — selection still matters.
+- **Portfolio framing: SPY rotation.** Cash drag loses to a rallying SPY, so
+  the policy is: park in SPY, rotate a slice into a signal only while held,
+  return to SPY on exit. $100 on the validation window: $104.72 (TP4, ⅓
+  slices) vs SPY $105.17 — a wash on 16 trading days, dragged by three
+  overlapping August time-stops crowding out the TTWO winner; the analytic
+  per-trade sum is ≈ +0.9% over SPY. The per-trade edge is the robust claim;
+  the 3-week portfolio realization is noise-dominated.
+
+### Change Made (Part 2)
+
+- `signals.py`: buy-lane recommendations now carry an `exit_plan`
+  (`EXIT_TAKE_PROFIT_PCT = 0.04`, `EXIT_MAX_HOLD_TRADING_DAYS = 10`) with the
+  SPY-rotation policy spelled out.
+- `market.py`: `get_take_profit_hit()` (no-look-ahead: signal-day highs are
+  ignored) and `get_benchmark_return(..., end_iso=)` so reviews can score the
+  benchmark over the actual holding window.
+- `reviews.py` + `run.py review_signals`: reviews of exit-planned buys score
+  the managed trade — TP hit ⇒ +4% banked, compared to SPY up to the hit
+  date; time-stop ⇒ price at window end. Legacy scoring is untouched for
+  non-buy actions and for recs without an `exit_plan`.
+- `notify.py`: buy alerts include the exit plan line.
+
+### Validation (Part 2)
+
+- `python3 -m pytest` — 23 passed (6 new in `test_exit_plan.py`).
+- `historical_replay.py --split full` — per-case results identical (the
+  engine's action logic is untouched by Part 2).
+- `get_take_profit_hit` spot-checked against the replay: TTWO (rec Aug 7,
+  ref 241.51) → hit Aug 10; BMY (rec Aug 4, ref 65.88) → no hit. Matches.
+
+### Honest Expectations
+
+With ~2-3 signals/week at ⅓ slices and +1.6%/trade excess, expected
+outperformance is roughly +1.5-2%/month over SPY **if the per-trade edge
+holds** — n=20 across both eras is thin, and the edge must be re-measured as
+reviews accumulate under the new scoring. The TP-aware review outcomes now
+measure exactly this policy, so `review_summary` becomes the live scoreboard
+for whether the edge is real.
+
 ## Remaining Gaps (not addressed here)
 
 - Wire `buy_now` recs into the watchlist automatically (paper position) so the
-  review cadence can generate `trim`/`sell` guidance — currently the sell half
-  of the spec is dead code in practice.
+  review cadence can generate `trim`/`sell` guidance mid-hold — the exit plan
+  covers the scheduled exits, not thesis-break exits.
 - Feed extension/crowding into the confidence label so `high` stops selecting
   late entries.

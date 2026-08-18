@@ -30,7 +30,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from market import get_benchmark_return, get_stock_data
+from market import get_benchmark_return, get_stock_data, get_take_profit_hit
 
 
 MAX_PRICE_DEVIATION_PCT = 0.35
@@ -475,11 +475,26 @@ def cmd_review_signals(ticker: str | None = None) -> None:
             skipped_no_market_data += 1
             continue
 
+        exit_result = None
+        benchmark_end = None
+        exit_plan = rec.get("exit_plan")
+        if exit_plan and rec.get("action") in ("buy_now", "early_accumulation"):
+            exit_result = get_take_profit_hit(
+                rec["ticker"],
+                rec.get("timestamp"),
+                rec.get("reference_price"),
+                exit_plan.get("take_profit_pct", 0.04),
+                exit_plan.get("max_hold_trading_days", 10),
+            )
+            if exit_result and exit_result.get("hit"):
+                benchmark_end = exit_result.get("hit_date")
+
         review = build_recommendation_review(
             rec,
             data["price"],
-            benchmark_return=get_benchmark_return(rec.get("timestamp")),
+            benchmark_return=get_benchmark_return(rec.get("timestamp"), end_iso=benchmark_end),
             avg_daily_move=data.get("avg_daily_move"),
+            exit_result=exit_result,
         )
         append_recommendation_review(review)
         created += 1

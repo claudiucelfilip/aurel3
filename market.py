@@ -318,11 +318,12 @@ def get_stock_data(ticker: str) -> dict | None:
 _BENCHMARK_CACHE: dict[str, object] = {}
 
 
-def get_benchmark_return(start_iso: str | None, benchmark: str = "SPY") -> float | None:
-    """Benchmark return from start_iso to the latest close.
+def get_benchmark_return(start_iso: str | None, benchmark: str = "SPY", end_iso: str | None = None) -> float | None:
+    """Benchmark return from start_iso to end_iso (default: latest close).
 
     Used by signal reviews to judge excess return instead of raw return —
-    in a rising tape every buy 'works' otherwise.
+    in a rising tape every buy 'works' otherwise. end_iso lets exit-plan
+    reviews compare against the benchmark over the actual holding window.
     """
     if not start_iso:
         return None
@@ -332,6 +333,14 @@ def get_benchmark_return(start_iso: str | None, benchmark: str = "SPY") -> float
         return None
     if start.tzinfo is None:
         start = start.replace(tzinfo=timezone.utc)
+    end = None
+    if end_iso:
+        try:
+            end = datetime.fromisoformat(end_iso)
+            if end.tzinfo is None:
+                end = end.replace(tzinfo=timezone.utc)
+        except Exception:
+            end = None
     try:
         hist = _BENCHMARK_CACHE.get(benchmark)
         if hist is None:
@@ -344,10 +353,65 @@ def get_benchmark_return(start_iso: str | None, benchmark: str = "SPY") -> float
         if len(sub) == 0:
             return None
         base = float(sub.iloc[0])
-        last = float(closes.iloc[-1])
+        if end is not None:
+            upto = closes[closes.index <= end]
+            if len(upto) == 0:
+                return None
+            last = float(upto.iloc[-1])
+        else:
+            last = float(closes.iloc[-1])
         if base <= 0:
             return None
         return round(last / base - 1, 4)
+    except Exception:
+        return None
+
+
+def get_take_profit_hit(
+    ticker: str,
+    start_iso: str | None,
+    reference_price: float | None,
+    take_profit_pct: float,
+    max_hold_trading_days: int,
+) -> dict | None:
+    """Whether the daily High reached reference*(1+tp) within the hold window.
+
+    Highs on the signal day itself are ignored — the signal arrived intraday,
+    so that day's high may predate it (no look-ahead). Returns
+    {"hit", "hit_date", "sessions_to_hit", "window_complete"} or None on
+    missing data.
+    """
+    if not start_iso or not reference_price:
+        return None
+    try:
+        start = datetime.fromisoformat(start_iso)
+    except Exception:
+        return None
+    if start.tzinfo is None:
+        start = start.replace(tzinfo=timezone.utc)
+    try:
+        hist = yf.Ticker(_yahoo_symbol(ticker)).history(period="6mo", auto_adjust=True)
+        if hist is None or len(hist) == 0:
+            return None
+        after = hist[hist.index > start]
+        if len(after) == 0:
+            return {"hit": False, "hit_date": None, "sessions_to_hit": None, "window_complete": False}
+        window = after.iloc[:max_hold_trading_days]
+        target = reference_price * (1 + take_profit_pct)
+        for offset, (idx, row) in enumerate(window.iterrows(), start=1):
+            if float(row["High"]) >= target:
+                return {
+                    "hit": True,
+                    "hit_date": idx.date().isoformat(),
+                    "sessions_to_hit": offset,
+                    "window_complete": True,
+                }
+        return {
+            "hit": False,
+            "hit_date": None,
+            "sessions_to_hit": None,
+            "window_complete": len(after) >= max_hold_trading_days,
+        }
     except Exception:
         return None
 

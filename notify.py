@@ -107,6 +107,9 @@ def format_recommendation_alert(rec: dict) -> str:
                 f"{alt['confirmation_state']}, {alt['confidence']})"
             )
         lines.append(f"Alternative: {'; '.join(alt_lines)}")
+    plan = rec.get("exit_plan")
+    if plan:
+        lines.append(f"Exit plan: {plan['policy']}")
     if rec.get("action") == "buy_now":
         lines.append(f"Action template: `buy {rec['ticker']} [PRICE] [SHARES]`")
     return "\n".join(lines)

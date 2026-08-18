@@ -161,6 +161,20 @@ Exit urgency:
 - medium
 - high
 
+## Exit Plan For Fresh Buys
+
+Every `buy now` and `early accumulation` recommendation carries an explicit
+exit plan: sell at +4% above entry, or after 10 trading days, whichever comes
+first. Capital parks in a broad benchmark (SPY) between signals.
+
+Why: live replay (May-Aug 2026) showed the signal universe spikes above entry
+within two weeks but drifts below SPY afterwards. Harvesting the spike and
+time-stopping the rest was the only exit style that beat the benchmark in
+both measured eras. See REPLAY_LIVE_BUYS_2026_08.md.
+
+The exit plan handles scheduled exits. Thesis-break exits (below) still apply
+and take precedence when invalidation hits before the time stop.
+
 ## Sell Philosophy
 
 Exits are thesis-first with price confirmation.

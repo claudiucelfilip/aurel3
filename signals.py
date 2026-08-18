@@ -38,6 +38,26 @@ MIN_SOCIAL_BUY_POINTS = 3
 # deeper into the pop mean-reverted vs SPY in the Jul-Aug 2026 live sample.
 EARNINGS_FRESH_BUY_MAX_CHANGE = 0.04
 
+# Exit plan for buy-lane recommendations. Live May-Aug 2026 replay: these names
+# usually spike >=4% above entry within 2 weeks but drift below SPY afterwards,
+# so harvest the spike and time-stop the rest (REPLAY_LIVE_BUYS_2026_08.md).
+EXIT_TAKE_PROFIT_PCT = 0.04
+EXIT_MAX_HOLD_TRADING_DAYS = 10
+
+
+def _exit_plan(action: str) -> dict | None:
+    if action not in ("buy_now", "early_accumulation"):
+        return None
+    return {
+        "take_profit_pct": EXIT_TAKE_PROFIT_PCT,
+        "max_hold_trading_days": EXIT_MAX_HOLD_TRADING_DAYS,
+        "policy": (
+            f"Sell at +{EXIT_TAKE_PROFIT_PCT:.0%} above entry or after "
+            f"{EXIT_MAX_HOLD_TRADING_DAYS} trading days, whichever comes first; "
+            "park capital in SPY between signals."
+        ),
+    }
+
 
 def _news_age_hours(news: dict) -> float | None:
     """Return age of an interpreted news item in hours, or None if unknown.
@@ -1121,6 +1141,7 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
             "expected_horizon": expected_horizon,
             "social_evidence": social_evidence,
             "reference_price": data.get("price"),
+            "exit_plan": _exit_plan(action),
             "invalidation": invalidation,
             "invalidation_conditions": invalidation_conditions,
             "alternatives": [],

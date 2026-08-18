@@ -89,10 +89,22 @@ def build_recommendation_review(
     current_price: float,
     benchmark_return: float | None = None,
     avg_daily_move: float | None = None,
+    exit_result: dict | None = None,
 ) -> dict:
     reference_price = recommendation.get("reference_price") or 0
     pnl_pct = ((current_price / reference_price) - 1) if reference_price else 0
     original_action = recommendation.get("action")
+
+    # Exit-plan-aware scoring: buy-lane recs carry a take-profit/time-stop
+    # plan, so score the managed trade, not the raw drift to review time.
+    exit_plan = recommendation.get("exit_plan")
+    exit_plan_applied = False
+    if exit_plan and exit_result and original_action in ("buy_now", "early_accumulation"):
+        if exit_result.get("hit"):
+            pnl_pct = exit_plan.get("take_profit_pct", 0.04)
+            exit_plan_applied = True
+        elif exit_result.get("window_complete"):
+            exit_plan_applied = True  # time-stopped at current price
 
     # Judge excess return over the benchmark, scaled to the name's own
     # volatility and the stated horizon — raw fixed thresholds called every
@@ -103,7 +115,16 @@ def build_recommendation_review(
     meaningful_move = max(0.03, adm * math.sqrt(horizon_days))
 
     if original_action in ("buy_now", "early_accumulation"):
-        if excess_pct >= meaningful_move:
+        if exit_plan_applied and exit_result and exit_result.get("hit"):
+            # Managed trade banked the take-profit; a small positive excess is
+            # the plan working, not a weak "partial".
+            if excess_pct >= 0:
+                outcome = "worked"
+                note = "The take-profit exit banked the planned gain ahead of the benchmark."
+            else:
+                outcome = "partial"
+                note = "The take-profit hit, but the benchmark outran the managed trade over the holding window."
+        elif excess_pct >= meaningful_move:
             outcome = "worked"
             note = "The buy recommendation beat the benchmark by a meaningful margin for this name and horizon."
         elif excess_pct >= 0:
@@ -138,6 +159,9 @@ def build_recommendation_review(
         "benchmark_return_pct": round(benchmark_return, 4) if benchmark_return is not None else None,
         "excess_return_pct": round(excess_pct, 4),
         "meaningful_move_threshold": round(meaningful_move, 4),
+        "exit_plan_applied": exit_plan_applied,
+        "take_profit_hit": bool(exit_result.get("hit")) if exit_result else None,
+        "take_profit_hit_date": exit_result.get("hit_date") if exit_result else None,
         "outcome": outcome,
         "summary": note,
         "review_model_version": REVIEW_MODEL_VERSION,
