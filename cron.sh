@@ -11,13 +11,21 @@ set -uo pipefail
 cd /root/aurel3
 LOGFILE="/root/aurel3/data/runtime.log"
 COMMAND="${1:-signal_scan}"
-LOCKFILE="/root/aurel3/data/${COMMAND}.lock"
+# mkdir-based lock: flock does not exist on macOS (Dumbo), where the old
+# version silently skipped every run as "another run is still active".
+LOCKDIR="/root/aurel3/data/${COMMAND}.lockdir"
 
-exec 9>"$LOCKFILE"
-if ! flock -n 9; then
-    echo "$(date -u '+%Y-%m-%dT%H:%M:%SZ') skipped ${COMMAND}: another run is still active" >> "$LOGFILE"
-    exit 0
+if ! mkdir "$LOCKDIR" 2>/dev/null; then
+    # stale lock (crashed run) older than 6h is reclaimed
+    if [ -n "$(find "$LOCKDIR" -maxdepth 0 -mmin +360 2>/dev/null)" ]; then
+        rmdir "$LOCKDIR" 2>/dev/null || true
+        mkdir "$LOCKDIR" 2>/dev/null || exit 0
+    else
+        echo "$(date -u '+%Y-%m-%dT%H:%M:%SZ') skipped ${COMMAND}: another run is still active" >> "$LOGFILE"
+        exit 0
+    fi
 fi
+trap 'rmdir "$LOCKDIR" 2>/dev/null' EXIT
 
 python3 run.py "$COMMAND" >> "$LOGFILE" 2>&1
 EXIT_CODE=$?
