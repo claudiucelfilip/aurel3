@@ -87,6 +87,23 @@ def load_unique_recommendations() -> List[dict]:
     )
 
 
+def dedupe_signals(recs: List[dict]) -> List[dict]:
+    """Collapse the same ticker re-emitted by successive scans on one day.
+
+    The scan runs several times a day and re-issues a live signal with a fresh
+    id each cycle (PLD at 15:35/17:33/19:33 on Jul 16, all ~$149). Counting
+    those as separate buys would triple the cohort and double-book the equity
+    curve. The earliest emission wins — that is when the signal was actionable.
+    """
+    by_key: Dict[Tuple[str, str, str], dict] = {}
+    for rec in recs:
+        key = (rec.get("ticker") or "", (rec.get("timestamp") or "")[:10], rec.get("action") or "")
+        current = by_key.get(key)
+        if current is None or (rec.get("timestamp") or "") < (current.get("timestamp") or ""):
+            by_key[key] = rec
+    return sorted(by_key.values(), key=lambda rec: rec.get("timestamp") or "", reverse=True)
+
+
 def latest_batch() -> Optional[dict]:
     history = load_recommendation_history()
     return history[-1] if history else None
@@ -166,7 +183,7 @@ def build_scoreboard(recs: List[dict], reviews: Dict[str, dict]) -> dict:
     it should fill up until mid-October, when the user judges whether managed
     exits actually earn the +1.6%/trade the replays suggested.
     """
-    buy_lane = [r for r in recs if r.get("action") in BUY_LANE]
+    buy_lane = [r for r in dedupe_signals(recs) if r.get("action") in BUY_LANE]
     action_counts: Dict[str, int] = {}
     for rec in recs:
         action = rec.get("action") or "unknown"
@@ -290,7 +307,7 @@ def build_equity_curve(recs: List[dict], reviews: Dict[str, dict], start_capital
     """
     buy_lane = [
         rec
-        for rec in recs
+        for rec in dedupe_signals(recs)
         if rec.get("action") in BUY_LANE and rec.get("reference_price") and rec.get("timestamp")
     ]
     buy_lane.sort(key=lambda rec: rec.get("timestamp") or "")
@@ -301,6 +318,8 @@ def build_equity_curve(recs: List[dict], reviews: Dict[str, dict], start_capital
     points: List[dict] = []
     trades: List[dict] = []
     busy_until: Optional[datetime] = None
+    skipped_busy = 0
+    skipped_open = 0
 
     first_ts = buy_lane[0].get("timestamp")
     points.append({"date": (_parse_iso(first_ts) or datetime.now(timezone.utc)).date().isoformat(), "equity": round(equity, 2)})
@@ -312,6 +331,7 @@ def build_equity_curve(recs: List[dict], reviews: Dict[str, dict], start_capital
         # One position at a time: a signal arriving mid-trade is skipped rather
         # than pretending capital was available for both.
         if busy_until is not None and entered < busy_until:
+            skipped_busy += 1
             continue
 
         tp_pct, hold_days = _exit_plan_of(rec)
@@ -323,6 +343,7 @@ def build_equity_curve(recs: List[dict], reviews: Dict[str, dict], start_capital
         window_complete = bool(result and result.get("window_complete"))
         if not hit and not window_complete:
             # Trade still open — do not book an unrealized result into the curve.
+            skipped_open += 1
             continue
 
         if hit:
@@ -363,6 +384,9 @@ def build_equity_curve(recs: List[dict], reviews: Dict[str, dict], start_capital
         "total_return": (equity / start_capital) - 1,
         "spy_final": round(spy_final, 2) if spy_final is not None else None,
         "spy_return": spy_return,
+        "candidate_signals": len(buy_lane),
+        "skipped_busy": skipped_busy,
+        "skipped_open": skipped_open,
         "start_capital": start_capital,
         "start_date": (_parse_iso(first_ts) or datetime.now(timezone.utc)).date().isoformat(),
     }

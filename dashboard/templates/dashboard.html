@@ -142,7 +142,7 @@
       <h2>All-time</h2>
       <div class="body">
         <div class="stat"><span class="k">Recommendations</span><span class="v">{{ scoreboard.total_recommendations }}</span></div>
-        <div class="stat"><span class="k">Buy lane</span><span class="v">{{ scoreboard.buy_lane_count }}</span></div>
+        <div class="stat"><span class="k">Buy signals (deduped)</span><span class="v">{{ scoreboard.buy_lane_count }}</span></div>
         <div class="stat"><span class="k">Buy lane reviewed</span><span class="v">{{ scoreboard.buy_lane_reviewed }}</span></div>
         <div class="stat">
           <span class="k">Buy mean excess</span>
@@ -270,6 +270,11 @@
           <div class="value {% if delta is not none %}{{ 'good' if delta > 0 else 'bad' }}{% endif %}">{{ delta | pct }}</div>
           <div class="note">policy minus benchmark</div>
         </div>
+      </div>
+      <div class="legend" style="padding-top:10px">
+        <span>{{ equity.trade_count }} of {{ equity.candidate_signals }} distinct buy signals traded —
+        {{ equity.skipped_busy }} arrived while capital was already committed,
+        {{ equity.skipped_open }} are still inside their hold window.</span>
       </div>
 
       {% if equity.points | length > 1 %}
