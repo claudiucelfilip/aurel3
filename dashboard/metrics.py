@@ -56,6 +56,23 @@ def _mean(values: List[float]) -> Optional[float]:
     return sum(values) / len(values) if values else None
 
 
+def _median(values: List[float]) -> Optional[float]:
+    if not values:
+        return None
+    ordered = sorted(values)
+    mid = len(ordered) // 2
+    if len(ordered) % 2:
+        return ordered[mid]
+    return (ordered[mid - 1] + ordered[mid]) / 2
+
+
+# A reverse split or other corporate action makes reference_price and
+# review_price incomparable (VYNE: $0.85 -> $28.56 = "+3257%"), which drags a
+# theme's mean far from anything the signal earned. Flag those rather than
+# letting two records define a 95-review theme.
+OUTLIER_ABS_RETURN = 1.5
+
+
 def load_desk_orders() -> List[dict]:
     import json
 
@@ -194,6 +211,7 @@ def build_scoreboard(recs: List[dict], reviews: Dict[str, dict]) -> dict:
         for r in buy_lane
         if r.get("id") in reviews and isinstance(reviews[r["id"]].get("excess_return_pct"), (int, float))
     ]
+    buy_excess = [value for value in buy_excess if abs(value) < OUTLIER_ABS_RETURN]
 
     cohort = build_managed_cohort(buy_lane, reviews)
 
@@ -462,11 +480,15 @@ def build_theme_scorecard() -> List[dict]:
 
     rows = []
     for entry in stats.values():
+        clean = [value for value in entry["excess"] if abs(value) < OUTLIER_ABS_RETURN]
+        outliers = len(entry["excess"]) - len(clean)
         rows.append(
             {
                 "theme": entry["theme"],
                 "n": entry["n"],
-                "mean_excess": _mean(entry["excess"]),
+                "mean_excess": _mean(clean),
+                "median_excess": _median(clean),
+                "outliers": outliers,
                 "outcomes": entry["outcomes"],
                 "worked": entry["outcomes"].get("worked", 0),
                 "partial": entry["outcomes"].get("partial", 0),

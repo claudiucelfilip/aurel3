@@ -392,12 +392,16 @@
       <h2>Theme scorecard</h2>
       <div class="scroll" style="max-height:420px">
         <table>
-          <thead><tr><th>Theme</th><th class="num">n</th><th class="num">Mean excess</th><th class="num">worked</th><th class="num">partial</th><th class="num">failed</th><th class="num">late</th></tr></thead>
+          <thead><tr><th>Theme</th><th class="num">n</th><th class="num">Median excess</th><th class="num">Mean excess</th><th class="num">worked</th><th class="num">partial</th><th class="num">failed</th><th class="num">late</th></tr></thead>
           <tbody>
           {% for theme in themes %}
             <tr>
-              <td>{{ theme.theme }}</td>
+              <td>
+                {{ theme.theme }}
+                {% if theme.outliers %}<div class="gates">{{ theme.outliers }} corporate-action outlier{{ 's' if theme.outliers > 1 }} excluded</div>{% endif %}
+              </td>
               <td class="num">{{ theme.n }}</td>
+              <td class="num {% if theme.median_excess is not none %}{{ 'good' if theme.median_excess > 0 else 'bad' }}{% endif %}">{{ theme.median_excess | pct }}</td>
               <td class="num {% if theme.mean_excess is not none %}{{ 'good' if theme.mean_excess > 0 else 'bad' }}{% endif %}">{{ theme.mean_excess | pct }}</td>
               <td class="num good">{{ theme.worked or '' }}</td>
               <td class="num warn">{{ theme.partial or '' }}</td>
