@@ -272,9 +272,33 @@
         </div>
       </div>
       <div class="legend" style="padding-top:10px">
-        <span>{{ equity.trade_count }} of {{ equity.candidate_signals }} distinct buy signals traded —
-        {{ equity.skipped_busy }} arrived while capital was already committed,
+        <span>Curve holds one position at a time: {{ equity.trade_count }} of {{ equity.candidate_signals }}
+        distinct buy signals traded — {{ equity.skipped_busy }} arrived while capital was already committed,
         {{ equity.skipped_open }} are still inside their hold window.</span>
+      </div>
+
+      {% set ps = equity.per_signal %}
+      <div class="hero" style="border-top:1px solid var(--border)">
+        <div class="cell">
+          <div class="label">Per-signal mean excess</div>
+          <div class="value {% if ps.mean_excess is not none %}{{ 'good' if ps.mean_excess > 0 else 'bad' }}{% endif %}">{{ ps.mean_excess | pct }}</div>
+          <div class="note">vs +1.6% replay target</div>
+        </div>
+        <div class="cell">
+          <div class="label">Per-signal mean return</div>
+          <div class="value {% if ps.mean_return is not none %}{{ 'good' if ps.mean_return > 0 else 'bad' }}{% endif %}">{{ ps.mean_return | pct }}</div>
+          <div class="note">{{ ps.resolved }} resolved trades</div>
+        </div>
+        <div class="cell">
+          <div class="label">Take-profit hit rate</div>
+          <div class="value">{% if ps.tp_hit_rate is not none %}{{ (ps.tp_hit_rate * 100) | num(0) }}%{% else %}—{% endif %}</div>
+          <div class="note">{{ ps.tp_hits }} of {{ ps.resolved }}</div>
+        </div>
+        <div class="cell">
+          <div class="label">Beat SPY</div>
+          <div class="value">{% if ps.win_rate is not none %}{{ (ps.win_rate * 100) | num(0) }}%{% else %}—{% endif %}</div>
+          <div class="note">every signal scored separately</div>
+        </div>
       </div>
 
       {% if equity.points | length > 1 %}

@@ -297,6 +297,55 @@ def build_managed_cohort(buy_lane: List[dict], reviews: Dict[str, dict]) -> dict
 # --- equity curve ----------------------------------------------------------
 
 
+def _per_signal_stats(buy_lane: List[dict], reviews: Dict[str, dict]) -> dict:
+    """Every resolved buy scored on its own, independent of arrival order.
+
+    The signals cluster (several land the same day) so a single-position curve
+    silently drops most of them; scoring each trade separately keeps the whole
+    sample, which is what the +1.6%/trade replay figure is comparable to.
+    """
+    returns: List[float] = []
+    excesses: List[float] = []
+    tp_hits = 0
+    resolved = 0
+
+    for rec in buy_lane:
+        tp_pct, hold_days = _exit_plan_of(rec)
+        result = take_profit_hit(
+            rec.get("ticker") or "", rec.get("timestamp"), rec.get("reference_price"), tp_pct, hold_days
+        )
+        review = reviews.get(rec.get("id") or "")
+        hit = bool(result and result.get("hit"))
+        window_complete = bool(result and result.get("window_complete"))
+        if not hit and not window_complete:
+            continue
+
+        if hit:
+            trade_return = tp_pct
+            tp_hits += 1
+            end_iso = result.get("hit_date")
+        elif review and isinstance(review.get("forward_return_pct"), (int, float)):
+            trade_return = float(review["forward_return_pct"])
+            end_iso = None
+        else:
+            continue
+
+        resolved += 1
+        returns.append(trade_return)
+        bench = benchmark_return(rec.get("timestamp"), end_iso)
+        if bench is not None:
+            excesses.append(trade_return - bench)
+
+    return {
+        "resolved": resolved,
+        "tp_hits": tp_hits,
+        "tp_hit_rate": (tp_hits / resolved) if resolved else None,
+        "mean_return": _mean(returns),
+        "mean_excess": _mean(excesses),
+        "win_rate": (sum(1 for value in excesses if value > 0) / len(excesses)) if excesses else None,
+    }
+
+
 def build_equity_curve(recs: List[dict], reviews: Dict[str, dict], start_capital: float = 100.0) -> dict:
     """$100 following the managed-exit policy vs SPY buy-and-hold.
 
@@ -376,7 +425,10 @@ def build_equity_curve(recs: List[dict], reviews: Dict[str, dict], start_capital
     spy_return = benchmark_return(first_ts)
     spy_final = start_capital * (1 + spy_return) if spy_return is not None else None
 
+    per_signal = _per_signal_stats(buy_lane, reviews)
+
     return {
+        "per_signal": per_signal,
         "points": points,
         "trades": list(reversed(trades)),
         "trade_count": len(trades),
