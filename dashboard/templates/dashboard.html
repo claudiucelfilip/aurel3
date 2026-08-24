@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aurel3 — Performance</title>
+<style>
+  :root {
+    --bg: #0e1116;
+    --panel: #161b22;
+    --panel-2: #1c222b;
+    --border: #2a313c;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --dim: #6e7681;
+    --accent: #58a6ff;
+    --good: #3fb950;
+    --bad: #f85149;
+    --warn: #d29922;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  header.masthead {
+    display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
+    padding: 18px 24px; border-bottom: 1px solid var(--border); background: var(--panel);
+  }
+  .masthead h1 { margin: 0; font-size: 18px; letter-spacing: .3px; }
+  .masthead .sub { color: var(--muted); font-size: 12px; }
+  .pill {
+    font-size: 11px; padding: 3px 9px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--panel-2); color: var(--muted);
+    text-transform: uppercase; letter-spacing: .6px;
+  }
+  .pill.fresh { color: var(--good); border-color: #23502f; background: #10241a; }
+  .pill.aging { color: var(--warn); border-color: #4d3c14; background: #241d0f; }
+  .pill.stale, .pill.unknown { color: var(--bad); border-color: #5c2020; background: #2a1315; }
+
+  .layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 20px; padding: 20px 24px 60px; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; }
+  .card > h2 {
+    margin: 0; padding: 11px 14px; font-size: 12px; text-transform: uppercase;
+    letter-spacing: .8px; color: var(--muted); border-bottom: 1px solid var(--border); font-weight: 600;
+  }
+  .card .body { padding: 14px; }
+
+  .stat { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 5px 0; }
+  .stat + .stat { border-top: 1px solid #202632; }
+  .stat .k { color: var(--muted); font-size: 12px; }
+  .stat .v { font-family: var(--mono); font-size: 13px; }
+
+  .hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--border); }
+  .hero .cell { background: var(--panel); padding: 14px; }
+  .hero .label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .6px; }
+  .hero .value { font-family: var(--mono); font-size: 24px; margin-top: 6px; }
+  .hero .note { color: var(--dim); font-size: 11px; margin-top: 4px; }
+
+  .good { color: var(--good); }
+  .bad { color: var(--bad); }
+  .warn { color: var(--warn); }
+  .muted { color: var(--muted); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 7px 10px; text-align: left; border-bottom: 1px solid #202632; vertical-align: top; }
+  th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; font-weight: 600; position: sticky; top: 0; background: var(--panel); }
+  td.num, th.num { text-align: right; font-family: var(--mono); }
+  tbody tr:hover { background: #1a2029; }
+  .scroll { overflow-x: auto; max-height: 620px; overflow-y: auto; }
+
+  .tag {
+    display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 4px;
+    border: 1px solid var(--border); background: var(--panel-2); color: var(--muted); white-space: nowrap;
+  }
+  .tag.buy_now { color: var(--good); border-color: #23502f; background: #10241a; }
+  .tag.early_accumulation { color: #6cc4a1; border-color: #224a3e; background: #10211c; }
+  .tag.watch_for_confirmation { color: var(--accent); border-color: #1d3f63; background: #101d2c; }
+  .tag.hold_not_fresh_buy { color: var(--warn); border-color: #4d3c14; background: #241d0f; }
+  .tag.worked { color: var(--good); border-color: #23502f; background: #10241a; }
+  .tag.partial { color: var(--warn); border-color: #4d3c14; background: #241d0f; }
+  .tag.failed { color: var(--bad); border-color: #5c2020; background: #2a1315; }
+  .tag.late { color: #c39bd3; border-color: #3d2a4a; background: #1d1526; }
+
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  .tabs a { font-size: 12px; padding: 4px 11px; border-radius: 5px; border: 1px solid var(--border); color: var(--muted); }
+  .tabs a.on { background: var(--panel-2); color: var(--text); border-color: #3d4756; }
+  .tabs a:hover { text-decoration: none; color: var(--text); }
+
+  .why { color: var(--dim); font-size: 11.5px; max-width: 460px; }
+  .gates { color: var(--dim); font-size: 11px; }
+  .empty { padding: 22px 14px; color: var(--muted); font-size: 13px; }
+  .empty strong { color: var(--text); }
+
+  .curve { width: 100%; height: 190px; display: block; }
+  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); padding: 0 14px 12px; }
+  .swatch { display: inline-block; width: 10px; height: 3px; vertical-align: middle; margin-right: 6px; }
+  footer { padding: 0 24px 40px; color: var(--dim); font-size: 11.5px; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <h1>Aurel3 — Signal Performance</h1>
+  <span class="pill {{ ops.staleness }}">{{ ops.staleness }}</span>
+  <span class="sub">
+    last scan
+    {% if ops.last_batch_at %}{{ ops.last_batch_at[:16].replace('T', ' ') }} UTC{% if ops.last_batch_age_hours is not none %} · {{ ops.last_batch_age_hours | num(1) }}h ago{% endif %}{% else %}unknown{% endif %}
+  </span>
+  <span class="sub" style="margin-left:auto"><a href="/?refresh=1">force refresh</a> · <a href="/api/summary">api</a></span>
+</header>
+
+<div class="layout">
+
+  <aside>
+    <div class="card">
+      <h2>Managed-exit gate</h2>
+      <div class="body">
+        <div class="stat"><span class="k">Cohort since</span><span class="v">{{ cohort.start_date }}</span></div>
+        <div class="stat"><span class="k">Buys w/ exit plan</span><span class="v">{{ cohort.n }}</span></div>
+        <div class="stat"><span class="k">Resolved</span><span class="v">{{ cohort.resolved }}</span></div>
+        <div class="stat"><span class="k">Still open</span><span class="v">{{ cohort.open_trades }}</span></div>
+        <div class="stat"><span class="k">TP hits</span><span class="v">{{ cohort.tp_hits }}</span></div>
+        <div class="stat"><span class="k">TP hit rate</span><span class="v">{% if cohort.tp_hit_rate is not none %}{{ (cohort.tp_hit_rate * 100) | num(0) }}%{% else %}—{% endif %}</span></div>
+        <div class="stat">
+          <span class="k">Mean excess</span>
+          <span class="v {% if cohort.mean_excess is not none %}{{ 'good' if cohort.mean_excess > 0 else 'bad' }}{% endif %}">{{ cohort.mean_excess | pct }}</span>
+        </div>
+        <p class="why" style="margin:10px 0 0">
+          Decision checkpoint mid-October: is the managed-exit edge (+1.6%/trade in replay) real?
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>All-time</h2>
+      <div class="body">
+        <div class="stat"><span class="k">Recommendations</span><span class="v">{{ scoreboard.total_recommendations }}</span></div>
+        <div class="stat"><span class="k">Buy lane</span><span class="v">{{ scoreboard.buy_lane_count }}</span></div>
+        <div class="stat"><span class="k">Buy lane reviewed</span><span class="v">{{ scoreboard.buy_lane_reviewed }}</span></div>
+        <div class="stat">
+          <span class="k">Buy mean excess</span>
+          <span class="v {% if scoreboard.buy_lane_mean_excess is not none %}{{ 'good' if scoreboard.buy_lane_mean_excess > 0 else 'bad' }}{% endif %}">{{ scoreboard.buy_lane_mean_excess | pct }}</span>
+        </div>
+        <div class="stat"><span class="k">Buy win rate</span><span class="v">{% if scoreboard.buy_lane_win_rate is not none %}{{ (scoreboard.buy_lane_win_rate * 100) | num(0) }}%{% else %}—{% endif %}</span></div>
+        <div class="stat"><span class="k">Signal reviews</span><span class="v">{{ scoreboard.total_reviews }}</span></div>
+        {% for name, count in scoreboard.action_counts | dictsort %}
+        <div class="stat"><span class="k">{{ name.replace('_', ' ') }}</span><span class="v">{{ count }}</span></div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Ops</h2>
+      <div class="body">
+        <div class="stat"><span class="k">Open spec candidates</span><span class="v {{ 'warn' if ops.open_spec_candidates else '' }}">{{ ops.open_spec_candidates }}</span></div>
+        <div class="stat"><span class="k">Desk orders pending</span><span class="v">{{ ops.desk_orders_pending }}</span></div>
+        <div class="stat"><span class="k">Desk orders total</span><span class="v">{{ ops.desk_orders_total }}</span></div>
+        <div class="stat"><span class="k">Closed trade reviews</span><span class="v">{{ ops.closed_trade_reviews }}</span></div>
+        {% if ops.last_batch_metadata.source_items %}
+        <div class="stat"><span class="k">Last scan sources</span><span class="v">{{ ops.last_batch_metadata.source_items.news | default(0) }}n / {{ ops.last_batch_metadata.source_items.social | default(0) }}s</span></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Active themes</h2>
+      <div class="body">
+        {% for theme in ops.active_themes %}
+          <div class="stat"><span class="k">{{ theme.label }}</span><span class="v">{{ theme.strength or '—' }}</span></div>
+        {% else %}
+          <span class="muted">No live theme events.</span>
+        {% endfor %}
+      </div>
+    </div>
+  </aside>
+
+  <main>
+
+    <div class="card">
+      <h2>Managed-exit cohort — since {{ cohort.start_date }}</h2>
+      <div class="hero">
+        <div class="cell">
+          <div class="label">Buys issued</div>
+          <div class="value">{{ cohort.n }}</div>
+          <div class="note">with a take-profit / time-stop plan</div>
+        </div>
+        <div class="cell">
+          <div class="label">Take-profit hit rate</div>
+          <div class="value">{% if cohort.tp_hit_rate is not none %}{{ (cohort.tp_hit_rate * 100) | num(0) }}%{% else %}—{% endif %}</div>
+          <div class="note">{{ cohort.tp_hits }} of {{ cohort.n }}</div>
+        </div>
+        <div class="cell">
+          <div class="label">Mean banked return</div>
+          <div class="value {% if cohort.mean_banked_return is not none %}{{ 'good' if cohort.mean_banked_return > 0 else 'bad' }}{% endif %}">{{ cohort.mean_banked_return | pct }}</div>
+          <div class="note">per resolved trade</div>
+        </div>
+        <div class="cell">
+          <div class="label">Mean excess vs SPY</div>
+          <div class="value {% if cohort.mean_excess is not none %}{{ 'good' if cohort.mean_excess > 0 else 'bad' }}{% endif %}">{{ cohort.mean_excess | pct }}</div>
+          <div class="note">replay target +1.6%</div>
+        </div>
+      </div>
+      {% if cohort.rows %}
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Ticker</th><th>Action</th><th>Issued</th><th class="num">Entry</th>
+              <th>Plan</th><th>Status</th><th class="num">Return</th><th class="num">SPY</th><th class="num">Excess</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for row in cohort.rows %}
+            <tr>
+              <td><strong>{{ row.ticker }}</strong></td>
+              <td><span class="tag {{ row.action }}">{{ row.action.replace('_', ' ') }}</span></td>
+              <td>{{ row.timestamp[:10] }}</td>
+              <td class="num">{{ row.reference_price | num }}</td>
+              <td class="muted">+{{ (row.take_profit_pct * 100) | num(0) }}% / {{ row.max_hold_trading_days }}td</td>
+              <td>
+                {% if row.take_profit_hit %}<span class="tag worked">TP hit{% if row.take_profit_hit_date %} {{ row.take_profit_hit_date }}{% endif %}</span>
+                {% elif row.window_complete %}<span class="tag partial">time-stopped</span>
+                {% else %}<span class="tag">open</span>{% endif %}
+              </td>
+              <td class="num {% if row.trade_return is not none %}{{ 'good' if row.trade_return > 0 else 'bad' }}{% endif %}">{{ row.trade_return | pct }}</td>
+              <td class="num muted">{{ row.benchmark_return | pct }}</td>
+              <td class="num {% if row.excess_return is not none %}{{ 'good' if row.excess_return > 0 else 'bad' }}{% endif %}">{{ row.excess_return | pct }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty">
+        <strong>No managed-exit buys yet.</strong> The tightened entry gate has issued no buy-lane
+        recommendation with an exit plan since {{ cohort.start_date }}. This table fills up as buys
+        clear the gate — that is the evidence the mid-October decision rests on.
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2>Hypothetical equity — $100 on the managed-exit policy</h2>
+      <div class="hero">
+        <div class="cell">
+          <div class="label">Policy equity</div>
+          <div class="value {{ 'good' if equity.final_equity >= equity.start_capital else 'bad' }}">{{ equity.final_equity | money }}</div>
+          <div class="note">{{ equity.trade_count }} trades since {{ equity.start_date }}</div>
+        </div>
+        <div class="cell">
+          <div class="label">SPY buy &amp; hold</div>
+          <div class="value">{{ equity.spy_final | money }}</div>
+          <div class="note">{{ equity.spy_return | pct }} over the same window</div>
+        </div>
+        <div class="cell">
+          <div class="label">Policy return</div>
+          <div class="value {% if equity.total_return is not none %}{{ 'good' if equity.total_return > 0 else 'bad' }}{% endif %}">{{ equity.total_return | pct }}</div>
+          <div class="note">one position at a time, full capital</div>
+        </div>
+        <div class="cell">
+          <div class="label">vs SPY</div>
+          {% set delta = (equity.total_return - equity.spy_return) if (equity.total_return is not none and equity.spy_return is not none) else None %}
+          <div class="value {% if delta is not none %}{{ 'good' if delta > 0 else 'bad' }}{% endif %}">{{ delta | pct }}</div>
+          <div class="note">policy minus benchmark</div>
+        </div>
+      </div>
+
+      {% if equity.points | length > 1 %}
+      {% set eqs = equity.points | map(attribute='equity') | list %}
+      {% set lo = [eqs | min, equity.start_capital] | min %}
+      {% set hi = [eqs | max, equity.start_capital] | max %}
+      {% set span = (hi - lo) if (hi - lo) > 0.01 else 1 %}
+      <svg class="curve" viewBox="0 0 1000 190" preserveAspectRatio="none">
+        <line x1="0" x2="1000" y1="{{ 175 - ((equity.start_capital - lo) / span) * 160 }}" y2="{{ 175 - ((equity.start_capital - lo) / span) * 160 }}" stroke="#2a313c" stroke-dasharray="4 4" stroke-width="1"/>
+        <polyline fill="none" stroke="#58a6ff" stroke-width="2"
+          points="{% for point in equity.points %}{{ loop.index0 * (1000 / ([equity.points | length - 1, 1] | max)) }},{{ 175 - ((point.equity - lo) / span) * 160 }} {% endfor %}" />
+        {% for point in equity.points %}
+        <circle cx="{{ loop.index0 * (1000 / ([equity.points | length - 1, 1] | max)) }}" cy="{{ 175 - ((point.equity - lo) / span) * 160 }}" r="3" fill="#58a6ff">
+          <title>{{ point.date }} — ${{ point.equity }}</title>
+        </circle>
+        {% endfor %}
+      </svg>
+      <div class="legend">
+        <span><span class="swatch" style="background:#58a6ff"></span>policy equity ({{ lo | money }} – {{ hi | money }})</span>
+        <span><span class="swatch" style="background:#2a313c"></span>$100 start</span>
+      </div>
+      {% else %}
+      <div class="empty">Not enough resolved trades to draw a curve yet.</div>
+      {% endif %}
+
+      {% if equity.trades %}
+      <div class="scroll" style="max-height:280px">
+        <table>
+          <thead><tr><th>Ticker</th><th>Entry</th><th>Exit</th><th>Exit reason</th><th class="num">Return</th><th class="num">Equity</th></tr></thead>
+          <tbody>
+          {% for trade in equity.trades %}
+            <tr>
+              <td><strong>{{ trade.ticker }}</strong></td>
+              <td>{{ trade.entry_date }}</td>
+              <td>{{ trade.exit_date }}</td>
+              <td>{% if trade.take_profit_hit %}<span class="tag worked">take-profit</span>{% else %}<span class="tag partial">time stop</span>{% endif %}</td>
+              <td class="num {{ 'good' if trade.trade_return > 0 else 'bad' }}">{{ trade.trade_return | pct }}</td>
+              <td class="num">{{ trade.equity_after | money }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2>Recommendations</h2>
+      <div class="tabs">
+        <a href="/?action=all" class="{{ 'on' if action == 'all' }}">All</a>
+        <a href="/?action=buy" class="{{ 'on' if action == 'buy' }}">Buy lane</a>
+        <a href="/?action=buy_now" class="{{ 'on' if action == 'buy_now' }}">buy_now</a>
+        <a href="/?action=early_accumulation" class="{{ 'on' if action == 'early_accumulation' }}">early_accumulation</a>
+        <a href="/?action=watch_for_confirmation" class="{{ 'on' if action == 'watch_for_confirmation' }}">watch_for_confirmation</a>
+        <a href="/?action=hold_not_fresh_buy" class="{{ 'on' if action == 'hold_not_fresh_buy' }}">hold_not_fresh_buy</a>
+      </div>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th><th>Ticker</th><th>Action</th><th class="num">Ref price</th><th>Conf</th>
+              <th>Theme</th><th>Exit plan</th><th>Outcome</th><th class="num">Excess</th><th>Why / gates</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for row in rows %}
+            <tr>
+              <td>{{ row.date }}</td>
+              <td><strong>{{ row.ticker }}</strong></td>
+              <td><span class="tag {{ row.action }}">{{ row.action.replace('_', ' ') }}</span></td>
+              <td class="num">{{ row.reference_price | num }}</td>
+              <td class="muted">{{ row.confidence or '—' }}</td>
+              <td class="muted">{{ row.theme_driver or '—' }}</td>
+              <td class="muted">{{ row.exit_plan or '—' }}</td>
+              <td>{% if row.outcome %}<span class="tag {{ row.outcome }}">{{ row.outcome }}</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+              <td class="num {% if row.excess_return_pct is not none %}{{ 'good' if row.excess_return_pct > 0 else 'bad' }}{% endif %}">{{ row.excess_return_pct | pct }}</td>
+              <td>
+                <div class="why">{{ (row.why_now or '')[:170] }}</div>
+                {% if row.gate_reasons %}<div class="gates">gates: {{ row.gate_reasons | join('; ') | truncate(150) }}</div>{% endif %}
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="10" class="empty">No recommendations match this filter.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Theme scorecard</h2>
+      <div class="scroll" style="max-height:420px">
+        <table>
+          <thead><tr><th>Theme</th><th class="num">n</th><th class="num">Mean excess</th><th class="num">worked</th><th class="num">partial</th><th class="num">failed</th><th class="num">late</th></tr></thead>
+          <tbody>
+          {% for theme in themes %}
+            <tr>
+              <td>{{ theme.theme }}</td>
+              <td class="num">{{ theme.n }}</td>
+              <td class="num {% if theme.mean_excess is not none %}{{ 'good' if theme.mean_excess > 0 else 'bad' }}{% endif %}">{{ theme.mean_excess | pct }}</td>
+              <td class="num good">{{ theme.worked or '' }}</td>
+              <td class="num warn">{{ theme.partial or '' }}</td>
+              <td class="num bad">{{ theme.failed or '' }}</td>
+              <td class="num muted">{{ theme.late or '' }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% if ops.spec_candidate_details %}
+    <div class="card">
+      <h2>Open spec-change candidates</h2>
+      <div class="scroll" style="max-height:260px">
+        <table>
+          <thead><tr><th>Ticker</th><th>Theme</th><th>Outcome</th><th>Reason</th></tr></thead>
+          <tbody>
+          {% for candidate in ops.spec_candidate_details %}
+            <tr>
+              <td><strong>{{ candidate.ticker }}</strong></td>
+              <td class="muted">{{ candidate.theme }}</td>
+              <td><span class="tag {{ candidate.outcome }}">{{ candidate.outcome }}</span></td>
+              <td class="why">{{ candidate.reason }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+  </main>
+</div>
+
+<footer>
+  Read-only view of <code>data/</code>. Excess return is measured against SPY over each signal's own window.
+  Prices are cached for 15 minutes and the page payload for 10 minutes — hit <a href="/?refresh=1">force refresh</a> to rebuild.
+  Built {{ data.generated_at[:19].replace('T', ' ') }} UTC.
+</footer>
+
+<script>
+  // Reload hourly so a long-open tab keeps pace with the scan cron.
+  setTimeout(function () { window.location.reload(); }, 3600000);
+</script>
+</body>
+</html>
