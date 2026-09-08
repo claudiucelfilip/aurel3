@@ -74,7 +74,8 @@ from notify import (
     send_postmortem_summary,
 )
 from openclaw_bridge import load_fresh_interpreted_items
-from reviews import (, managed_trade_is_resolved
+from reviews import (
+    managed_trade_is_resolved,
     active_spec_change_candidates,
     build_closed_position_review,
     build_recommendation_review,
