@@ -74,7 +74,7 @@ from notify import (
     send_postmortem_summary,
 )
 from openclaw_bridge import load_fresh_interpreted_items
-from reviews import (
+from reviews import (, managed_trade_is_resolved
     active_spec_change_candidates,
     build_closed_position_review,
     build_recommendation_review,
@@ -464,21 +464,15 @@ def cmd_review_signals(ticker: str | None = None) -> None:
         if rec.get("id") in reviewed_ids:
             skipped_reviewed += 1
             continue
-        if not recommendation_is_mature(rec):
-            skipped_immature += 1
-            continue
         if not rec.get("reference_price"):
             skipped_no_price += 1
-            continue
-        data = get_stock_data(rec["ticker"])
-        if not data:
-            skipped_no_market_data += 1
             continue
 
         exit_result = None
         benchmark_end = None
         exit_plan = rec.get("exit_plan")
-        if exit_plan and rec.get("action") in ("buy_now", "early_accumulation"):
+        managed = bool(exit_plan) and rec.get("action") in ("buy_now", "early_accumulation")
+        if managed:
             exit_result = get_take_profit_hit(
                 rec["ticker"],
                 rec.get("timestamp"),
@@ -486,8 +480,20 @@ def cmd_review_signals(ticker: str | None = None) -> None:
                 exit_plan.get("take_profit_pct", 0.04),
                 exit_plan.get("max_hold_trading_days", 10),
             )
-            if exit_result and exit_result.get("hit"):
+            # Managed trades mature when the plan resolves, not on expected_horizon.
+            if not managed_trade_is_resolved(exit_result):
+                skipped_immature += 1
+                continue
+            if exit_result.get("hit"):
                 benchmark_end = exit_result.get("hit_date")
+        elif not recommendation_is_mature(rec):
+            skipped_immature += 1
+            continue
+
+        data = get_stock_data(rec["ticker"])
+        if not data:
+            skipped_no_market_data += 1
+            continue
 
         review = build_recommendation_review(
             rec,

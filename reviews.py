@@ -75,6 +75,13 @@ def _required_age_days(expected_horizon: str | None) -> int:
     return mapping.get(expected_horizon or "", 14)
 
 
+def managed_trade_is_resolved(exit_result: dict | None) -> bool:
+    """An exit-planned buy is reviewable once its plan resolves: take-profit
+    hit or time-stop window complete. The narrative expected_horizon (weeks to
+    months) must not delay scoring a trade that closed in 10 sessions."""
+    return bool(exit_result and (exit_result.get("hit") or exit_result.get("window_complete")))
+
+
 def recommendation_is_mature(recommendation: dict, now: datetime | None = None) -> bool:
     now = now or datetime.now(timezone.utc)
     created = _parse_iso(recommendation.get("timestamp"))

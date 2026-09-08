@@ -86,3 +86,23 @@ def test_buy_alert_includes_exit_plan():
     text = notify.format_recommendation_alert(_buy_rec())
     assert "Exit plan:" in text
     assert "10 trading days" in text
+
+
+
+def test_managed_trade_resolves_on_hit_or_window():
+    from reviews import managed_trade_is_resolved
+    assert managed_trade_is_resolved({"hit": True, "window_complete": False})
+    assert managed_trade_is_resolved({"hit": False, "window_complete": True})
+    assert not managed_trade_is_resolved({"hit": False, "window_complete": False})
+    assert not managed_trade_is_resolved(None)
+
+
+def test_early_accumulation_horizon_no_longer_gates_review():
+    # A 1-3 month early_accumulation with a resolved 10-session plan must be reviewable now.
+    from reviews import managed_trade_is_resolved, recommendation_is_mature
+    from datetime import datetime, timezone, timedelta
+    rec = {"action": "early_accumulation", "expected_horizon": "1-3 months",
+           "timestamp": (datetime.now(timezone.utc) - timedelta(days=15)).isoformat(),
+           "exit_plan": {"take_profit_pct": 0.04, "max_hold_trading_days": 10}}
+    assert not recommendation_is_mature(rec)            # horizon clock says wait (30d)
+    assert managed_trade_is_resolved({"hit": False, "window_complete": True})  # plan clock says score it
