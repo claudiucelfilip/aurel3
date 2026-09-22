@@ -38,6 +38,29 @@ MIN_SOCIAL_BUY_POINTS = 3
 # deeper into the pop mean-reverted vs SPY in the Jul-Aug 2026 live sample.
 EARNINGS_FRESH_BUY_MAX_CHANGE = 0.04
 
+# Buy-lane extension gate (2026-09-22). Re-scoring all 39 live buys May-Sep
+# under the managed-exit policy: signals with day-of volume <=1.5x average made
+# +1.4% vs SPY per trade (tuning and holdout halves agree); >1.5x made -0.7% to
+# -3.1%. Aurel3 sees news after the move; only names that have not yet moved
+# have room. Applies to buy_now AND early_accumulation.
+BUY_LANE_MAX_VOLUME_RATIO = 1.5
+# "high" confidence selected late, already-moved entries (worse than "medium" in
+# every analysis since July); buy-lane confidence is capped at medium.
+BUY_LANE_MAX_CONFIDENCE = "medium"
+
+
+def buy_lane_extension_gate(action: str, volume_ratio: float | None) -> str:
+    """Demote an extended buy-lane action to hold_not_fresh_buy."""
+    if action in ("buy_now", "early_accumulation") and (volume_ratio or 0) > BUY_LANE_MAX_VOLUME_RATIO:
+        return "hold_not_fresh_buy"
+    return action
+
+
+def buy_lane_confidence(action: str, confidence: str) -> str:
+    if action in ("buy_now", "early_accumulation") and confidence == "high":
+        return BUY_LANE_MAX_CONFIDENCE
+    return confidence
+
 # Exit plan for buy-lane recommendations. Live May-Aug 2026 replay: these names
 # usually spike >=4% above entry within 2 weeks but drift below SPY afterwards,
 # so harvest the spike and time-stop the rest (REPLAY_LIVE_BUYS_2026_08.md).
@@ -1040,6 +1063,12 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
             elif item.get("signal_origin") != "interpreted_news" and not _social_is_actionable(social_evidence):
                 action = "watch_for_confirmation"
 
+        volume_extended = action in ("buy_now", "early_accumulation") and (
+            data.get("volume_ratio", 0) > BUY_LANE_MAX_VOLUME_RATIO
+        )
+        action = buy_lane_extension_gate(action, data.get("volume_ratio"))
+        confidence = buy_lane_confidence(action, confidence)
+
         gate_reasons = _non_buy_gate_reasons(
             action,
             item.get("signal_origin"),
@@ -1053,6 +1082,9 @@ def generate_signal_scan(source_items: dict) -> tuple[list[dict], list[dict]]:
             contradictory_catalyst,
             market_profile["accessible"],
         )
+
+        if volume_extended and "volume_extended" not in gate_reasons:
+            gate_reasons.append("volume_extended")
 
         social_summary = _format_social_summary(social_evidence)
         why_now = (
