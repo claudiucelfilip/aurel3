@@ -14,7 +14,7 @@ agent interprets the source batch itself, then calls `openclaw_import` and
 
 Important:
 - OpenClaw provides the model/runtime/auth layer
-- Current Aurel3 interpretation model: `openai-codex/gpt-5.6-sol` (gpt-5.4 and gpt-5.5 are no longer served to ChatGPT Codex accounts as of 2026-10-15)
+- Current Aurel3 interpretation model: `openai-codex/gpt-6.1-sol`, kept current by the daily model-freshness watchdog (~/.hermes/bin/model_freshness_watchdog.py); gpt-5.4 and gpt-5.5 are no longer served to ChatGPT Codex accounts.
 - Do not rewire back to a direct API flow — use OpenClaw for model routing
 - Gemini is no longer part of the intended Aurel3 runtime path
 

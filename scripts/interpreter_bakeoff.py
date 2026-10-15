@@ -32,7 +32,7 @@ archived items before acting. This caveat is printed with every result.
 Backends (select with --models):
   - fable   : FLAT-RATE. Calls the Claude Code CLI (`claude -p --model claude-fable-5`),
               using your existing subscription auth. No per-token API billing.
-  - gpt5    : FLAT-RATE. Calls the Codex CLI (`codex exec -m gpt-5.6-sol`), using
+  - gpt5    : FLAT-RATE. Calls the Codex CLI (`codex exec -m gpt-6.1-sol`), using
               your existing subscription auth. No per-token API billing.
   - inkling : TOKEN-BILLED (Tinker/Thinking Machines). This is the ONLY backend that
               costs money per call. It is gated behind --allow-tinker-billing so it
@@ -270,9 +270,9 @@ def _backend_fable() -> Callable[[str, str], str]:
 def _backend_gpt5() -> Callable[[str, str], str]:
     """Codex CLI (`codex exec`), subscription auth. Prints a transcript; the
     model reply is the trailing text — _parse_model_json takes the last object.
-    Defaults to gpt-5.6-sol (the model actually configured in Codex); override
+    Defaults to gpt-6.1-sol (the model actually configured in Codex); override
     with GPT5_MODEL."""
-    model = os.getenv("GPT5_MODEL", "gpt-5.6-sol")
+    model = os.getenv("GPT5_MODEL", "gpt-6.1-sol")
 
     def call(system: str, user: str) -> str:
         prompt = f"{system}\n\n{user}"
