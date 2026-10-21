@@ -1,0 +1,32 @@
+{
+  "frozen_before_historical_results": "2026-10-21",
+  "purpose": "Baseline reconstruction of the gold grid described in the user's TikTok; not an exact replication or deployable strategy.",
+  "source_video": "https://www.tiktok.com/@thequantbuilder/video/7699030814419422497",
+  "known_rules": ["Long gold", "Add as price falls", "Double subsequent purchases", "Close basket in profit", "No discretionary stop loss", "Also test the creator's fixed-size alternative"],
+  "assumed_baseline": {
+    "capital_usd": 10000, "initial_ounces": 1, "grid_dollars_per_ounce": 10,
+    "net_target_dollars_per_ounce": 1, "leverage": 20, "margin_closeout_fraction": 0.5,
+    "commission_usd_per_ounce_per_side": 0.035, "slippage_usd_per_ounce_per_side": 0.05,
+    "annual_notional_financing": 0.05
+  },
+  "execution": [
+    "Enter immediately at the first active minute's ask plus slippage. Fixed starting size, no compounding.",
+    "Add when ask falls $10 from the last grid fill; gaps fill at the available quote. Refuse additions that fail available-margin checks.",
+    "Close when bid covers weighted entry cost, commissions, financing, exit slippage, plus $1 per total ounce.",
+    "Start the next basket at the next active minute after a close, not repeatedly within the same minute.",
+    "Liquidate the entire basket when account equity reaches 50% of used margin, then cease trading permanently for that run. No deposits or restarts.",
+    "Track open positions at bid less estimated exit costs. Include unresolved final baskets in equity and final return.",
+    "Apply continuous financing on prior notional over elapsed calendar time, including weekends. This is an assumption, not historical broker swaps.",
+    "Reconstruct both open-low-high-close and open-high-low-close minute paths with linear transitions. Bid/ask extrema are paired assumptions, not synchronized tick data; these are sensitivity scenarios, not rigorous bounds."
+  ],
+  "predeclared_experiments": {
+    "main": "Doubling and fixed-size, full available 2019 onward and a fresh 2022 onward account, both minute-path orders.",
+    "sensitivity": {"initial_ounces": [0.1, 0.5, 1], "grid_dollars": [5, 10, 20], "target_dollars": [0.5, 1, 2], "multiplier": [1, 2]},
+    "cost_stress": {"annual_financing": [0, 0.10], "slippage": [0.15]},
+    "leverage_stress": [10, 100],
+    "fresh_start_years": [2019,2020,2021,2022,2023,2024,2025,2026]
+  },
+  "benchmarks": "Unleveraged spot gold from the same feed; existing Alpaca split/dividend-adjusted SPY daily data at the same date range. Different trading clocks; not execution-equivalent instruments.",
+  "selection_policy": "Report the complete parameter grid, do not choose the strongest historical setting. All periods are exploratory baseline evaluation; no untouched test set is claimed.",
+  "out_of_scope": ["Loss mitigation", "AI filters", "Live execution", "Romanian taxes", "Exact creator P&L reproduction", "Broker-specific swaps, partial liquidation and historical margin changes"]
+}

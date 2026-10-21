@@ -1,0 +1,59 @@
+Gold-grid baseline findings — 2026-10-21
+========================================
+
+Verified experiment, not exact creator replication.
+Source: https://www.tiktok.com/@thequantbuilder/video/7699030814419422497
+Data: 2019-01-01 23:00 UTC to 2026-10-19 13:59 UTC, 2,762,399 active minute observations.
+
+Default reconstruction ($10,000 starting account):
+- Doubling: $6,022.07 ending equity; -39.78% total return;
+  62.74% maximum simulated intraminute drawdown.
+- 3,229 winning batches followed by one forced-liquidation loss.
+  Profits summed to $6,161.69; the losing batch cost $10,139.62.
+- Forced liquidation on 2020-08-12 01:44:00+00:00. Trading stopped permanently then.
+  Remaining cash stayed idle through the dataset end. No restart or extra deposit.
+- Fixed-size version: $6,778.06; -32.22% total return;
+  79.94% worst drawdown; also forced to liquidate.
+- Fresh 2022 doubling account: $5,413.30, with a margin exit in July 2022.
+- SPY adjusted daily benchmark: $34,183.54; 241.84% total return.
+  Its final available close is 2026-10-16; exact gold/stock execution clocks differ.
+
+Sensitivity, not optimization:
+- 24 of 27 doubling parameter combinations hit a margin exit; 3 survived.
+- All 3 survivors used a 0.1-ounce initial order and $20 spacing. Total returns
+  ranged from 31.2% to 85.4%, below SPY over this sample. They are not selected winners.
+- 18 of 27 fixed-size combinations hit a margin exit.
+- Both assumed intraminute price orderings produced losses and forced exits for
+  all four main start-year/sizing baselines, though exact P&L and exit dates differ.
+- Higher leverage did not repair the default baseline. Financing assumptions
+  materially affect some long-held fixed-size baskets.
+
+Verified:
+- 11 targeted tests pass: doubling, fixed sizing, weighted target, costs, funding,
+  open losses, forced exits, gaps, rejection, path order, future-data isolation.
+- Independent fill-by-fill accounting reconciles 145,333 ledger entries across
+  eight main runs with maximum cash error below $0.000000002.
+- All mirrored file hashes match the pinned archive tree. Prices exactly match
+  194 original-provider daily archives across 2019, 2022, 2023 and 2026 samples.
+
+Assumed:
+- The creator's unknown order size, spacing, target, entry rule, capital,
+  historical leverage and swaps are NOT recovered. Explicit defaults are in protocol.json.
+- M1 high/low paths are synthetic quote paths, not ticks or rigorous result bounds.
+- Financing is 5% annual notional, not a historical broker swap schedule.
+- Margin exit liquidates the whole basket at 50% of used margin; no partial exits.
+- Mirror lacks volume. Entirely flat minutes are omitted; one unmatched quote is excluded.
+
+Out of scope:
+- Loss-mitigation variants, AI filters, live deployment and tax treatment.
+- No untouched test set is claimed. Every inspected period is now development data.
+
+Interpretation:
+The reconstruction displays the advertised failure mechanism: profitable closed
+batches can coexist with a large hidden open loss. A very high winning-batch rate
+is largely a consequence of only voluntarily closing winners. Adding more gold
+when it falls creates concentrated exposure to a prolonged decline. This does
+not prove every grid must lose, or that a bounded variant cannot work.
+
+Next: keep this baseline fixed and separately evaluate bounded exposure, limited
+additions and basket-loss exits, counting lost recoveries as well as avoided disasters.

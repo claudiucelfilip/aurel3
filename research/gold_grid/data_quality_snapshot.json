@@ -1,0 +1,30 @@
+{
+  "source": "https://www.dukascopy.com/api/data/get/historical-data-export",
+  "mirror": "https://github.com/kevingtlin/Market-Data-Lab/blob/main/XAUUSD_DUKASCOPY_M1_BID_ASK_README.md",
+  "mirror_commit": "78fd60f8bf3a1cebe198828147e54e4ed32385d8",
+  "rows": 2762399,
+  "start": "2019-01-01 23:00:00+00:00",
+  "end": "2026-10-19 13:59:00+00:00",
+  "days": 2427,
+  "flat_minutes_removed": 1292723,
+  "matching_original_archives": 194,
+  "matching_original_side_minutes": 278758,
+  "bid_only_minutes": 0,
+  "ask_only_minutes": 1,
+  "unmatched_minutes_excluded": {
+    "bid_only": [],
+    "ask_only": [
+      "2026-08-16 23:59:00+00:00"
+    ]
+  },
+  "gaps_over_120_minutes": 461,
+  "median_open_spread": 0.37000000000011823,
+  "first_bid": 1282.295,
+  "last_bid": 4154.495,
+  "sha256": "105d53e58f5c8f073338292709fa7f40f7a5ae12057b64b1f1eaf0b01db6b1c2",
+  "limitations": [
+    "Mirror data; original-provider checks cover only the downloaded sample.",
+    "Flat minutes excluded because mirror has no volume; some genuine quiet quotes may be omitted.",
+    "Intraminute bid/ask extrema are not synchronized ticks."
+  ]
+}
