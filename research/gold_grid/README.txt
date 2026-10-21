@@ -90,7 +90,51 @@ without fund fees/storage. Benchmark drawdowns are daily-close, not intraday.
 
 Scope
 -----
-This is baseline characterization. No loss limit, AI filter, optimization,
-out-of-sample claim, live execution or tax model is included. All inspected
-history is now development evidence. Any later mitigation experiment must
-disclose that it has been designed after seeing these results.
+run.py and result_snapshot.json characterize the original baseline, with all
+new risk controls disabled. No untouched-test claim, AI filter, live execution
+or tax model is included. All inspected history is development evidence.
+
+Loss limits and profit locks (added after the baseline)
+------------------------------------------------------
+The original protocol and snapshot remain intact. loss_control_protocol.json
+records the first-round candidates before their results. profit_lock_protocol.json
+records a second, adaptive round designed after those results. Both rounds use
+already-inspected history and must not be called independent validation.
+
+Run the additional studies from the repository root:
+
+  /Users/claudiu/Research/gold-grid-env/bin/python -m pytest research/gold_grid/test_engine.py research/gold_grid/test_loss_controls.py -q
+  /Users/claudiu/Research/gold-grid-env/bin/python research/gold_grid/loss_controls.py
+  /Users/claudiu/Research/gold-grid-env/bin/python research/gold_grid/profit_locks.py
+  /Users/claudiu/Research/gold-grid-env/bin/python research/gold_grid/loss_report.py
+
+The served /loss-controls.html report has year and purchase-sizing selectors,
+all named variants, both minute paths, 54 nearby settings, cost stress, SPY/gold
+comparisons, profit-lock activation sensitivity and downloadable results.
+
+Controls are optional Settings fields:
+- max_entries includes the initial purchase; zero is unlimited.
+- max_notional_multiple limits new purchases using basket-start cash. It does
+  not continuously rebalance existing holdings. An initial fixed-size order
+  that cannot meet this limit permanently halts that account.
+- batch_loss_fraction exits at the specified loss from basket-start cash,
+  including estimated exit costs. Trading resumes with the remaining money.
+- cooldown_hours delays new entries after loss exits, using elapsed calendar
+  time. Profit exits keep the original next-minute reentry.
+- account_drawdown_fraction closes the basket and permanently halts the account
+  after a fall from the running net-equity peak.
+- drawdown_activation_multiple delays that account exit until the running peak
+  reaches this multiple of initial capital. It does not protect earlier losses.
+
+Gaps and financing can exceed nominal stop thresholds. No threshold clamps a
+loss, fills at an unavailable quote, replenishes cash, or restarts a margin-
+liquidated account. Idle cash earns zero. Codes in the fill and batch logs are:
+1 buy, 2 profit exit, 3 margin exit, 4 unresolved final batch, 5 batch-loss exit,
+6 account-drawdown exit. Batch code 4 is not a fill or completed win.
+
+Twenty-two targeted tests cover the baseline and controls. The full runner
+also reproduces all eight saved baseline summaries with controls disabled and
+independently reconciles fills, financing, final equity and batch P&L in every
+main and profit-lock comparison. Floating-point account arrays also prevent
+whole-dollar truncation when a caller supplies an integer starting balance;
+the original $10,000.0 baseline results are unchanged.

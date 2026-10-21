@@ -94,6 +94,7 @@ table{{border-collapse:collapse;width:100%;font-size:13px;text-align:left;font-v
 <main><h1>{headline}</h1><p>This implements the <a href="https://www.tiktok.com/@thequantbuilder/video/7699030814419422497">gold grid in your video</a>: buy falling gold, increase the next purchase, and close the batch after a rebound. The creator did not provide the exact settings, so this is a declared reconstruction.</p>
 <div class="callout"><p><strong>This is the correct strategy family, not a reproduction of the advertised numbers.</strong> The earlier Nasdaq opening-move backtest does not apply. No AI or loss-limiting filter has been added.</p></div>
 <div class="switch" aria-label="Choose start date"><button aria-pressed="true" data-year="2019">From 2019</button><button aria-pressed="false" data-year="2022">From 2022</button></div>
+<p><a href="loss-controls.html">See the loss-limit and profit-lock experiments</a></p>
 {''.join(panels)}
 <h2>What exactly was tested?</h2><p>Start with $10,000. Buy 1 ounce. Buy 2, 4, 8… ounces whenever gold falls another $10 from the last purchase. Close when the batch earns $1 per ounce after costs. The fixed-size variant buys 1 ounce each time. Start the next batch in the following active minute.</p>
 <p>Assumed margin: 20:1 leverage; reject unaffordable additions; force a complete exit when equity reaches 50% of used margin. Trading then stops for that account. There are no hidden deposits or restarts. A margin exit can leave cash; it is not necessarily a total wipeout.</p>

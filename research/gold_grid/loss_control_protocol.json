@@ -1,0 +1,28 @@
+{
+  "frozen_before_loss_control_results": "2026-10-21",
+  "context": "Designed after seeing the full baseline history. These are exploratory comparisons, not untouched out-of-sample validation.",
+  "unchanged": "Same gold quotes, costs, financing, starting capital, entry, grid spacing and net profit target as the baseline.",
+  "controls": {
+    "max_entries": "Maximum total purchases per basket, including the initial purchase; zero means unlimited.",
+    "max_notional_multiple": "Approve new purchases only when total ask notional after the purchase is at most this multiple of basket-start cash. This is an admission limit, not continuous rebalancing.",
+    "batch_loss_fraction": "Close the basket when its liquidation value after fees falls this fraction below basket-start cash. Gaps and financing can exceed the threshold.",
+    "cooldown_hours": "After a batch-loss exit, wait this many calendar hours before a new basket. After profit exits, use the original next-minute entry.",
+    "account_drawdown_fraction": "Close all positions and permanently stop this account at this drawdown from its prior net-equity high. No replenishment or restart."
+  },
+  "main_variants": {
+    "entries_4": {"max_entries": 4},
+    "exposure_2x": {"max_notional_multiple": 2},
+    "batch_loss_2pct": {"batch_loss_fraction": 0.02},
+    "batch_loss_5pct": {"batch_loss_fraction": 0.05},
+    "combined_2pct": {"max_entries": 4, "max_notional_multiple": 2, "batch_loss_fraction": 0.02},
+    "combined_5pct": {"max_entries": 4, "max_notional_multiple": 2, "batch_loss_fraction": 0.05},
+    "combined_2pct_pause24": {"max_entries": 4, "max_notional_multiple": 2, "batch_loss_fraction": 0.02, "cooldown_hours": 24},
+    "combined_5pct_pause24": {"max_entries": 4, "max_notional_multiple": 2, "batch_loss_fraction": 0.05, "cooldown_hours": 24},
+    "combined_5pct_pause24_account20": {"max_entries": 4, "max_notional_multiple": 2, "batch_loss_fraction": 0.05, "cooldown_hours": 24, "account_drawdown_fraction": 0.20}
+  },
+  "comparison": "Every variant on doubling and fixed-size grids, from 2019 and a fresh 2022 account, on both assumed intraminute paths.",
+  "display_variant_chosen_before_results": "combined_2pct_pause24",
+  "sensitivity": {"max_entries": [2, 4, 8], "batch_loss_fraction": [0.01, 0.02, 0.05], "cooldown_hours": [0, 24, 72], "max_notional_multiple": 2},
+  "cost_stress": {"variants": ["combined_2pct_pause24", "combined_5pct_pause24"], "annual_financing": 0.10, "slippage_per_ounce": 0.15},
+  "evaluation": "Report all results, actual drawdowns, open losses, stops, margin exits and costs. Compare with baseline and SPY/gold. Do not recommend the highest-return historical row without independent evidence."
+}

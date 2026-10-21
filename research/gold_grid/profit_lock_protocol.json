@@ -1,0 +1,10 @@
+{
+  "created_after_first_loss_control_results": "2026-10-21",
+  "motivation": "Early batch stops lost money and a 20% account stop from inception halted before the later peak. Test fixed profit milestones without picking the historical peak date.",
+  "rules": "Use the original grid. Activate an account trailing exit only after net account equity first reaches a fixed multiple of original capital. On a subsequent drawdown from its running high, close all positions and permanently stop. Idle cash earns zero. No replenishments or restarts.",
+  "activation_multiples": [1.25, 1.5, 2.0],
+  "trailing_drawdown_fractions": [0.10, 0.20, 0.30],
+  "display_variant_chosen_before_profit_lock_results": {"activation_multiple": 2.0, "trailing_drawdown_fraction": 0.20},
+  "experiments": "Both grid sizing modes, 2019 and fresh 2022 accounts, both assumed minute paths. Report every result, including controls that never activate before margin liquidation.",
+  "limitations": "This is an adaptive second round on already-inspected data, not an independent test. Stop thresholds can be exceeded by gaps and costs. No best historical row is treated as a validated strategy."
+}

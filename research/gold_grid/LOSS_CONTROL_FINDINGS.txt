@@ -1,0 +1,63 @@
+Gold-grid loss-control experiments — 2026-10-21
+================================================
+
+Verified on this reconstruction:
+- All eight original baseline summaries reproduce with the controls disabled.
+- 22 targeted baseline/risk tests pass.
+- Independent accounting reconciles 2,244,844 fills in 144 main comparisons;
+  maximum cash discrepancy is $0.000000007956.
+- 72 loss-control comparisons: nine named rules, two sizing modes, two starting
+  years and both assumed minute paths. 54 nearby settings and 16 cost stresses
+  are also reported. Profit locks add 72 comparisons in an adaptive second round.
+- No named rule or profit-lock setting beat SPY in BOTH periods and BOTH paths.
+
+Selected settings were declared before their own results, not chosen as winners:
+- Combined control: maximum four purchases, new-purchase notional at most 2x
+  basket-start cash, exit at 2% loss after costs, pause 24 hours after a loss.
+- Profit lock: original grid; activate a 20% trailing account exit after the
+  net-equity peak first reaches 2x initial capital. Permanently stop afterward.
+
+Fixed-size purchases, $10,000 initial capital, low-first path:
+                              2019 onward       Fresh 2022 onward
+Original grid                    $6,778               $6,396
+Combined 2% control              $2,479               $1,973
+Profit lock                     $17,276              $24,480
+SPY                             $34,184              $17,024
+Unleveraged spot gold            $32,386              $22,706
+
+Why the profitable 2022 profit-lock result is insufficient:
+- Its worst drawdown was 83.0% BEFORE the delayed protection activated.
+- The same setting's 2019 account lost 64.4% from a peak before activation,
+  and ended far below SPY after stopping in October 2025.
+- A trailing stop can exit before the later peak and miss the recovery.
+- Its nominal 20% trail is not a 20% maximum drawdown over the account's life.
+
+Other observations:
+- An account-wide 20% exit active from inception halted much earlier and preserved
+  roughly $8,000-$9,000 in the default combined runs; it never reached the later peak.
+- All 54 combined-control sensitivity settings lost money in the full 2019
+  low-first sample. Counting small losses and costs is essential.
+- Exposure/entry caps alone avoided margin liquidation in the main runs but
+  sometimes left large losing baskets open at the sample end. Those open
+  losses are fully included in equity, not discarded as unfinished trades.
+- Some stopped accounts could no longer afford the fixed one-ounce first order
+  within their risk budget. This is reported separately from margin liquidation.
+
+Assumed and limited:
+- Same declared original settings, synthetic minute paths, quote filtering,
+  financing and margin policy as the baseline; no recovered creator source code.
+- First-round candidates were frozen before their results, but after the full
+  baseline history had been inspected. Profit locks were designed after that
+  round. Neither is independent out-of-sample validation.
+- Gaps/funding can exceed nominal loss limits. No losses or balances are clamped.
+- No cash replenishment, hidden restart, interest on idle cash or personal tax.
+- No AI filter, model training, new strategy selection or live deployment.
+
+Conclusion:
+These experiments do not justify replacing SPY with this gold grid. Some rules
+preserve profits or reduce a single crash, but the tested rules did not combine
+competitive full-period returns with acceptable drawdowns across start dates.
+This is evidence about the tested reconstruction, not every possible grid.
+
+Reproduce with loss_controls.py, profit_locks.py and loss_report.py, following
+README.txt. Full snapshots are loss_control_snapshot.json and profit_lock_snapshot.json.
