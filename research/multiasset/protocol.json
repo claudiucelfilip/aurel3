@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "frozen_on": "2026-10-21",
+  "purpose": "Research-only rejection screen for a manually executed multi-asset Aurel3 portfolio; no orders or notifications",
+  "start": "2008-01-02",
+  "end_exclusive": "2026-10-21",
+  "download_start": "2000-01-01",
+  "initial_usd": 25000,
+  "capital_status": "Illustrative test capital, not a recovered user budget",
+  "assets": {
+    "SPY": "equity", "EFA": "equity", "EEM": "equity", "IWM": "equity",
+    "IEF": "bond", "TLT": "bond",
+    "GLD": "commodity", "DBC": "commodity",
+    "UUP": "currency", "FXE": "currency", "FXY": "currency",
+    "BTC-USD": "crypto", "ETH-USD": "crypto"
+  },
+  "group_budget": {"equity": 0.45, "bond": 0.20, "commodity": 0.15, "currency": 0.10, "crypto": 0.10},
+  "cash_proxy": "BIL",
+  "price_trend": "Mean of positive 63/126/252-session trailing excess-return signs, relative to BIL. Allocate within each fixed group inversely to trailing 63-session volatility, then multiply by trend fraction. Unused budget stays in BIL. No leverage or shorts.",
+  "economic_trend": "Price portfolio multiplied by 1 + 0.25 times an asset-group economic score, clipped to [0,1] at the signal level. Growth is sign of latest three first-release payroll changes minus preceding three; inflation is sign of latest three first-release CPI annualized changes minus preceding three. Equity/crypto: (growth-inflation)/2; bonds: (-growth-inflation)/2; commodities: (growth+inflation)/2; currencies: 0. Missing/stale macro is neutral. This is a deliberately simple hypothesis, not an AQR replication.",
+  "macro_availability": "First-release values assumed usable 90 calendar days after observation month end; stress at 120 days. Publication timestamps are not in this dataset: this remains a timing assumption, not certified point-in-time data. Missing first releases are not filled using revised values.",
+  "ml": "Expanding-window ridge on fixed nonlinear price/macro features, pooled across assets, refitted yearly. Learn 21-session forward excess returns divided by trailing volatility; train only on labels ending before the fit date. Minimum five years history and 500 rows. Fixed ridge penalty 10. Blend 50% economic trend score with 50% clipped predicted risk-adjusted return score. No language model or retrospective news.",
+  "rebalance": "Last US trading session of each ISO week, signal after its close. ETFs execute next US session open; crypto executes at next UTC daily open AFTER that US opening date, avoiding mixed-time-zone lookahead. Delay stress uses third US session open, crypto another UTC day later.",
+  "sizing": "Fractional research units. Suppress individual changes below max(USD100, 1% NAV). Allocate using only prior close risk estimates. Actual lot sizes/broker availability must be audited before live qualification.",
+  "costs": {"etf_one_way_bps": 25, "crypto_one_way_bps": 75, "minimum_per_order_usd": 1},
+  "cost_status": "Conservative generic scenarios, not verified broker quotes; taxes, currency conversion and subscriptions excluded. Net means after modeled trading costs only.",
+  "candidates": ["price", "economic", "ml"],
+  "controls": ["SPY buy-and-hold", "same-universe static group allocation", "90% SPY / 10% BTC rebalanced weekly"],
+  "stress_tests": ["double costs", "third-session execution", "deterministically skip 20% of weekly decisions", "remove crypto", "macro lag 120 days", "lookbacks 50/100/200", "lookbacks 75/150/300", "remove each asset group"],
+  "periods": {"full": "2008-01-02", "walk_forward_comparison": "2013-01-02", "recent": "2022-01-03"},
+  "hurdles": {"annual_excess_after_modeled_costs": 0.03, "drawdown_no_worse_than_spy": true, "must_survive_double_cost_and_delay": true},
+  "inference": "Use monthly block-bootstrap excess-return uncertainty; report overlapping rolling three-year windows descriptively. Track all tested variants. No claim that the inspected recent period is a pristine holdout. Failed return/drawdown hurdle is sufficient to reject; passing this screen is not deployment approval.",
+  "scope_limits": ["Only long/cash retail proxies and spot BTC/ETH; no futures/option/FX margin simulation", "Surviving proxy universe chosen today; no comprehensive historical tradable universe", "Crypto selected ex post; report no-crypto ablation", "USD base; user-specific tax, FX and lot feasibility outstanding", "Daily crypto marks are UTC, ETF marks US close; stagger fills and disclose mixed valuation times", "Historic adjusted prices are a total-return proxy, not literal historical order prices", "No claim of a globally best strategy"],
+  "sources": [
+    "https://www.aqr.com/Insights/Research/White-Papers/Economic-Trend",
+    "https://www.aqr.com/Insights/Research/Journal-Article/A-Century-of-Evidence-on-Trend-Following-Investing",
+    "https://www.philadelphiafed.org/surveys-and-data/real-time-data-research/first-second-third",
+    "https://www.davidhbailey.com/dhbpapers/deflated-sharpe.pdf"
+  ]
+}

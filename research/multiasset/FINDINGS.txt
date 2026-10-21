@@ -1,0 +1,84 @@
+Research decision — 21 October 2026
+==================================
+
+Verdict: reject the three tested weekly, long/cash specifications for replacing
+SPY. This is not a rejection of all multi-asset investing or all machine learning.
+
+All returns below are annualized USD total-return proxies after generic trading
+costs, before taxes, FX conversion and subscriptions. Price cutoff: 20 Oct 2026.
+Initial capital is an illustrative USD25,000, not the user's verified budget.
+
+                                  2013-latest      2022-latest    Recent drawdown
+SPY                                  14.92%            12.04%           -24.50%
+Diversified allocation               12.13%             7.65%           -23.50%
+90% SPY / 10% Bitcoin                 19.92%            13.20%           -27.91%
+Price trends                          7.73%             5.17%            -7.57%
+Price + economic trends               7.86%             4.31%            -8.23%
+Model-assisted trends                 8.64%             5.36%           -10.76%
+
+The active candidates are much less volatile and spend substantial time in cash.
+An ex-post volatility-matched SPY/cash diagnostic earns 7.65%, 7.35% and 7.29%
+against price, economic and model strategies, respectively, in 2013-latest.
+The model's roughly 1.35 percentage-point advantage on that diagnostic remains
+below the desired practical margin. This comparison is diagnostic, not a claim
+that scaling the active strategy with leverage would reproduce its return.
+
+38 simulations retained: six main portfolios, execution/cost/skip stresses,
+asset-group removals, macro timing and lookback sensitivity. Removing crypto
+reduces active annual returns to approximately 2.71%-3.44%. No parameters were
+retuned to rescue the failed portfolios.
+
+The passive Bitcoin control benefits from hindsight in asset choice and early
+Bitcoin gains. Its recent advantage is only 1.16 percentage points with a worse
+drawdown. It is not promoted as a replacement or a predictive algorithm.
+
+Verified
+--------
+* Frozen strategy specification and SHA256 input/protocol fingerprints.
+* Actual first-release CPI/payroll columns; no most-recent values substituted.
+* Annual model training excludes unfinished forward labels. Future-price
+  perturbation leaves prior model predictions unchanged.
+* Cash conservation, fee deductions, no unintended borrowing/shorts, minimum
+  tickets, delayed fills and missed-decision paths.
+* Zero-cost SPY simulation matches an independently computed buy-and-hold value.
+* Ten research tests passed on the downloaded data.
+
+Assumed
+-------
+* First-release macro data usable after a 90-day lag, stressed to 120 days.
+  Original publication timestamps were not supplied by these workbooks.
+* ETF cost 25bps each way, crypto 75bps, minimum USD1. These are generic scenarios.
+* Fractional adjusted-price units, USD base, 1% NAV trade threshold.
+* One cash pool; no broker-to-broker transfer delay or separate-account funding.
+
+Out of scope
+------------
+* Actual broker availability, tax, FX conversion, integer lots, and subscriptions.
+* Futures, options, leveraged FX, margin, financing and liquidation simulation.
+* A complete historical instrument universe, live profitability, and a globally
+  optimal strategy. The inspected recent period is not an untouched holdout.
+* Runtime deployment or changes to live recommendations and portfolio records.
+
+Issues corrected during implementation
+-------------------------------------
+* Original-release workbooks have a NOTES sheet before their DATA sheet.
+* A UTC crypto close labelled Friday is unavailable at the US Friday close.
+* Crypto midnight sizing must not use the coming US session's opening prices.
+* A five-year learning-history minimum must count completed labels, not older
+  rows whose labels are missing. All results were rerun after this correction.
+
+Reproduction
+------------
+See README.txt. Full outputs, fill ledgers, annual returns, model training logs
+and the HTML report live in data/multiasset/results/. The local report's download
+bundle includes code, raw inputs and results. Tests validate the research engine;
+they do not validate a live investment strategy.
+
+Next evidence needed
+--------------------
+Test a separately specified long/short global-macro approach using actual
+capital-efficient instruments, including financing, margin and manual execution.
+Do not infer that leveraged returns can be obtained by multiplying these curves.
+Before implementing a live producer, a candidate must clear the return, risk,
+execution and broker-feasibility gates. The existing manual desk is the intended
+integration point; no producer was activated by this research.
