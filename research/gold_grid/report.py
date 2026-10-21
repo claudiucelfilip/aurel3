@@ -30,23 +30,19 @@ def charts(year):
     plt.rcParams.update({'font.family':'DejaVu Sans','font.size':10,'axes.spines.top':False,
                          'axes.spines.right':False,'axes.edgecolor':'#c9d1d5','figure.facecolor':'#f9faf7',
                          'axes.facecolor':'#f9faf7','text.color':'#1e2a33','axes.labelcolor':'#1e2a33'})
-    fig,axs=plt.subplots(2,1,figsize=(12,7.5),layout='constrained')
+    fig,ax=plt.subplots(figsize=(12,5),layout='constrained')
     for mode,color in [('doubling','#9c3c32'),('fixed','#246b72')]:
         f=pd.read_csv(ROOT/f'{year}_{mode}_low_first_daily.csv',index_col=0,parse_dates=True)
-        axs[0].plot(f.index,f.equity,label=mode.title()+' · account value',color=color,lw=1.8)
-        if mode=='doubling':
-            axs[0].plot(f.index,f.balance,label='Doubling · closed-trade balance',color=color,lw=1,ls='--',alpha=.6)
-        axs[1].plot(f.index,f.equity,label=mode.title(),color=color,lw=1.5)
+        ax.plot(f.index,f.equity,label=mode.title()+' grid',color=color,lw=2)
     for name,color in [('SPY','#665d9c'),('gold','#9b7424')]:
         f=pd.read_csv(ROOT/f'{year}_{name}_daily.csv',index_col=0,parse_dates=True)
-        axs[1].plot(f.index,f.equity,label=name+' buy & hold',color=color,lw=1.5)
-    for ax in axs:
-        ax.axhline(10000,color='#818d96',lw=1,ls=':')
-        ax.yaxis.set_major_formatter(FuncFormatter(lambda x,_:f'${x/1000:,.0f}k'))
-        ax.grid(axis='y',alpha=.15)
-        ax.legend(loc='upper left',frameon=False,ncol=2,fontsize=9)
-    axs[0].set_title('The account includes losses in positions still open',loc='left',weight='bold',pad=16)
-    axs[1].set_title('Same $10,000 starting capital · benchmark comparison',loc='left',weight='bold',pad=16)
+        ax.plot(f.index,f.equity,label=name.title()+' buy & hold' if name=='gold' else 'SPY buy & hold',color=color,lw=2)
+    ax.axhline(10000,color='#818d96',lw=1,ls=':')
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda x,_:f'${x/1000:,.0f}k'))
+    ax.grid(axis='y',alpha=.15)
+    ax.legend(loc='upper left',frameon=False,ncol=2,fontsize=11)
+    ax.set_title('Gold grids vs SPY and gold · same $10,000 starting capital',loc='left',weight='bold',pad=16)
+    ax.set_ylabel('Account value, including open losses')
     fig.savefig(ROOT/f'chart-{year}.svg')
     fig.savefig(ROOT/f'chart-{year}.png',dpi=150)
     plt.close(fig)
@@ -66,7 +62,7 @@ for year in [2019,2022]:
     panels.append(f'''<section class="period" id="period-{year}" {'hidden' if year==2022 else ''}>
     <h2>Fresh account starting in {year}</h2><div class="table-scroll"><table>{header}<tbody>{rows}</tbody></table></div>
     <p class="note">Grid drawdown includes simulated intraminute lows. Benchmark drawdown uses daily closes and understates intraday falls. SPY uses adjusted prices; gold excludes storage/fund fees. The trading clocks differ.</p>
-    <img class="chart" src="chart-{year}.svg" alt="Account values and benchmark comparison from {year}">
+    <img class="chart" src="chart-{year}.svg?v=all-four" alt="Doubling grid, fixed-size grid, SPY buy and hold, and gold buy and hold from {year}">
     <p><a href="chart-{year}.png" download>Download chart</a> · <a href="{year}_doubling_low_first_daily.csv" download>Daily account values</a> · <a href="{year}_doubling_low_first_cycles.csv" download>Every batch</a> · <a href="{year}_doubling_low_first_ledger.csv.gz" download>Every fill</a></p>
     <details><summary>What changes when the high comes before the low?</summary><div class="table-scroll"><table>{header}<tbody>{path_rows}</tbody></table></div>
     <p>These are two assumed intraminute paths, not proven best/worst bounds. Tick data is required for exact quote ordering.</p></details></section>''')
