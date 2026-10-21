@@ -1,0 +1,94 @@
+Gold-grid redesign study, 21 October 2026
+=======================================
+
+Result: none of the 24 tested rules/controls beat both unleveraged benchmarks
+from both 2020 and 2022 while keeping daily-close drawdown at or below 25%.
+The direct grid repairs are not justified as a passive-investment replacement.
+Simple leveraged diversification beats both at several endpoints, but its
+drawdown, funding sensitivity and rolling-period performance remain substantial.
+
+Actual SPY/GLD archive, $10,000, ending 16 October 2026, net modeled costs:
+
+                         2006 start       2019 start       2022 start
+SPY                       $88,830          $34,702          $17,039
+Gold ETF                  $72,910          $31,417          $22,578
+50/50 mix, 1.5x           $146,903          $50,094          $24,602
+Vol target20%, cap1.5x    $119,250          $39,780          $23,161
+Trend target15%, cap1.5x   $69,628          $32,911          $19,942
+Capped dip ladder, hold   $26,110          $16,726          $15,180
+
+Maximum drawdown at daily closes:
+                         2006 start       2019 start       2022 start
+SPY                         55.2%             33.7%             24.5%
+Gold ETF                    45.6%             26.4%             26.4%
+50/50 mix, 1.5x              47.3%             30.1%             27.4%
+Vol target20%, cap1.5x       35.2%             27.6%             27.1%
+Trend target15%, cap1.5x     27.5%             17.0%             16.6%
+Capped dip ladder, hold     23.0%             23.0%             14.8%
+
+The monthly mix buys $7,500 SPY + $7,500 gold per $10,000 equity, borrowing
+$5,000. It resets that allocation monthly. Its annual return since 2006 was
+13.8%, versus SPY 11.1% and gold 10.0%. It beat both in only 81/214 overlapping
+three-year windows (37.9%). These overlapping windows are not independent.
+
+The volatility-only alternative inverse-vol weights the two assets using
+60 previous sessions, scales with their covariance toward 20% annual volatility,
+caps target exposure at 1.5x and rebalances weekly. Since 2006 its annual return
+was 12.7%, but since 2022 its annual advantage over gold was just 0.63 points.
+A volatility target is not a drawdown guarantee.
+
+Funding-only sensitivity for the fresh 2022 account, holding trade costs fixed:
+                         2.5% loan      5% loan     7.5% loan      10% loan
+50/50 mix, 1.5x            $26,100       $24,602       $23,187       $21,849
+Vol target20%, cap1.5x     $24,347       $23,161       $22,032       $20,958
+Gold benchmark            $22,578 in each case
+
+Verified
+--------
+- 34 targeted tests pass, including delayed signals, future-price perturbation,
+ next-open execution, calendar funding, costs and gaps through stop levels.
+- Independent replay: 144 curves, 33,011 trade days, maximum account error
+ $0.000000000262. No tested main account became insolvent.
+- Both ETF file hashes match the earlier archive manifest. SPY dividends are
+ incorporated through adjusted OHLC; GLD fund expenses are embedded.
+- A timestamp-resolution mismatch in the initial data alignment was caught
+ before interpreting those outputs, fixed and covered by a regression test.
+ The displayed outputs were rerun with nanosecond-normalized quote lookup.
+- All candidates, neighboring settings, cost stresses and source comparisons
+ remain in the downloadable results; no losing candidate is hidden.
+
+Assumed / limits
+----------------
+- Borrowing 5% annual on actual negative cash; trading 10bps per side. Stress
+ uses 10% borrowing and 30bps per side. Positive cash earns zero. No taxes.
+- Fractional adjusted-price research units; no verified brokerage loan access,
+ margin-call/maintenance policy, minimum fee, FX costs or executable orders.
+- Exposure caps apply at rebalance; drift is possible. Maximum close exposure
+ for the monthly 1.5x mix was 1.746x; volatility-controlled 1.5x reached 1.569x.
+- Extra execution-delay stress moves the order date as well as the signal.
+  Stateful dip-ladder latency is excluded; it needs a pending-order model.
+- Daily-close drawdown differs from the original grid's minute-path metric.
+- First-round SPY daily returns differ from the Yahoo archive by up to 2.69
+ percentage points on certain March 2020 dates, although terminal cumulative
+ returns closely agree. Cause unresolved. Headline figures use actual ETF
+ archive prices; the original reconstruction is preserved separately.
+- Every period has been inspected earlier in this research process. Annual
+ walk-forward selection is causal but is not a new untouched holdout.
+
+Out of scope
+------------
+No live Aurel3 policy change, trade, account setup, broker selection, AI return
+prediction, tax guidance or assertion of future superiority.
+
+Reproduction and report
+-----------------------
+Follow README.txt: redesign.py -> allocation.py -> redesign_audit.py ->
+redesign_report.py. Report: http://127.0.0.1:49889/redesign.html
+Source: https://github.com/claudiucelfilip/aurel3
+Branch: research/gold-grid-20261021
+
+Motivation, not validation of this exact construction:
+https://www.aqr.com/Insights/Research/Journal-Article/A-Century-of-Evidence-on-Trend-Following-Investing
+https://www.nber.org/papers/w22208
+https://www.aqr.com/insights/research/alternative-thinking/hold-the-dip
+https://www.ssga.com/us/en/individual/etfs/spdr-gold-shares-gld

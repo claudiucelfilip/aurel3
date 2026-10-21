@@ -138,3 +138,45 @@ independently reconciles fills, financing, final equity and batch P&L in every
 main and profit-lock comparison. Floating-point account arrays also prevent
 whole-dollar truncation when a caller supplies an integer starting balance;
 the original $10,000.0 baseline results are unchanged.
+
+Redesign and longer ETF comparison
+---------------------------------
+redesign_protocol.json freezes 11 dip/trend rules and nine controls before the
+first redesign results. allocation_protocol.json records four subsequent
+volatility-only rules, motivated by those results. This entire sequence uses
+previously inspected history. No untouched validation claim is made.
+
+  /Users/claudiu/Research/gold-grid-env/bin/python -m pytest research/gold_grid/test_engine.py research/gold_grid/test_loss_controls.py research/gold_grid/test_redesign.py -q
+  /Users/claudiu/Research/gold-grid-env/bin/python research/gold_grid/redesign.py
+  /Users/claudiu/Research/gold-grid-env/bin/python research/gold_grid/allocation.py
+  /Users/claudiu/Research/gold-grid-env/bin/python research/gold_grid/redesign_audit.py
+  /Users/claudiu/Research/gold-grid-env/bin/python research/gold_grid/redesign_report.py
+
+Open the existing local server's /redesign.html. It compares starts in 2019,
+2022, 2020 and 2006, retains every candidate, and includes equity/drawdown
+charts, borrowing sensitivities, old-period tests and downloads. The primary
+tables use actual adjusted SPY/GLD ETF prices, not the spot/CFD proxy.
+
+The ETF archive is copied from /Users/claudiu/Sites/aurel3/data/multiasset into
+data/gold_grid/etf_archive and checked against its earlier manifest. The bundle
+contains those CSVs and their manifest. If restoring on another machine,
+place that directory at data/gold_grid/etf_archive before allocation.py runs.
+SPY OHLC is adjusted by Adj Close/Close; GLD expenses are already embedded.
+
+The daily engine trades at the next open using preceding close information.
+Monthly portfolio controls and weekly trend/risk rules hold actual simulated
+units between rebalances. Borrowing accrues on negative cash across calendar
+days; positive cash earns zero. Exit-cost estimates and open P&L are in NAV.
+Annual walk-forward selection starts in 2023, chooses on previous years only,
+and liquidates at each year end before starting the next selected rule.
+
+These daily estimates have no broker-specific maintenance/margin-call model,
+tax, FX conversion, minimum order size or live execution. Exposure caps apply
+at rebalancing, not continuously. Daily-close drawdowns can miss intraday lows.
+The first round's Alpaca SPY archive differs materially from the ETF archive
+on some March 2020 dates; headline results therefore use the ETF archive, with
+all earlier-source results retained. The cause of that discrepancy is unresolved.
+
+Thirty-four targeted tests pass. Independent replay reconciles 144 curves
+and 33,011 trade days with maximum account discrepancy below $0.000000001.
+See REDESIGN_FINDINGS.txt and redesign_snapshot.json for durable results.

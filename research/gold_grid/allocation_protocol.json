@@ -1,0 +1,18 @@
+{
+  "created": "2026-10-21",
+  "status": "Adaptive second round, fixed after redesign_results.json: trend exits reduced drawdown but surrendered recent gold gains; no untouched-data claim",
+  "hypothesis": "Keep both assets invested, size by their volatility and correlation, and reduce exposure during turbulence instead of making binary trend exits",
+  "variants": [
+    {"name":"balanced_vol15_1p5x", "family":"balanced_vol", "cap":1.5, "target_volatility":0.15},
+    {"name":"balanced_vol15_2x", "family":"balanced_vol", "cap":2.0, "target_volatility":0.15},
+    {"name":"balanced_vol20_1p5x", "family":"balanced_vol", "cap":1.5, "target_volatility":0.20},
+    {"name":"balanced_vol20_2x", "family":"balanced_vol", "cap":2.0, "target_volatility":0.20}
+  ],
+  "display_candidate_before_results": "balanced_vol15_1p5x",
+  "rules": "Inverse 60-session volatility weights for SPY and gold, full covariance portfolio-volatility sizing, weekly next-open rebalancing, gross exposure capped at 1.5x/2x. No trend signal, shorts, doubling, cash top-ups or stop guarantees. Target volatility is not a drawdown limit.",
+  "checks": ["Same spot-proxy 2020/2022 windows", "Actual SPY/GLD ETF prices 2006-2026, 2006-2019, 2020-2026, 2022-2026", "5% and 10% borrowing; 10 and 30 bps per side", "One additional session of execution delay", "40/80-session volatility estimates for the 15%-target 1.5x candidate", "Rolling 24/36-month wins versus both benchmarks"],
+  "etf_source": "/Users/claudiu/Sites/aurel3/data/multiasset/manifest.json",
+  "etf_adjustment": "Adjust all OHLC by Adj Close/Close; gold ETF expense already embedded, so do not subtract extra 0.4%",
+  "selection": "Report all four. Do not promote the best-looking row as a validated winner.",
+  "success": "Same screen as first redesign: beat both benchmarks in both recent starts with <=25% daily-close drawdown. Also report old-period and cost failures, plus same-cap static controls."
+}

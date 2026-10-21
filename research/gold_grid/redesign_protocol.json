@@ -1,0 +1,62 @@
+{
+  "created": "2026-10-21",
+  "status": "Frozen before this round's results; adaptive research on previously inspected history, not an untouched holdout",
+  "question": "Can bounded dip buying or holding positive trends outperform both SPY and gold without the original grid's drawdown?",
+  "primary_candidate": "diversified_trend_1p5x",
+  "primary_reason": "Diversification, trend exits and volatility sizing have prior published motivation; this is a different strategy from the TikTok grid",
+  "evaluation_starts": [2020, 2022],
+  "warmup": "2019 gold quotes; all candidates and benchmarks start together in 2020 or 2022",
+  "signals": "Previous completed US-session close only; orders at next session open; weekly rules rebalance on first session of each ISO week",
+  "trend_sessions": 200,
+  "volatility_sessions": 60,
+  "target_volatility": 0.15,
+  "cost_per_side": 0.001,
+  "annual_borrowing_cost": 0.05,
+  "annual_gold_holding_cost": 0.004,
+  "idle_cash_interest": 0,
+  "gold_execution": "Funded gold spot proxy with 0.4% annual holding drag, not the earlier fully financed CFD; portfolio prices sampled at US open/close from minute bid/ask midpoints",
+  "spy_execution": "Existing split/dividend-adjusted daily OHLC, with dividends implicitly reinvested; fractional units allowed",
+  "strategies": [
+    {"name":"dip_ladder_target_1x", "family":"dip", "cap":1.0, "take_profit_atr":1.0},
+    {"name":"dip_ladder_hold_1x", "family":"dip", "cap":1.0, "take_profit_atr":0.0},
+    {"name":"dip_ladder_hold_1p5x", "family":"dip", "cap":1.5, "take_profit_atr":0.0},
+    {"name":"gold_trend_1x", "family":"gold_trend", "cap":1.0},
+    {"name":"gold_vol_trend_1p5x", "family":"gold_vol", "cap":1.5},
+    {"name":"gold_vol_trend_2x", "family":"gold_vol", "cap":2.0},
+    {"name":"diversified_trend_1x", "family":"diversified", "cap":1.0},
+    {"name":"diversified_trend_1p5x", "family":"diversified", "cap":1.5},
+    {"name":"diversified_trend_2x", "family":"diversified", "cap":2.0},
+    {"name":"relative_strength_1x", "family":"relative", "cap":1.0},
+    {"name":"relative_strength_1p5x", "family":"relative", "cap":1.5}
+  ],
+  "controls": [
+    {"name":"SPY", "family":"hold_spy", "cap":1.0},
+    {"name":"gold", "family":"hold_gold", "cap":1.0},
+    {"name":"mix_1x", "family":"mix", "cap":1.0},
+    {"name":"mix_1p5x", "family":"mix", "cap":1.5},
+    {"name":"mix_2x", "family":"mix", "cap":2.0},
+    {"name":"SPY_1p5x", "family":"lever_spy", "cap":1.5},
+    {"name":"gold_1p5x", "family":"lever_gold", "cap":1.5},
+    {"name":"SPY_2x", "family":"lever_spy", "cap":2.0},
+    {"name":"gold_2x", "family":"lever_gold", "cap":2.0}
+  ],
+  "dip_rules": "Above 200-session average: buy 50% of capped exposure; add 25% on each of up to two further 20-session ATR close-to-close drops. Quantity based on current equity; never double. Sell next open after close falls below average, basket equity loses 5%, or optional net gain per gold unit exceeds one entry ATR. After a loss wait 20 sessions. Trim exposure at next open if prior close exceeds cap. No intraday guaranteed stop.",
+  "trend_rules": "Positive means close above trailing moving average. Gold-only holds while positive. Vol-scaled rules size using trailing 60-session covariance, target 15% annualized volatility, cap gross exposure. Diversified rule inverse-vol weights eligible gold/SPY; relative rule holds eligible asset with highest 126-session return. Rebalance weekly; no shorts.",
+  "controls_rules": "Unleveraged single-asset controls buy and hold. Mix and leveraged single assets rebalance monthly. Same trade, gold holding and borrowing assumptions.",
+  "main_metrics": ["ending_equity", "cagr", "daily_close_max_drawdown", "worst_calendar_year", "turnover", "costs", "realized_volatility", "trade_days"],
+  "pass_rule": "Higher after-cost ending equity than BOTH unleveraged benchmarks in BOTH start periods, daily-close drawdown <=25% in BOTH, and no reliance solely on leverage versus same-cap mix. This is a research screen, not confidence of future outperformance.",
+  "robustness": {
+    "primary_neighbors_one_at_a_time": {"trend_sessions":[150,250], "volatility_sessions":[40,80], "target_volatility":[0.12,0.18]},
+    "cost_stress": {"cost_per_side":0.003,"annual_borrowing_cost":0.10},
+    "additional_execution_delay_sessions": 1,
+    "fresh_annual_starts": [2020,2021,2022,2023,2024,2025,2026],
+    "rolling_windows_months": [24,36],
+    "annual_walk_forward": "Starting 2023, choose among the 11 fixed strategies using only 2020 through previous December: highest CAGR among positive-return rules with <=25% close drawdown, else cash. Do not describe reused history as untouched."
+  },
+  "limitations": ["No historical taxes or broker-specific availability", "No live or paper execution", "Gold fund proxy is not a traded ETF history", "Daily-close drawdown misses intraday lows", "No universal or future guarantee", "No modern LLM asked to predict historical prices from hindsight"],
+  "motivation_sources": [
+    "https://www.aqr.com/Insights/Research/Journal-Article/A-Century-of-Evidence-on-Trend-Following-Investing",
+    "https://www.nber.org/papers/w22208",
+    "https://www.aqr.com/insights/research/alternative-thinking/hold-the-dip"
+  ]
+}
