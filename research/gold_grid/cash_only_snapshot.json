@@ -1,0 +1,1792 @@
+{
+  "status": "Retrospective audit; no independently validated winner",
+  "protocol_sha256": "fb9ca9905feb80b76d3e395824670c0b8b5f45ede160812685cac8e99cb79d4b",
+  "eligible_specs": [
+    {
+      "name": "dip_ladder_target_1x",
+      "family": "dip",
+      "cap": 1.0,
+      "take_profit_atr": 1.0
+    },
+    {
+      "name": "dip_ladder_hold_1x",
+      "family": "dip",
+      "cap": 1.0,
+      "take_profit_atr": 0.0
+    },
+    {
+      "name": "gold_trend_1x",
+      "family": "gold_trend",
+      "cap": 1.0
+    },
+    {
+      "name": "diversified_trend_1x",
+      "family": "diversified",
+      "cap": 1.0
+    },
+    {
+      "name": "relative_strength_1x",
+      "family": "relative",
+      "cap": 1.0
+    },
+    {
+      "name": "SPY",
+      "family": "hold_spy",
+      "cap": 1.0
+    },
+    {
+      "name": "gold",
+      "family": "hold_gold",
+      "cap": 1.0
+    },
+    {
+      "name": "mix_1x",
+      "family": "mix",
+      "cap": 1.0
+    }
+  ],
+  "checks": {
+    "etf_2006_dip_ladder_target_1x": {
+      "sessions": 5230,
+      "trade_days": 684,
+      "minimum_cash": 43.30827947656362,
+      "maximum_exposure": 0.9969358753939696,
+      "maximum_funding": 0.0,
+      "accounting": {
+        "sessions": 5230,
+        "trade_days": 684,
+        "max_error": 4.001776687800884e-11
+      }
+    },
+    "etf_2006_dip_ladder_hold_1x": {
+      "sessions": 5230,
+      "trade_days": 107,
+      "minimum_cash": 109.56039017277178,
+      "maximum_exposure": 0.9937188166508808,
+      "maximum_funding": 0.0,
+      "accounting": {
+        "sessions": 5230,
+        "trade_days": 107,
+        "max_error": 2.546585164964199e-11
+      }
+    },
+    "etf_2006_gold_trend_1x": {
+      "sessions": 5230,
+      "trade_days": 78,
+      "minimum_cash": -7.438331575280944e-12,
+      "maximum_exposure": 1.0000000000000002,
+      "maximum_funding": 3.917182421908685e-13,
+      "accounting": {
+        "sessions": 5230,
+        "trade_days": 78,
+        "max_error": 1.4551915228366852e-11
+      }
+    },
+    "etf_2006_diversified_trend_1x": {
+      "sessions": 5230,
+      "trade_days": 809,
+      "minimum_cash": -1.3317087003610276e-11,
+      "maximum_exposure": 1.0000000000000004,
+      "maximum_funding": 9.21986440998512e-13,
+      "accounting": {
+        "sessions": 5230,
+        "trade_days": 809,
+        "max_error": 6.548361852765083e-11
+      }
+    },
+    "etf_2006_relative_strength_1x": {
+      "sessions": 5230,
+      "trade_days": 509,
+      "minimum_cash": -7.497892941611227e-12,
+      "maximum_exposure": 1.0000000000000002,
+      "maximum_funding": 3.0082778072669777e-13,
+      "accounting": {
+        "sessions": 5230,
+        "trade_days": 509,
+        "max_error": 2.546585164964199e-11
+      }
+    },
+    "etf_2006_SPY": {
+      "sessions": 5230,
+      "trade_days": 1,
+      "minimum_cash": -9.941039496321617e-13,
+      "maximum_exposure": 1.0,
+      "maximum_funding": 6.423852954309071e-13,
+      "accounting": {
+        "sessions": 5230,
+        "trade_days": 1,
+        "max_error": 2.9103830456733704e-11
+      }
+    },
+    "etf_2006_gold": {
+      "sessions": 5230,
+      "trade_days": 1,
+      "minimum_cash": -9.941039496321617e-13,
+      "maximum_exposure": 1.0,
+      "maximum_funding": 6.423852954309071e-13,
+      "accounting": {
+        "sessions": 5230,
+        "trade_days": 1,
+        "max_error": 1.4551915228366852e-11
+      }
+    },
+    "etf_2006_mix_1x": {
+      "sessions": 5230,
+      "trade_days": 250,
+      "minimum_cash": -8.075445373851183e-12,
+      "maximum_exposure": 1.0000000000000004,
+      "maximum_funding": 9.520723869014288e-13,
+      "accounting": {
+        "sessions": 5230,
+        "trade_days": 250,
+        "max_error": 2.9103830456733704e-11
+      }
+    },
+    "etf_2019_dip_ladder_target_1x": {
+      "sessions": 1959,
+      "trade_days": 283,
+      "minimum_cash": 30.808338471978484,
+      "maximum_exposure": 0.9969358753939698,
+      "maximum_funding": 0.0,
+      "accounting": {
+        "sessions": 1959,
+        "trade_days": 283,
+        "max_error": 1.0913936421275139e-11
+      }
+    },
+    "etf_2019_dip_ladder_hold_1x": {
+      "sessions": 1959,
+      "trade_days": 46,
+      "minimum_cash": 70.18341584608001,
+      "maximum_exposure": 0.9937188166508806,
+      "maximum_funding": 0.0,
+      "accounting": {
+        "sessions": 1959,
+        "trade_days": 46,
+        "max_error": 1.0913936421275139e-11
+      }
+    },
+    "etf_2019_gold_trend_1x": {
+      "sessions": 1959,
+      "trade_days": 32,
+      "minimum_cash": -4.2623259793055334e-12,
+      "maximum_exposure": 1.0000000000000002,
+      "maximum_funding": 1.2217264271882994e-13,
+      "accounting": {
+        "sessions": 1959,
+        "trade_days": 32,
+        "max_error": 1.4551915228366852e-11
+      }
+    },
+    "etf_2019_diversified_trend_1x": {
+      "sessions": 1959,
+      "trade_days": 330,
+      "minimum_cash": -6.340290523715413e-12,
+      "maximum_exposure": 1.0000000000000004,
+      "maximum_funding": 2.0359550645974134e-13,
+      "accounting": {
+        "sessions": 1959,
+        "trade_days": 330,
+        "max_error": 1.539119510822293e-11
+      }
+    },
+    "etf_2019_relative_strength_1x": {
+      "sessions": 1959,
+      "trade_days": 200,
+      "minimum_cash": -3.197554157130052e-12,
+      "maximum_exposure": 1.0000000000000002,
+      "maximum_funding": 7.506707973821065e-14,
+      "accounting": {
+        "sessions": 1959,
+        "trade_days": 200,
+        "max_error": 1.8189894035458565e-11
+      }
+    },
+    "etf_2019_SPY": {
+      "sessions": 1959,
+      "trade_days": 1,
+      "minimum_cash": -5.191023407712162e-13,
+      "maximum_exposure": 1.0,
+      "maximum_funding": 1.6738368656996674e-13,
+      "accounting": {
+        "sessions": 1959,
+        "trade_days": 1,
+        "max_error": 7.275957614183426e-12
+      }
+    },
+    "etf_2019_gold": {
+      "sessions": 1959,
+      "trade_days": 1,
+      "minimum_cash": -5.191023407712162e-13,
+      "maximum_exposure": 1.0,
+      "maximum_funding": 1.6738368656996674e-13,
+      "accounting": {
+        "sessions": 1959,
+        "trade_days": 1,
+        "max_error": 7.275957614183426e-12
+      }
+    },
+    "etf_2019_mix_1x": {
+      "sessions": 1959,
+      "trade_days": 94,
+      "minimum_cash": -8.85363052627312e-12,
+      "maximum_exposure": 1.0000000000000002,
+      "maximum_funding": 3.299780875444893e-13,
+      "accounting": {
+        "sessions": 1959,
+        "trade_days": 94,
+        "max_error": 1.4551915228366852e-11
+      }
+    },
+    "etf_2020_dip_ladder_target_1x": {
+      "sessions": 1707,
+      "trade_days": 254,
+      "minimum_cash": 27.960463106112556,
+      "maximum_exposure": 0.9969358753939696,
+      "maximum_funding": 0.0,
+      "accounting": {
+        "sessions": 1707,
+        "trade_days": 254,
+        "max_error": 2.000888343900442e-11
+      }
+    },
+    "etf_2020_dip_ladder_hold_1x": {
+      "sessions": 1707,
+      "trade_days": 44,
+      "minimum_cash": 59.131269779490594,
+      "maximum_exposure": 0.9937188166508808,
+      "maximum_funding": 0.0,
+      "accounting": {
+        "sessions": 1707,
+        "trade_days": 44,
+        "max_error": 1.6370904631912708e-11
+      }
+    },
+    "etf_2020_gold_trend_1x": {
+      "sessions": 1707,
+      "trade_days": 32,
+      "minimum_cash": -3.884868453007672e-12,
+      "maximum_exposure": 1.0000000000000002,
+      "maximum_funding": 1.438804641207376e-13,
+      "accounting": {
+        "sessions": 1707,
+        "trade_days": 32,
+        "max_error": 1.0913936421275139e-11
+      }
+    },
+    "etf_2020_diversified_trend_1x": {
+      "sessions": 1707,
+      "trade_days": 284,
+      "minimum_cash": -5.940863328816457e-12,
+      "maximum_exposure": 1.0000000000000004,
+      "maximum_funding": 1.8199357429141066e-13,
+      "accounting": {
+        "sessions": 1707,
+        "trade_days": 284,
+        "max_error": 2.1827872842550278e-11
+      }
+    },
+    "etf_2020_relative_strength_1x": {
+      "sessions": 1707,
+      "trade_days": 187,
+      "minimum_cash": -2.223778641441993e-12,
+      "maximum_exposure": 1.0000000000000002,
+      "maximum_funding": 4.62253986832343e-14,
+      "accounting": {
+        "sessions": 1707,
+        "trade_days": 187,
+        "max_error": 1.0913936421275139e-11
+      }
+    },
+    "etf_2020_SPY": {
+      "sessions": 1707,
+      "trade_days": 1,
+      "minimum_cash": -4.93805627464017e-13,
+      "maximum_exposure": 1.0,
+      "maximum_funding": 1.4208697326276718e-13,
+      "accounting": {
+        "sessions": 1707,
+        "trade_days": 1,
+        "max_error": 3.637978807091713e-12
+      }
+    },
+    "etf_2020_gold": {
+      "sessions": 1707,
+      "trade_days": 1,
+      "minimum_cash": -4.93805627464017e-13,
+      "maximum_exposure": 1.0,
+      "maximum_funding": 1.4208697326276718e-13,
+      "accounting": {
+        "sessions": 1707,
+        "trade_days": 1,
+        "max_error": 3.637978807091713e-12
+      }
+    },
+    "etf_2020_mix_1x": {
+      "sessions": 1707,
+      "trade_days": 82,
+      "minimum_cash": -5.712522952834037e-12,
+      "maximum_exposure": 1.0000000000000004,
+      "maximum_funding": 2.3315417870409404e-13,
+      "accounting": {
+        "sessions": 1707,
+        "trade_days": 82,
+        "max_error": 7.275957614183426e-12
+      }
+    },
+    "etf_2022_dip_ladder_target_1x": {
+      "sessions": 1202,
+      "trade_days": 197,
+      "minimum_cash": 50.31686604152172,
+      "maximum_exposure": 0.9965106690874224,
+      "maximum_funding": 0.0,
+      "accounting": {
+        "sessions": 1202,
+        "trade_days": 197,
+        "max_error": 7.275957614183426e-12
+      }
+    },
+    "etf_2022_dip_ladder_hold_1x": {
+      "sessions": 1202,
+      "trade_days": 25,
+      "minimum_cash": 104.3559124506596,
+      "maximum_exposure": 0.9901381478329644,
+      "maximum_funding": 0.0,
+      "accounting": {
+        "sessions": 1202,
+        "trade_days": 25,
+        "max_error": 7.275957614183426e-12
+      }
+    },
+    "etf_2022_gold_trend_1x": {
+      "sessions": 1202,
+      "trade_days": 18,
+      "minimum_cash": -4.128129947339416e-12,
+      "maximum_exposure": 1.0000000000000002,
+      "maximum_funding": 1.36081425623735e-13,
+      "accounting": {
+        "sessions": 1202,
+        "trade_days": 18,
+        "max_error": 7.275957614183426e-12
+      }
+    },
+    "etf_2022_diversified_trend_1x": {
+      "sessions": 1202,
+      "trade_days": 204,
+      "minimum_cash": -4.298583008851469e-12,
+      "maximum_exposure": 1.0000000000000004,
+      "maximum_funding": 9.944279340844376e-14,
+      "accounting": {
+        "sessions": 1202,
+        "trade_days": 204,
+        "max_error": 1.0913936421275139e-11
+      }
+    },
+    "etf_2022_relative_strength_1x": {
+      "sessions": 1202,
+      "trade_days": 130,
+      "minimum_cash": -2.3064721452636785e-12,
+      "maximum_exposure": 1.0000000000000002,
+      "maximum_funding": 4.3248677270629484e-14,
+      "accounting": {
+        "sessions": 1202,
+        "trade_days": 130,
+        "max_error": 1.0913936421275139e-11
+      }
+    },
+    "etf_2022_SPY": {
+      "sessions": 1202,
+      "trade_days": 1,
+      "minimum_cash": -4.467281631221782e-13,
+      "maximum_exposure": 1.0,
+      "maximum_funding": 9.500950892092892e-14,
+      "accounting": {
+        "sessions": 1202,
+        "trade_days": 1,
+        "max_error": 3.637978807091713e-12
+      }
+    },
+    "etf_2022_gold": {
+      "sessions": 1202,
+      "trade_days": 1,
+      "minimum_cash": -4.467281631221782e-13,
+      "maximum_exposure": 1.0,
+      "maximum_funding": 9.500950892092892e-14,
+      "accounting": {
+        "sessions": 1202,
+        "trade_days": 1,
+        "max_error": 3.637978807091713e-12
+      }
+    },
+    "etf_2022_mix_1x": {
+      "sessions": 1202,
+      "trade_days": 58,
+      "minimum_cash": -3.4957111036535664e-12,
+      "maximum_exposure": 1.0000000000000004,
+      "maximum_funding": 1.5689935768828874e-13,
+      "accounting": {
+        "sessions": 1202,
+        "trade_days": 58,
+        "max_error": 7.275957614183426e-12
+      }
+    }
+  },
+  "summaries": {
+    "etf_2006_dip_ladder_target_1x": {
+      "name": "dip_ladder_target_1x",
+      "family": "dip",
+      "start": 2006,
+      "ending_equity": 17866.731396890904,
+      "total_return": 0.7866731396890905,
+      "cagr": 0.02831802955872642,
+      "max_drawdown_daily": 0.38296687844502975,
+      "annual_returns": {
+        "2006": 0.029464264808494622,
+        "2007": 0.061211849824634124,
+        "2008": 0.06897321003295076,
+        "2009": 0.13821571697669466,
+        "2010": 0.25682466134090487,
+        "2011": 0.012300534599623214,
+        "2012": -0.019417744247038238,
+        "2013": -0.013193928389317655,
+        "2014": -0.04774690488625677,
+        "2015": -0.040272623045262135,
+        "2016": -0.013467027246906182,
+        "2017": -0.041481703888028076,
+        "2018": -0.006784628102306844,
+        "2019": 0.10039151402284996,
+        "2020": -0.051750032201160256,
+        "2021": -0.08731512756086202,
+        "2022": -0.0773401188302717,
+        "2023": 0.038881725854188476,
+        "2024": 0.15456968156826068,
+        "2025": 0.3182092041635318,
+        "2026": -0.08445127184667234
+      },
+      "realized_volatility": 0.09373637599484073,
+      "trade_days": 684,
+      "trade_days_per_year": 32.911474114082466,
+      "trading_cost": 5005.270235771549,
+      "borrowing_cost": 0.0,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 0.0,
+      "turnover_dollars": 5005270.2357715415,
+      "mean_exposure": 0.37851364640110463,
+      "maximum_close_exposure": 0.9969358753939697,
+      "insolvent": false,
+      "first_date": "2006-01-03",
+      "last_date": "2026-10-16"
+    },
+    "etf_2006_dip_ladder_hold_1x": {
+      "name": "dip_ladder_hold_1x",
+      "family": "dip",
+      "start": 2006,
+      "ending_equity": 26109.96645756491,
+      "total_return": 1.610996645756491,
+      "cagr": 0.04726148512347206,
+      "max_drawdown_daily": 0.22973653235923042,
+      "annual_returns": {
+        "2006": 0.038861254435007986,
+        "2007": 0.14983992425087966,
+        "2008": 0.00405902404129832,
+        "2009": 0.13716302865004204,
+        "2010": 0.16406876974073947,
+        "2011": 0.07188560368132979,
+        "2012": -0.01286683490508167,
+        "2013": -0.013193928389317433,
+        "2014": -0.04467164595242412,
+        "2015": -0.024597917201325536,
+        "2016": 0.04246935212151759,
+        "2017": -0.02859635928476234,
+        "2018": -0.0032446407315739334,
+        "2019": 0.1353222691635847,
+        "2020": 0.07250622318223066,
+        "2021": -0.05560127196306486,
+        "2022": -0.06259286520651319,
+        "2023": 0.006100632073089862,
+        "2024": 0.13582307872046528,
+        "2025": 0.361794054599311,
+        "2026": -0.0017469289654075126
+      },
+      "realized_volatility": 0.09141440649829802,
+      "trade_days": 107,
+      "trade_days_per_year": 5.1484323541035435,
+      "trading_cost": 875.2869097743533,
+      "borrowing_cost": 0.0,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 0.0,
+      "turnover_dollars": 875286.9097743537,
+      "mean_exposure": 0.3808671057464807,
+      "maximum_close_exposure": 0.9937188166508809,
+      "insolvent": false,
+      "first_date": "2006-01-03",
+      "last_date": "2026-10-16"
+    },
+    "etf_2006_gold_trend_1x": {
+      "name": "gold_trend_1x",
+      "family": "gold_trend",
+      "start": 2006,
+      "ending_equity": 36444.47504474524,
+      "total_return": 2.644447504474524,
+      "cagr": 0.06420079166262171,
+      "max_drawdown_daily": 0.3904656981993331,
+      "annual_returns": {
+        "2006": 0.04137834300929022,
+        "2007": 0.2638387842277823,
+        "2008": 0.022444031145635313,
+        "2009": 0.13376028916107185,
+        "2010": 0.29270342350868606,
+        "2011": 0.12081887513950451,
+        "2012": -0.011438310181367206,
+        "2013": -0.056377006394543905,
+        "2014": -0.06960526449570592,
+        "2015": -0.07468757613315025,
+        "2016": 0.004555805985936301,
+        "2017": -0.08233744180328717,
+        "2018": -0.011823602010047507,
+        "2019": 0.17855665069265436,
+        "2020": 0.12414162175308574,
+        "2021": -0.1072850706029067,
+        "2022": -0.04681324426436462,
+        "2023": 0.012396870102256985,
+        "2024": 0.2665690600092592,
+        "2025": 0.6367653308824823,
+        "2026": -0.047514225514015185
+      },
+      "realized_volatility": 0.1505258646696022,
+      "trade_days": 78,
+      "trade_days_per_year": 3.7530628375708077,
+      "trading_cost": 1442.7408603011206,
+      "borrowing_cost": 3.9171824219086846e-13,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 0.0,
+      "turnover_dollars": 1442740.8603011207,
+      "mean_exposure": 0.6760994263862332,
+      "maximum_close_exposure": 1.0000000000000002,
+      "insolvent": false,
+      "first_date": "2006-01-03",
+      "last_date": "2026-10-16"
+    },
+    "etf_2006_diversified_trend_1x": {
+      "name": "diversified_trend_1x",
+      "family": "diversified",
+      "start": 2006,
+      "ending_equity": 62067.5305056613,
+      "total_return": 5.20675305056613,
+      "cagr": 0.09181641005388341,
+      "max_drawdown_daily": 0.1971130195679418,
+      "annual_returns": {
+        "2006": 0.07683481497166822,
+        "2007": 0.12459729878150694,
+        "2008": -0.007990631464428799,
+        "2009": 0.18994354424036852,
+        "2010": 0.15599540917668442,
+        "2011": 0.03601319906114209,
+        "2012": 0.06737992694017647,
+        "2013": 0.2614976811204692,
+        "2014": 0.03284353922384886,
+        "2015": -0.1671480950350781,
+        "2016": 0.08361083360788424,
+        "2017": 0.11541351279999734,
+        "2018": -0.0757016646812334,
+        "2019": 0.16952204315941422,
+        "2020": 0.11328544839478338,
+        "2021": 0.19921218713582434,
+        "2022": -0.11782641049616449,
+        "2023": 0.10983940005550297,
+        "2024": 0.26107247834932923,
+        "2025": 0.36783409238545506,
+        "2026": 0.06249514585341198
+      },
+      "realized_volatility": 0.11648273257857719,
+      "trade_days": 809,
+      "trade_days_per_year": 38.925997892240815,
+      "trading_cost": 3333.7528835687312,
+      "borrowing_cost": 9.219864409985119e-13,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 62.12966016582712,
+      "turnover_dollars": 3333752.883568731,
+      "mean_exposure": 0.8807369604118027,
+      "maximum_close_exposure": 1.0000000000000004,
+      "insolvent": false,
+      "first_date": "2006-01-03",
+      "last_date": "2026-10-16"
+    },
+    "etf_2006_relative_strength_1x": {
+      "name": "relative_strength_1x",
+      "family": "relative",
+      "start": 2006,
+      "ending_equity": 58882.24877774749,
+      "total_return": 4.888224877774749,
+      "cagr": 0.08905224663443856,
+      "max_drawdown_daily": 0.38546724422663503,
+      "annual_returns": {
+        "2006": 0.16803243352259578,
+        "2007": 0.1060479509742136,
+        "2008": 0.013155580367464337,
+        "2009": 0.11229451913140842,
+        "2010": 0.22711989307160585,
+        "2011": 0.07309245189990765,
+        "2012": 0.044448287396812614,
+        "2013": 0.3230775431738986,
+        "2014": 0.08061994915203008,
+        "2015": -0.1678564081305678,
+        "2016": -0.06143715284073137,
+        "2017": 0.13774929927579027,
+        "2018": -0.06289328755161594,
+        "2019": -0.04046058240833783,
+        "2020": 0.03300954122987565,
+        "2021": 0.28246558498076024,
+        "2022": -0.121345406134716,
+        "2023": 0.1160669265755172,
+        "2024": 0.22434756973986603,
+        "2025": 0.4813341074001247,
+        "2026": 0.09248110897005146
+      },
+      "realized_volatility": 0.1342303485524612,
+      "trade_days": 509,
+      "trade_days_per_year": 24.491140824660782,
+      "trading_cost": 4544.3224417140245,
+      "borrowing_cost": 3.0082778072669777e-13,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 58.941189967715204,
+      "turnover_dollars": 4544322.441714031,
+      "mean_exposure": 0.8367000181146674,
+      "maximum_close_exposure": 1.0000000000000002,
+      "insolvent": false,
+      "first_date": "2006-01-03",
+      "last_date": "2026-10-16"
+    },
+    "etf_2006_SPY": {
+      "name": "SPY",
+      "family": "hold_spy",
+      "start": 2006,
+      "ending_equity": 88829.740673666,
+      "total_return": 7.8829740673666,
+      "cagr": 0.11081315965502125,
+      "max_drawdown_daily": 0.5518944274436162,
+      "annual_returns": {
+        "2006": 0.1498572947785386,
+        "2007": 0.05146273947420177,
+        "2008": -0.36795001956491824,
+        "2009": 0.26351793211438945,
+        "2010": 0.15056108189154638,
+        "2011": 0.01894975314901881,
+        "2012": 0.1599034253729683,
+        "2013": 0.3230775431738997,
+        "2014": 0.13463863960218325,
+        "2015": 0.012342577870788185,
+        "2016": 0.11997872917973829,
+        "2017": 0.21705429621435135,
+        "2018": -0.045689885161370514,
+        "2019": 0.3122386434799931,
+        "2020": 0.18331606483445317,
+        "2021": 0.2872879134165498,
+        "2022": -0.18175372022668623,
+        "2023": 0.2617577977739953,
+        "2024": 0.24886462945796883,
+        "2025": 0.1771906377670287,
+        "2026": 0.12800843731745082
+      },
+      "realized_volatility": 0.1917999199903044,
+      "trade_days": 1,
+      "trade_days_per_year": 0.04811619022526677,
+      "trading_cost": 9.990009990009991,
+      "borrowing_cost": 6.423852954309071e-13,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 88.918659332999,
+      "turnover_dollars": 9990.00999000999,
+      "mean_exposure": 1.0,
+      "maximum_close_exposure": 1.0,
+      "insolvent": false,
+      "first_date": "2006-01-03",
+      "last_date": "2026-10-16"
+    },
+    "etf_2006_gold": {
+      "name": "gold",
+      "family": "hold_gold",
+      "start": 2006,
+      "ending_equity": 72910.06814452866,
+      "total_return": 6.291006814452866,
+      "cagr": 0.10030743522402719,
+      "max_drawdown_daily": 0.45555012734257005,
+      "annual_returns": {
+        "2006": 0.2064200473417015,
+        "2007": 0.3045404252304238,
+        "2008": 0.04923596414832376,
+        "2009": 0.24029128204079098,
+        "2010": 0.2927034235086865,
+        "2011": 0.09566035291009478,
+        "2012": 0.0659911732140046,
+        "2013": -0.28329836017465626,
+        "2014": -0.021873930894324656,
+        "2015": -0.10670895008973624,
+        "2016": 0.08032723831481237,
+        "2017": 0.12809051033068952,
+        "2018": -0.019409636039321887,
+        "2019": 0.17855665069265636,
+        "2020": 0.2481456139148177,
+        "2021": -0.04148908875959467,
+        "2022": -0.007721146890382835,
+        "2023": 0.12691581500094418,
+        "2024": 0.26656906000925495,
+        "2025": 0.6367653308824814,
+        "2026": -0.03608283384487332
+      },
+      "realized_volatility": 0.18508086771431598,
+      "trade_days": 1,
+      "trade_days_per_year": 0.04811619022526677,
+      "trading_cost": 9.990009990009991,
+      "borrowing_cost": 6.423852954309071e-13,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 72.98305119572439,
+      "turnover_dollars": 9990.00999000999,
+      "mean_exposure": 1.0,
+      "maximum_close_exposure": 1.0,
+      "insolvent": false,
+      "first_date": "2006-01-03",
+      "last_date": "2026-10-16"
+    },
+    "etf_2006_mix_1x": {
+      "name": "mix_1x",
+      "family": "mix",
+      "start": 2006,
+      "ending_equity": 91710.61201035738,
+      "total_return": 8.171061201035737,
+      "cagr": 0.11252035100807833,
+      "max_drawdown_daily": 0.32952012105504,
+      "annual_returns": {
+        "2006": 0.18111562889185806,
+        "2007": 0.17421813812690345,
+        "2008": -0.1671532132177317,
+        "2009": 0.2678936179404039,
+        "2010": 0.22665001823769515,
+        "2011": 0.06629811417492726,
+        "2012": 0.11422557907037212,
+        "2013": -0.01856234961339509,
+        "2014": 0.056051431076200586,
+        "2015": -0.04253041745582309,
+        "2016": 0.10779419060478856,
+        "2017": 0.17312684224653663,
+        "2018": -0.026980460771071968,
+        "2019": 0.25055043401867483,
+        "2020": 0.2256805085664173,
+        "2021": 0.11457196545853132,
+        "2022": -0.09354332652036534,
+        "2023": 0.19578240412187298,
+        "2024": 0.2616257128116357,
+        "2025": 0.3943955912999524,
+        "2026": 0.05113208001478964
+      },
+      "realized_volatility": 0.13687401647577105,
+      "trade_days": 250,
+      "trade_days_per_year": 12.02904755631669,
+      "trading_cost": 206.68815600838226,
+      "borrowing_cost": 9.520723869014288e-13,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 91.80241442478216,
+      "turnover_dollars": 206688.1560083824,
+      "mean_exposure": 1.0,
+      "maximum_close_exposure": 1.0000000000000004,
+      "insolvent": false,
+      "first_date": "2006-01-03",
+      "last_date": "2026-10-16"
+    },
+    "etf_2019_dip_ladder_target_1x": {
+      "name": "dip_ladder_target_1x",
+      "family": "dip",
+      "start": 2019,
+      "ending_equity": 12709.909396452762,
+      "total_return": 0.2709909396452761,
+      "cagr": 0.0312758204454906,
+      "max_drawdown_daily": 0.28360729965970033,
+      "annual_returns": {
+        "2019": 0.09952490103451139,
+        "2020": -0.0517500322011597,
+        "2021": -0.0873151275608608,
+        "2022": -0.0773401188302707,
+        "2023": 0.038881725854191806,
+        "2024": 0.1545696815682598,
+        "2025": 0.3182092041635325,
+        "2026": -0.08445127184667212
+      },
+      "realized_volatility": 0.0968061860758683,
+      "trade_days": 283,
+      "trade_days_per_year": 36.34520042194093,
+      "trading_cost": 1568.6034374341964,
+      "borrowing_cost": 0.0,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 0.0,
+      "turnover_dollars": 1568603.4374341944,
+      "mean_exposure": 0.43468416043067587,
+      "maximum_close_exposure": 0.9969358753939698,
+      "insolvent": false,
+      "first_date": "2019-01-02",
+      "last_date": "2026-10-16"
+    },
+    "etf_2019_dip_ladder_hold_1x": {
+      "name": "dip_ladder_hold_1x",
+      "family": "dip",
+      "start": 2019,
+      "ending_equity": 16725.813322941707,
+      "total_return": 0.6725813322941707,
+      "cagr": 0.0682901829506739,
+      "max_drawdown_daily": 0.22973653235923008,
+      "annual_returns": {
+        "2019": 0.1339563336631393,
+        "2020": 0.07251423884678765,
+        "2021": -0.05560127196306397,
+        "2022": -0.06259286520651297,
+        "2023": 0.006100632073089418,
+        "2024": 0.13582307872046506,
+        "2025": 0.3617940545993126,
+        "2026": -0.0017469289654078457
+      },
+      "realized_volatility": 0.10662924954579328,
+      "trade_days": 46,
+      "trade_days_per_year": 5.907700421940929,
+      "trading_cost": 268.31078243313584,
+      "borrowing_cost": 0.0,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 0.0,
+      "turnover_dollars": 268310.7824331357,
+      "mean_exposure": 0.48070754093876655,
+      "maximum_close_exposure": 0.9937188166508806,
+      "insolvent": false,
+      "first_date": "2019-01-02",
+      "last_date": "2026-10-16"
+    },
+    "etf_2019_gold_trend_1x": {
+      "name": "gold_trend_1x",
+      "family": "gold_trend",
+      "start": 2019,
+      "ending_equity": 22472.958777220676,
+      "total_return": 1.2472958777220677,
+      "cagr": 0.10959149242905553,
+      "max_drawdown_daily": 0.26996852119315684,
+      "annual_returns": {
+        "2019": 0.1752326429042219,
+        "2020": 0.12414162175308618,
+        "2021": -0.10728507060290693,
+        "2022": -0.04681324426436484,
+        "2023": 0.012396870102259205,
+        "2024": 0.26656906000925895,
+        "2025": 0.6367653308824861,
+        "2026": -0.04751422551401452
+      },
+      "realized_volatility": 0.15777263568266686,
+      "trade_days": 32,
+      "trade_days_per_year": 4.109704641350211,
+      "trading_cost": 409.28561503480313,
+      "borrowing_cost": 1.2217264271882994e-13,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 0.0,
+      "turnover_dollars": 409285.61503480305,
+      "mean_exposure": 0.7682491066870852,
+      "maximum_close_exposure": 1.0000000000000002,
+      "insolvent": false,
+      "first_date": "2019-01-02",
+      "last_date": "2026-10-16"
+    },
+    "etf_2019_diversified_trend_1x": {
+      "name": "diversified_trend_1x",
+      "family": "diversified",
+      "start": 2019,
+      "ending_equity": 27938.23571541613,
+      "total_return": 1.7938235715416129,
+      "cagr": 0.14104970421977492,
+      "max_drawdown_daily": 0.16062031498950136,
+      "annual_returns": {
+        "2019": 0.16622351662874957,
+        "2020": 0.11328544839478272,
+        "2021": 0.19921218713582234,
+        "2022": -0.11782641049616605,
+        "2023": 0.10983940005550141,
+        "2024": 0.26107247834932834,
+        "2025": 0.36783409238545306,
+        "2026": 0.062495145853411316
+      },
+      "realized_volatility": 0.11764243007276202,
+      "trade_days": 330,
+      "trade_days_per_year": 42.38132911392405,
+      "trading_cost": 837.545719657965,
+      "borrowing_cost": 2.0359550645974132e-13,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 27.966201917333464,
+      "turnover_dollars": 837545.7196579647,
+      "mean_exposure": 0.8962405317668922,
+      "maximum_close_exposure": 1.0000000000000004,
+      "insolvent": false,
+      "first_date": "2019-01-02",
+      "last_date": "2026-10-16"
+    },
+    "etf_2019_relative_strength_1x": {
+      "name": "relative_strength_1x",
+      "family": "relative",
+      "start": 2019,
+      "ending_equity": 24630.110476249756,
+      "total_return": 1.4630110476249758,
+      "cagr": 0.12273005162784179,
+      "max_drawdown_daily": 0.26679243980883194,
+      "annual_returns": {
+        "2019": -0.043166872764010766,
+        "2020": 0.03300954122987676,
+        "2021": 0.28246558498076024,
+        "2022": -0.12134540613471634,
+        "2023": 0.1160669265755172,
+        "2024": 0.22434756973986536,
+        "2025": 0.48133410740012494,
+        "2026": 0.09248110897005235
+      },
+      "realized_volatility": 0.13982853438345677,
+      "trade_days": 200,
+      "trade_days_per_year": 25.685654008438817,
+      "trading_cost": 964.9195206412672,
+      "borrowing_cost": 7.506707973821064e-14,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 24.654765241491248,
+      "turnover_dollars": 964919.5206412674,
+      "mean_exposure": 0.8468655270772921,
+      "maximum_close_exposure": 1.0000000000000002,
+      "insolvent": false,
+      "first_date": "2019-01-02",
+      "last_date": "2026-10-16"
+    },
+    "etf_2019_SPY": {
+      "name": "SPY",
+      "family": "hold_spy",
+      "start": 2019,
+      "ending_equity": 34702.15340093196,
+      "total_return": 2.470215340093196,
+      "cagr": 0.17326750054561857,
+      "max_drawdown_daily": 0.33717270361192986,
+      "annual_returns": {
+        "2019": 0.3305935780034961,
+        "2020": 0.18331606483445317,
+        "2021": 0.28728791341654825,
+        "2022": -0.18175372022668423,
+        "2023": 0.26175779777399266,
+        "2024": 0.24886462945796817,
+        "2025": 0.17719063776702737,
+        "2026": 0.12800843731744904
+      },
+      "realized_volatility": 0.19200017933873242,
+      "trade_days": 1,
+      "trade_days_per_year": 0.1284282700421941,
+      "trading_cost": 9.990009990009991,
+      "borrowing_cost": 1.6738368656996672e-13,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 34.736890291223176,
+      "turnover_dollars": 9990.00999000999,
+      "mean_exposure": 1.0,
+      "maximum_close_exposure": 1.0,
+      "insolvent": false,
+      "first_date": "2019-01-02",
+      "last_date": "2026-10-16"
+    },
+    "etf_2019_gold": {
+      "name": "gold",
+      "family": "hold_gold",
+      "start": 2019,
+      "ending_equity": 31417.12054361176,
+      "total_return": 2.141712054361176,
+      "cagr": 0.15837777893322147,
+      "max_drawdown_daily": 0.26404517857029663,
+      "annual_returns": {
+        "2019": 0.1752326429042219,
+        "2020": 0.24814561391481926,
+        "2021": -0.041489088759594894,
+        "2022": -0.007721146890382391,
+        "2023": 0.12691581500094506,
+        "2024": 0.2665690600092605,
+        "2025": 0.6367653308824854,
+        "2026": -0.036082833844872764
+      },
+      "realized_volatility": 0.17798768374148863,
+      "trade_days": 1,
+      "trade_days_per_year": 0.1284282700421941,
+      "trading_cost": 9.990009990009991,
+      "borrowing_cost": 1.6738368656996672e-13,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 31.448569112724485,
+      "turnover_dollars": 9990.00999000999,
+      "mean_exposure": 1.0,
+      "maximum_close_exposure": 1.0,
+      "insolvent": false,
+      "first_date": "2019-01-02",
+      "last_date": "2026-10-16"
+    },
+    "etf_2019_mix_1x": {
+      "name": "mix_1x",
+      "family": "mix",
+      "start": 2019,
+      "ending_equity": 34412.422690596664,
+      "total_return": 2.4412422690596665,
+      "cagr": 0.1720048554342104,
+      "max_drawdown_daily": 0.20503964905742145,
+      "annual_returns": {
+        "2019": 0.25677294026296327,
+        "2020": 0.22568050856641775,
+        "2021": 0.11457196545853221,
+        "2022": -0.09354332652036501,
+        "2023": 0.1957824041218723,
+        "2024": 0.2616257128116386,
+        "2025": 0.3943955912999524,
+        "2026": 0.051132080014789194
+      },
+      "realized_volatility": 0.13859546872101988,
+      "trade_days": 94,
+      "trade_days_per_year": 12.072257383966244,
+      "trading_cost": 55.01238086115782,
+      "borrowing_cost": 3.2997808754448926e-13,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 34.44686956015683,
+      "turnover_dollars": 55012.38086115783,
+      "mean_exposure": 1.0,
+      "maximum_close_exposure": 1.0000000000000002,
+      "insolvent": false,
+      "first_date": "2019-01-02",
+      "last_date": "2026-10-16"
+    },
+    "etf_2020_dip_ladder_target_1x": {
+      "name": "dip_ladder_target_1x",
+      "family": "dip",
+      "start": 2020,
+      "ending_equity": 11535.024944131837,
+      "total_return": 0.15350249441318375,
+      "cagr": 0.021263157390916332,
+      "max_drawdown_daily": 0.2836072996597012,
+      "annual_returns": {
+        "2020": -0.053754146781068046,
+        "2021": -0.08731512756086224,
+        "2022": -0.0773401188302727,
+        "2023": 0.038881725854191806,
+        "2024": 0.1545696815682578,
+        "2025": 0.3182092041635338,
+        "2026": -0.08445127184667278
+      },
+      "realized_volatility": 0.09848309526862445,
+      "trade_days": 254,
+      "trade_days_per_year": 37.423759580476,
+      "trading_cost": 1285.7350156066188,
+      "borrowing_cost": 0.0,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 0.0,
+      "turnover_dollars": 1285735.0156066183,
+      "mean_exposure": 0.3858655189241583,
+      "maximum_close_exposure": 0.9969358753939697,
+      "insolvent": false,
+      "first_date": "2020-01-02",
+      "last_date": "2026-10-16"
+    },
+    "etf_2020_dip_ladder_hold_1x": {
+      "name": "dip_ladder_hold_1x",
+      "family": "dip",
+      "start": 2020,
+      "ending_equity": 14091.912853733305,
+      "total_return": 0.4091912853733306,
+      "cagr": 0.05183805689107657,
+      "max_drawdown_daily": 0.20042625247993062,
+      "annual_returns": {
+        "2020": 0.024665469908395465,
+        "2021": -0.05560127196306419,
+        "2022": -0.06259286520651253,
+        "2023": 0.006100632073088974,
+        "2024": 0.13582307872046573,
+        "2025": 0.36179405459931235,
+        "2026": -0.0017469289654075126
+      },
+      "realized_volatility": 0.10183136772391144,
+      "trade_days": 44,
+      "trade_days_per_year": 6.4828559903186775,
+      "trading_cost": 217.73910765278544,
+      "borrowing_cost": 0.0,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 0.0,
+      "turnover_dollars": 217739.10765278546,
+      "mean_exposure": 0.4115478321533916,
+      "maximum_close_exposure": 0.9937188166508807,
+      "insolvent": false,
+      "first_date": "2020-01-02",
+      "last_date": "2026-10-16"
+    },
+    "etf_2020_gold_trend_1x": {
+      "name": "gold_trend_1x",
+      "family": "gold_trend",
+      "start": 2020,
+      "ending_equity": 18956.579325417344,
+      "total_return": 0.8956579325417344,
+      "cagr": 0.09881479353765488,
+      "max_drawdown_daily": 0.2699685211931564,
+      "annual_returns": {
+        "2020": 0.1144089497014269,
+        "2021": -0.10728507060290704,
+        "2022": -0.04681324426436395,
+        "2023": 0.012396870102257207,
+        "2024": 0.2665690600092563,
+        "2025": 0.6367653308824863,
+        "2026": -0.04751422551401485
+      },
+      "realized_volatility": 0.16297276715200099,
+      "trade_days": 32,
+      "trade_days_per_year": 4.714804356595401,
+      "trading_cost": 346.807199322222,
+      "borrowing_cost": 1.4388046412073758e-13,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 0.0,
+      "turnover_dollars": 346807.199322222,
+      "mean_exposure": 0.7340363210310487,
+      "maximum_close_exposure": 1.0000000000000002,
+      "insolvent": false,
+      "first_date": "2020-01-02",
+      "last_date": "2026-10-16"
+    },
+    "etf_2020_diversified_trend_1x": {
+      "name": "diversified_trend_1x",
+      "family": "diversified",
+      "start": 2020,
+      "ending_equity": 23756.64908140063,
+      "total_return": 1.3756649081400627,
+      "cagr": 0.13597114650835795,
+      "max_drawdown_daily": 0.16062031498950136,
+      "annual_returns": {
+        "2020": 0.10401387754067404,
+        "2021": 0.199212187135819,
+        "2022": -0.11782641049616571,
+        "2023": 0.1098394000555023,
+        "2024": 0.2610724783493261,
+        "2025": 0.3678340923854524,
+        "2026": 0.062495145853411094
+      },
+      "realized_volatility": 0.1224812036920812,
+      "trade_days": 284,
+      "trade_days_per_year": 41.84388866478419,
+      "trading_cost": 679.6440454135412,
+      "borrowing_cost": 1.8199357429141066e-13,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 23.780429510911542,
+      "turnover_dollars": 679644.0454135415,
+      "mean_exposure": 0.8809227895321277,
+      "maximum_close_exposure": 1.0000000000000004,
+      "insolvent": false,
+      "first_date": "2020-01-02",
+      "last_date": "2026-10-16"
+    },
+    "etf_2020_relative_strength_1x": {
+      "name": "relative_strength_1x",
+      "family": "relative",
+      "start": 2020,
+      "ending_equity": 25556.460765904012,
+      "total_return": 1.555646076590401,
+      "cagr": 0.1482598809476361,
+      "max_drawdown_daily": 0.20892710541827952,
+      "annual_returns": {
+        "2020": 0.02559261629925169,
+        "2021": 0.28246558498076224,
+        "2022": -0.12134540613471534,
+        "2023": 0.11606692657551632,
+        "2024": 0.22434756973986447,
+        "2025": 0.48133410740012295,
+        "2026": 0.09248110897005146
+      },
+      "realized_volatility": 0.14329992795643576,
+      "trade_days": 187,
+      "trade_days_per_year": 27.552137958854377,
+      "trading_cost": 899.3554870338178,
+      "borrowing_cost": 4.62253986832343e-14,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 25.582042808712725,
+      "turnover_dollars": 899355.4870338185,
+      "mean_exposure": 0.8252187127788666,
+      "maximum_close_exposure": 1.0000000000000002,
+      "insolvent": false,
+      "first_date": "2020-01-02",
+      "last_date": "2026-10-16"
+    },
+    "etf_2020_SPY": {
+      "name": "SPY",
+      "family": "hold_spy",
+      "start": 2020,
+      "ending_equity": 25892.951323858473,
+      "total_return": 1.5892951323858475,
+      "cagr": 0.15047502060010642,
+      "max_drawdown_daily": 0.33717270361192986,
+      "annual_returns": {
+        "2020": 0.17481995122486382,
+        "2021": 0.287287913416548,
+        "2022": -0.18175372022668623,
+        "2023": 0.26175779777399466,
+        "2024": 0.2488646294579664,
+        "2025": 0.17719063776702781,
+        "2026": 0.12800843731745082
+      },
+      "realized_volatility": 0.1998953471276261,
+      "trade_days": 1,
+      "trade_days_per_year": 0.1473376361436063,
+      "trading_cost": 9.990009990009991,
+      "borrowing_cost": 1.4208697326276716e-13,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 25.918870194052523,
+      "turnover_dollars": 9990.00999000999,
+      "mean_exposure": 1.0,
+      "maximum_close_exposure": 1.0,
+      "insolvent": false,
+      "first_date": "2020-01-02",
+      "last_date": "2026-10-16"
+    },
+    "etf_2020_gold": {
+      "name": "gold",
+      "family": "hold_gold",
+      "start": 2020,
+      "ending_equity": 26501.233934752505,
+      "total_return": 1.6501233934752504,
+      "cagr": 0.15441783050162794,
+      "max_drawdown_daily": 0.26404517857029686,
+      "annual_returns": {
+        "2020": 0.23733933141635388,
+        "2021": -0.041489088759595005,
+        "2022": -0.007721146890383057,
+        "2023": 0.12691581500094484,
+        "2024": 0.26656906000925784,
+        "2025": 0.6367653308824841,
+        "2026": -0.03608283384487421
+      },
+      "realized_volatility": 0.1853441326866643,
+      "trade_days": 1,
+      "trade_days_per_year": 0.1473376361436063,
+      "trading_cost": 9.990009990009991,
+      "borrowing_cost": 1.4208697326276716e-13,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 26.527761696448955,
+      "turnover_dollars": 9990.00999000999,
+      "mean_exposure": 1.0,
+      "maximum_close_exposure": 1.0,
+      "insolvent": false,
+      "first_date": "2020-01-02",
+      "last_date": "2026-10-16"
+    },
+    "etf_2020_mix_1x": {
+      "name": "mix_1x",
+      "family": "mix",
+      "start": 2020,
+      "ending_equity": 27164.790349806844,
+      "total_return": 1.7164790349806847,
+      "cagr": 0.15863187138703694,
+      "max_drawdown_daily": 0.20503964905742156,
+      "annual_returns": {
+        "2020": 0.2159765786926282,
+        "2021": 0.11457196545853554,
+        "2022": -0.09354332652036579,
+        "2023": 0.1957824041218712,
+        "2024": 0.2616257128116324,
+        "2025": 0.3943955912999553,
+        "2026": 0.05113208001479008
+      },
+      "realized_volatility": 0.14578338716283792,
+      "trade_days": 82,
+      "trade_days_per_year": 12.081686163775716,
+      "trading_cost": 42.909832141000116,
+      "borrowing_cost": 2.3315417870409404e-13,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 27.191982332138984,
+      "turnover_dollars": 42909.83214100013,
+      "mean_exposure": 1.0,
+      "maximum_close_exposure": 1.0000000000000004,
+      "insolvent": false,
+      "first_date": "2020-01-02",
+      "last_date": "2026-10-16"
+    },
+    "etf_2022_dip_ladder_target_1x": {
+      "name": "dip_ladder_target_1x",
+      "family": "dip",
+      "start": 2022,
+      "ending_equity": 13908.876864790269,
+      "total_return": 0.39088768647902694,
+      "cagr": 0.07141681453661386,
+      "max_drawdown_daily": 0.19542365861012145,
+      "annual_returns": {
+        "2022": -0.03918449454052164,
+        "2023": 0.03888172585419136,
+        "2024": 0.15456968156825734,
+        "2025": 0.31820920416353404,
+        "2026": -0.08445127184667267
+      },
+      "realized_volatility": 0.09909423464456575,
+      "trade_days": 197,
+      "trade_days_per_year": 41.1873211219233,
+      "trading_cost": 1212.2507231677403,
+      "borrowing_cost": 0.0,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 0.0,
+      "turnover_dollars": 1212250.7231677398,
+      "mean_exposure": 0.423705424691112,
+      "maximum_close_exposure": 0.9965106690874225,
+      "insolvent": false,
+      "first_date": "2022-01-03",
+      "last_date": "2026-10-16"
+    },
+    "etf_2022_dip_ladder_hold_1x": {
+      "name": "dip_ladder_hold_1x",
+      "family": "dip",
+      "start": 2022,
+      "ending_equity": 15180.40231353254,
+      "total_return": 0.5180402313532542,
+      "cagr": 0.09119253035006314,
+      "max_drawdown_daily": 0.14796329668348773,
+      "annual_returns": {
+        "2022": -0.02280984686963361,
+        "2023": 0.006100632073088308,
+        "2024": 0.13582307872046595,
+        "2025": 0.36179405459931235,
+        "2026": -0.0017469289654072906
+      },
+      "realized_volatility": 0.11297711057175815,
+      "trade_days": 25,
+      "trade_days_per_year": 5.226817401259302,
+      "trading_cost": 133.50300755165608,
+      "borrowing_cost": 0.0,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 0.0,
+      "turnover_dollars": 133503.00755165608,
+      "mean_exposure": 0.47004192805122197,
+      "maximum_close_exposure": 0.9901381478329645,
+      "insolvent": false,
+      "first_date": "2022-01-03",
+      "last_date": "2026-10-16"
+    },
+    "etf_2022_gold_trend_1x": {
+      "name": "gold_trend_1x",
+      "family": "gold_trend",
+      "start": 2022,
+      "ending_equity": 19253.147322485456,
+      "total_return": 0.9253147322485455,
+      "cagr": 0.14678378755417198,
+      "max_drawdown_daily": 0.23879887153228696,
+      "annual_returns": {
+        "2022": -0.03688721110969906,
+        "2023": 0.012396870102259205,
+        "2024": 0.26656906000925784,
+        "2025": 0.6367653308824828,
+        "2026": -0.047514225514015296
+      },
+      "realized_volatility": 0.17131062232712488,
+      "trade_days": 18,
+      "trade_days_per_year": 3.763308528906697,
+      "trading_cost": 205.30627410481375,
+      "borrowing_cost": 1.36081425623735e-13,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 0.0,
+      "turnover_dollars": 205306.27410481375,
+      "mean_exposure": 0.7853577371048253,
+      "maximum_close_exposure": 1.0000000000000002,
+      "insolvent": false,
+      "first_date": "2022-01-03",
+      "last_date": "2026-10-16"
+    },
+    "etf_2022_diversified_trend_1x": {
+      "name": "diversified_trend_1x",
+      "family": "diversified",
+      "start": 2022,
+      "ending_equity": 18006.297288141624,
+      "total_return": 0.8006297288141624,
+      "cagr": 0.13084288872091765,
+      "max_drawdown_daily": 0.1606203149895017,
+      "annual_returns": {
+        "2022": -0.11475424824464364,
+        "2023": 0.10983940005550319,
+        "2024": 0.26107247834933034,
+        "2025": 0.36783409238545084,
+        "2026": 0.06249514585341198
+      },
+      "realized_volatility": 0.1173276524422199,
+      "trade_days": 204,
+      "trade_days_per_year": 42.6508299942759,
+      "trading_cost": 382.32338236265883,
+      "borrowing_cost": 9.944279340844375e-14,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 18.024321609751375,
+      "turnover_dollars": 382323.3823626589,
+      "mean_exposure": 0.8601262784141903,
+      "maximum_close_exposure": 1.0000000000000004,
+      "insolvent": false,
+      "first_date": "2022-01-03",
+      "last_date": "2026-10-16"
+    },
+    "etf_2022_relative_strength_1x": {
+      "name": "relative_strength_1x",
+      "family": "relative",
+      "start": 2022,
+      "ending_equity": 19336.95268769381,
+      "total_return": 0.9336952687693811,
+      "cagr": 0.14782563147844052,
+      "max_drawdown_daily": 0.14412921702081827,
+      "annual_returns": {
+        "2022": -0.12556785529695125,
+        "2023": 0.1160669265755161,
+        "2024": 0.22434756973986314,
+        "2025": 0.4813341074001225,
+        "2026": 0.09248110897004991
+      },
+      "realized_volatility": 0.13995339020251102,
+      "trade_days": 130,
+      "trade_days_per_year": 27.17945048654837,
+      "trading_cost": 556.3458575870158,
+      "borrowing_cost": 4.3248677270629484e-14,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 19.3563089966905,
+      "turnover_dollars": 556345.8575870162,
+      "mean_exposure": 0.7942882395671867,
+      "maximum_close_exposure": 1.0000000000000002,
+      "insolvent": false,
+      "first_date": "2022-01-03",
+      "last_date": "2026-10-16"
+    },
+    "etf_2022_SPY": {
+      "name": "SPY",
+      "family": "hold_spy",
+      "start": 2022,
+      "ending_equity": 17038.936336043713,
+      "total_return": 0.7038936336043713,
+      "cagr": 0.11786228337376037,
+      "max_drawdown_daily": 0.24496388853798678,
+      "annual_returns": {
+        "2022": -0.18568587211282306,
+        "2023": 0.261757797773994,
+        "2024": 0.24886462945796928,
+        "2025": 0.17719063776702804,
+        "2026": 0.1280084373174477
+      },
+      "realized_volatility": 0.17269388358789448,
+      "trade_days": 1,
+      "trade_days_per_year": 0.20907269605037207,
+      "trading_cost": 9.990009990009991,
+      "borrowing_cost": 9.500950892092892e-14,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 17.055992328372085,
+      "turnover_dollars": 9990.00999000999,
+      "mean_exposure": 1.0,
+      "maximum_close_exposure": 1.0,
+      "insolvent": false,
+      "first_date": "2022-01-03",
+      "last_date": "2026-10-16"
+    },
+    "etf_2022_gold": {
+      "name": "gold",
+      "family": "hold_gold",
+      "start": 2022,
+      "ending_equity": 22577.68279194742,
+      "total_return": 1.257768279194742,
+      "cagr": 0.18561776709361477,
+      "max_drawdown_daily": 0.26404517857029675,
+      "annual_returns": {
+        "2022": 0.002611972758386427,
+        "2023": 0.12691581500094418,
+        "2024": 0.2665690600092585,
+        "2025": 0.6367653308824841,
+        "2026": -0.03608283384487376
+      },
+      "realized_volatility": 0.19196070475224167,
+      "trade_days": 1,
+      "trade_days_per_year": 0.20907269605037207,
+      "trading_cost": 9.990009990009991,
+      "borrowing_cost": 9.500950892092892e-14,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 22.600283075022443,
+      "turnover_dollars": 9990.00999000999,
+      "mean_exposure": 1.0,
+      "maximum_close_exposure": 1.0,
+      "insolvent": false,
+      "first_date": "2022-01-03",
+      "last_date": "2026-10-16"
+    },
+    "etf_2022_mix_1x": {
+      "name": "mix_1x",
+      "family": "mix",
+      "start": 2022,
+      "ending_equity": 20098.171683816647,
+      "total_return": 1.0098171683816646,
+      "cagr": 0.15712894559142088,
+      "max_drawdown_daily": 0.1818870955498636,
+      "annual_returns": {
+        "2022": -0.09106972377374722,
+        "2023": 0.19578240412187098,
+        "2024": 0.26162571281163616,
+        "2025": 0.3943955912999533,
+        "2026": 0.05113208001478742
+      },
+      "realized_volatility": 0.13933596060512293,
+      "trade_days": 58,
+      "trade_days_per_year": 12.12621637092158,
+      "trading_cost": 29.434708659768233,
+      "borrowing_cost": 1.5689935768828871e-13,
+      "gold_holding_drag": 0.0,
+      "terminal_liquidation_cost": 20.11828997379044,
+      "turnover_dollars": 29434.70865976823,
+      "mean_exposure": 1.0,
+      "maximum_close_exposure": 1.0000000000000004,
+      "insolvent": false,
+      "first_date": "2022-01-03",
+      "last_date": "2026-10-16"
+    }
+  },
+  "excluded_specs": [
+    {
+      "name": "dip_ladder_hold_1p5x",
+      "family": "dip",
+      "cap": 1.5,
+      "take_profit_atr": 0.0
+    },
+    {
+      "name": "gold_vol_trend_1p5x",
+      "family": "gold_vol",
+      "cap": 1.5
+    },
+    {
+      "name": "gold_vol_trend_2x",
+      "family": "gold_vol",
+      "cap": 2.0
+    },
+    {
+      "name": "diversified_trend_1p5x",
+      "family": "diversified",
+      "cap": 1.5
+    },
+    {
+      "name": "diversified_trend_2x",
+      "family": "diversified",
+      "cap": 2.0
+    },
+    {
+      "name": "relative_strength_1p5x",
+      "family": "relative",
+      "cap": 1.5
+    },
+    {
+      "name": "mix_1p5x",
+      "family": "mix",
+      "cap": 1.5
+    },
+    {
+      "name": "mix_2x",
+      "family": "mix",
+      "cap": 2.0
+    },
+    {
+      "name": "SPY_1p5x",
+      "family": "lever_spy",
+      "cap": 1.5
+    },
+    {
+      "name": "gold_1p5x",
+      "family": "lever_gold",
+      "cap": 1.5
+    },
+    {
+      "name": "SPY_2x",
+      "family": "lever_spy",
+      "cap": 2.0
+    },
+    {
+      "name": "gold_2x",
+      "family": "lever_gold",
+      "cap": 2.0
+    },
+    {
+      "name": "balanced_vol15_1p5x",
+      "family": "balanced_vol",
+      "cap": 1.5,
+      "target_volatility": 0.15
+    },
+    {
+      "name": "balanced_vol15_2x",
+      "family": "balanced_vol",
+      "cap": 2.0,
+      "target_volatility": 0.15
+    },
+    {
+      "name": "balanced_vol20_1p5x",
+      "family": "balanced_vol",
+      "cap": 1.5,
+      "target_volatility": 0.2
+    },
+    {
+      "name": "balanced_vol20_2x",
+      "family": "balanced_vol",
+      "cap": 2.0,
+      "target_volatility": 0.2
+    }
+  ],
+  "beat_both_2020_and_2022": [],
+  "trial_inventory": [
+    {
+      "file": "result_snapshot.json",
+      "groups": {
+        "baseline": 8,
+        "sensitivity": 54,
+        "stress": 10,
+        "fresh_starts": 16
+      }
+    },
+    {
+      "file": "loss_control_snapshot.json",
+      "groups": {
+        "main": 72,
+        "sensitivity": 54,
+        "cost_stress": 16
+      }
+    },
+    {
+      "file": "profit_lock_snapshot.json",
+      "groups": {
+        "main": 72
+      }
+    },
+    {
+      "file": "redesign_snapshot.json",
+      "stage": "redesign",
+      "groups": {
+        "main": 40,
+        "neighbors": 12,
+        "stress": 74,
+        "fresh_starts": 140
+      }
+    },
+    {
+      "file": "redesign_snapshot.json",
+      "stage": "allocation",
+      "groups": {
+        "main": 80,
+        "old_period": 24,
+        "stress": 70,
+        "neighbors": 6
+      }
+    },
+    {
+      "file": "redesign_snapshot.json",
+      "stage": "audit",
+      "groups": {
+        "additional_2019_results": 24,
+        "funding_diagnostic": 24
+      }
+    }
+  ],
+  "trial_count_warning": "Saved simulation rows are overlapping, correlated and include controls. Not an independent trial count. Earlier related studies and informal choices are incompletely inventoried; no DSR/PBO confidence number is justified.",
+  "rolling": {
+    "24": {
+      "dip_ladder_target_1x": {
+        "windows": 226,
+        "beat_both": 1,
+        "fraction": 0.004424778761061947,
+        "worst_return": -0.216583248588599,
+        "median_excess_to_best": -0.2887352660797189
+      },
+      "dip_ladder_hold_1x": {
+        "windows": 226,
+        "beat_both": 0,
+        "fraction": 0.0,
+        "worst_return": -0.16016596698676977,
+        "median_excess_to_best": -0.2717099824767249
+      },
+      "gold_trend_1x": {
+        "windows": 226,
+        "beat_both": 10,
+        "fraction": 0.04424778761061947,
+        "worst_return": -0.21756513685995604,
+        "median_excess_to_best": -0.19513246091972064
+      },
+      "diversified_trend_1x": {
+        "windows": 226,
+        "beat_both": 4,
+        "fraction": 0.017699115044247787,
+        "worst_return": -0.13979429082670458,
+        "median_excess_to_best": -0.1953009695226341
+      },
+      "relative_strength_1x": {
+        "windows": 226,
+        "beat_both": 18,
+        "fraction": 0.07964601769911504,
+        "worst_return": -0.27160830407957415,
+        "median_excess_to_best": -0.20644724403752457
+      },
+      "SPY": {
+        "windows": 226,
+        "beat_both": 0,
+        "fraction": 0.0,
+        "worst_return": -0.45287333398775564,
+        "median_excess_to_best": 0.0
+      },
+      "gold": {
+        "windows": 226,
+        "beat_both": 0,
+        "fraction": 0.0,
+        "worst_return": -0.32484192381853283,
+        "median_excess_to_best": -0.06715040535380523
+      },
+      "mix_1x": {
+        "windows": 226,
+        "beat_both": 13,
+        "fraction": 0.05752212389380531,
+        "worst_return": -0.10083236607042845,
+        "median_excess_to_best": -0.12706867477817696
+      }
+    },
+    "36": {
+      "dip_ladder_target_1x": {
+        "windows": 214,
+        "beat_both": 0,
+        "fraction": 0.0,
+        "worst_return": -0.23193795198160083,
+        "median_excess_to_best": -0.45269448638796406
+      },
+      "dip_ladder_hold_1x": {
+        "windows": 214,
+        "beat_both": 0,
+        "fraction": 0.0,
+        "worst_return": -0.16181804129868693,
+        "median_excess_to_best": -0.4224148480481239
+      },
+      "gold_trend_1x": {
+        "windows": 214,
+        "beat_both": 1,
+        "fraction": 0.004672897196261682,
+        "worst_return": -0.2396638956025765,
+        "median_excess_to_best": -0.39425300648449824
+      },
+      "diversified_trend_1x": {
+        "windows": 214,
+        "beat_both": 0,
+        "fraction": 0.0,
+        "worst_return": -0.07097391892546356,
+        "median_excess_to_best": -0.3031545476648001
+      },
+      "relative_strength_1x": {
+        "windows": 214,
+        "beat_both": 9,
+        "fraction": 0.04205607476635514,
+        "worst_return": -0.2226815698034379,
+        "median_excess_to_best": -0.3177283267745423
+      },
+      "SPY": {
+        "windows": 214,
+        "beat_both": 0,
+        "fraction": 0.0,
+        "worst_return": -0.3875659359220145,
+        "median_excess_to_best": 0.0
+      },
+      "gold": {
+        "windows": 214,
+        "beat_both": 0,
+        "fraction": 0.0,
+        "worst_return": -0.3862089955085587,
+        "median_excess_to_best": -0.1887841597390605
+      },
+      "mix_1x": {
+        "windows": 214,
+        "beat_both": 11,
+        "fraction": 0.0514018691588785,
+        "worst_return": -0.0468926392525173,
+        "median_excess_to_best": -0.16706833550283418
+      }
+    }
+  }
+}

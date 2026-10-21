@@ -139,7 +139,35 @@ main and profit-lock comparison. Floating-point account arrays also prevent
 whole-dollar truncation when a caller supplies an integer starting balance;
 the original $10,000.0 baseline results are unchanged.
 
-Redesign and longer ETF comparison
+Current constraint: cash only, no overfitting claims
+--------------------------------------------------
+The current /redesign.html shows only eight unchanged, unleveraged comparisons.
+No borrowing, shorts or products with embedded leverage are eligible. Earlier
+leveraged outputs are retained at /redesign-archive.html for reproduction;
+the historical runners and annual selector are not current recommendations.
+No live risk policy or portfolio was changed.
+
+cash_only_protocol.json freezes the already-observed rules and 73 evidence
+files. It is an audit plan made AFTER outcomes, not a preregistered test of a
+new strategy. Every inspected period remains development evidence; no
+independent holdout or forward validation date has been registered. The
+protocol sets requirements for any future experiment and preserves known
+trial counts without pretending they are independent hypotheses.
+
+Run from the repository root, using existing generated evidence:
+
+  /Users/claudiu/Research/gold-grid-env/bin/python research/gold_grid/cash_only.py
+  /Users/claudiu/Research/gold-grid-env/bin/python -m pytest research/gold_grid/test_engine.py research/gold_grid/test_loss_controls.py research/gold_grid/test_redesign.py research/gold_grid/test_cash_only.py -q
+  /Users/claudiu/Research/gold-grid-env/bin/python research/gold_grid/redesign_report.py
+
+Changed frozen inputs abort the audit; a new experiment must explicitly record
+its changes instead of silently overwriting a prior validation. See
+CASH_ONLY_FINDINGS.txt and cash_only_snapshot.json for eligibility, quantitative
+failures, adversarial findings and unverified execution assumptions.
+When restoring the download, put its results directory at data/gold_grid/results
+and its etf_archive directory at data/gold_grid/etf_archive before these commands.
+
+Historical redesign and longer ETF comparison
 ---------------------------------
 redesign_protocol.json freezes 11 dip/trend rules and nine controls before the
 first redesign results. allocation_protocol.json records four subsequent
@@ -152,7 +180,7 @@ previously inspected history. No untouched validation claim is made.
   /Users/claudiu/Research/gold-grid-env/bin/python research/gold_grid/redesign_audit.py
   /Users/claudiu/Research/gold-grid-env/bin/python research/gold_grid/redesign_report.py
 
-Open the existing local server's /redesign.html. It compares starts in 2019,
+The historical /redesign-archive.html compares starts in 2019,
 2022, 2020 and 2006, retains every candidate, and includes equity/drawdown
 charts, borrowing sensitivities, old-period tests and downloads. The primary
 tables use actual adjusted SPY/GLD ETF prices, not the spot/CFD proxy.

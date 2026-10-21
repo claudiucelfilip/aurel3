@@ -1,0 +1,126 @@
+Cash-only and overfitting audit — 21 October 2026
+================================================
+
+Decision
+--------
+No cash-only candidate currently establishes robust outperformance over both
+SPY and gold. Stop tuning this family to rescue its return objective. Existing
+history can reject it; it cannot supply independent confirmation of a winner.
+
+The user's hard constraint is no borrowing or leveraged approaches. The current
+shortlist contains the eight unchanged cap<=1 definitions from the first
+redesign: five active rules, SPY, gold, and a monthly 50/50 mix. All 16 cap>1
+redesign/allocation rules, the original margined grid and its controls, and
+the leveraged annual selector are excluded. Historical runners and results
+remain archived for reproduction. No live system or portfolio changed.
+
+Actual ETF history, $10,000, 2019 through 16 October 2026:
+  SPY                         $34,702    daily-close drawdown 33.7%
+  Gold                        $31,417    daily-close drawdown 26.4%
+  Monthly 50/50, cash only     $34,412    daily-close drawdown 20.5%
+  Diversified trend, 1x        $27,938    daily-close drawdown 16.1%
+Costs: 10bps per traded side, fractional units, no positive-cash interest,
+tax, FX or minimum fees. The mix's 2006-start drawdown is 33.0%; cash-only
+does not mean low risk. The former 25% screen was our research assumption,
+not a maximum loss approved by the user.
+
+Fresh 2022 results: gold $22,578; mix $20,098; relative strength $19,337;
+gold trend $19,253; diversified trend $18,006; hold dip $15,180; small-exit
+dip $13,909. Every eligible alternative trails gold. The mix beats both at
+2006/2020 endpoints, loses to SPY from 2019, and wins only 11/214 overlapping
+three-year windows. Overlap means these are not independent observations.
+
+Adversarial review: robust-outperformance claim REFUTED
+-----------------------------------------------------
+Evidence inspected independently without conversation context:
+- redesign_protocol.json:3, allocation_protocol.json:3 and the loss/profit-lock
+  protocols acknowledge sequential adaptive research on inspected history.
+- redesign.py:297 chooses on earlier rows, but walk-forward cannot unsee the
+  years that influenced the candidate family. It also includes leverage.
+- run.py:79, loss_controls.py:45, profit_locks.py:20 and the latest runners
+  contain far more trials than the eight eligible rows or latest 24 rules.
+  Complete global independent-trial count is unknown. No DSR/PBO probability
+  is reported. Saved simulation counts include repeated starts and controls.
+- allocation.py:89-104 omits the six cash-only alternatives from its ETF
+  cost/delay stresses and tests neighbors only for a leveraged rule. This is
+  disclosed as incomplete; the failed family receives no robustness pass.
+- Saved hold-dip results differ materially by source: $18,428 on original
+  spot/Alpaca inputs versus $15,180 on ETF inputs from 2022. Neither beats gold.
+- Hashes prove frozen bytes, not that results were unseen. This audit was
+  explicitly frozen after the outcomes were known.
+
+Adversarial review: cash funding and causality
+--------------------------------------------
+32 existing cash-only curves contain 80,784 holding rows and 4,945 trade days.
+An independent review reproduced every curve from source within $2.8e-9 and
+reconstructed a sell-first ledger within $9.5e-11. Minimum interim cash was
+about -$4e-11, numerical roundoff. Maximum saved gross exposure was
+1.0000000000000004; maximum cumulative funding was below $1e-12. No economic
+borrowing or short holdings were found in those records.
+
+The narrower no-future-close-signal-leak claim survived the reviewed tests.
+The literal claim that every trade input is known BEFORE execution is REFUTED:
+trade quantities use the current opening prices and open NAV, then fill at
+those same prices. Example: doubling only the 3 February 2020 gold open in
+mix_1x changes the same-open SPY purchase from about $85 to $2,663, despite
+identical prior history and SPY open (redesign.py:114-124,159,203).
+
+This is a simultaneous opening-price sizing assumption, not evidence of
+future-close leakage. Actual auction orders must be sized beforehand, or
+orders submitted after the open require later quotes/fills. Sell-first
+funding, settlement, rounding, quote movement and realistic latency remain
+unvalidated. Do not label these backtests executable order simulations.
+
+Path inventory
+--------------
+Daily input alignment: redesign.py:25-67; timestamp normalization and quote
+age assertions; actual ETF import allocation.py:17-44 hashes the archive.
+Indicators: redesign.py:70-108; trailing prices, moving average, volatility,
+covariance, momentum and ATR; execution consumes prev=scheduled-1.
+Single-asset hold: redesign.py:195-198; one initial cap1 target.
+Monthly mix: redesign.py:199-200; two half-cap targets.
+Weekly gold/diversified/relative: redesign.py:192-194; previous-close weights.
+Dip entry/add/exit/trim: redesign.py:171-191; previous-close conditions,
+cap1 targets, current-open sizing; no delayed dip model is implemented.
+Order funding: redesign.py:111-124,201-213; post-fee sizing and cash conservation.
+Valuation/funding: redesign.py:146-151,220-229; calendar charge on negative
+cash, daily net liquidation NAV; tolerances distinguish floating roundoff.
+Fresh starts: allocation.py:71-82 and redesign_audit.py additional-2019 loop;
+all eligible cases use the same simulate function and begin with own cash.
+Legacy annual selector: redesign.py:297-315; excluded from cash-only report.
+Weight override: redesign.py:133-134; accepts arbitrary weights, but no producer
+of these saved eight cases supplies it. It is not a cash-only execution gate.
+Insolvency fallback: redesign.py:165-167,212-216; closes positions, unused in
+the saved cash-only cases. No cash injection or reset is applied.
+Current eligibility: cash_only_protocol.json and cash_only.py; 73 pinned
+source/input/output files, eight definitions, 32 curves. Reports fail when
+frozen evidence changes. Legacy runners are historical reproduction paths,
+not globally disabled research engines or a live risk gate.
+
+Verification / assumptions / not checked
+---------------------------------------
+Verified: recorded holdings, accounting, exposure and existing test outcomes;
+all eight eligible cases shown; archived exclusions and adaptive history kept.
+42 targeted tests pass, including injected borrowing/short/financing errors
+and changed-evidence rejection. The served report's four period switches show
+eight rows and loaded charts without page overflow; 138 local links/assets
+return HTTP 200. The 387-file bundle has no duplicate entries and passes CRC.
+Assumed: adjusted ETF prices, fractional same-open fills, 10bps execution
+cost, cash earning zero, and a $1e-7 audit roundoff tolerance.
+Not checked: broker execution/settlement, point-in-time corporate-action
+availability, tax/FX, intraday worst loss, full cash-only robustness suite,
+complete historical trial count, independent holdout or future returns.
+
+Next-experiment requirements
+---------------------------
+Before new outputs: register the hypothesis, full candidate family, rules,
+sources, costs, metrics, rejection criteria and review date. Record every run.
+All inspected history stays development data. Changing rules after a result
+creates a new exploratory round. No search-until-a-winner stopping rule.
+Independent validation requires truly quarantined data or a fixed prospective
+evaluation. A short paper rehearsal tests execution, not profitability.
+
+https://www.davidhbailey.com/dhbpapers/deflated-sharpe.pdf
+https://www.davidhbailey.com/dhbpapers/backtest-prob.pdf
+Current report: http://127.0.0.1:49889/redesign.html
+Repository: https://github.com/claudiucelfilip/aurel3

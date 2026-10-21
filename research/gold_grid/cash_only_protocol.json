@@ -1,0 +1,195 @@
+{
+  "created": "2026-10-21",
+  "status": "Declared after inspecting all existing results. This freezes an audit, not a new out-of-sample experiment.",
+  "user_constraints": {
+    "cash_funded_only": true,
+    "maximum_gross_exposure": 1,
+    "short_positions": false,
+    "borrowing": false,
+    "leveraged_or_inverse_funds": false,
+    "derivatives_or_embedded_leverage": false
+  },
+  "scope": "Current research shortlist and report. Archived runners retain historical leverage experiments for reproduction; no live runtime is changed.",
+  "instruments": [
+    "Unleveraged SPY shares",
+    "Unleveraged GLD shares",
+    "Uninvested cash"
+  ],
+  "eligible_specs": [
+    {
+      "name": "dip_ladder_target_1x",
+      "family": "dip",
+      "cap": 1.0,
+      "take_profit_atr": 1.0
+    },
+    {
+      "name": "dip_ladder_hold_1x",
+      "family": "dip",
+      "cap": 1.0,
+      "take_profit_atr": 0.0
+    },
+    {
+      "name": "gold_trend_1x",
+      "family": "gold_trend",
+      "cap": 1.0
+    },
+    {
+      "name": "diversified_trend_1x",
+      "family": "diversified",
+      "cap": 1.0
+    },
+    {
+      "name": "relative_strength_1x",
+      "family": "relative",
+      "cap": 1.0
+    },
+    {
+      "name": "SPY",
+      "family": "hold_spy",
+      "cap": 1.0
+    },
+    {
+      "name": "gold",
+      "family": "hold_gold",
+      "cap": 1.0
+    },
+    {
+      "name": "mix_1x",
+      "family": "mix",
+      "cap": 1.0
+    }
+  ],
+  "assumptions": {
+    "capital": 10000.0,
+    "trend_sessions": 200,
+    "volatility_sessions": 60,
+    "target_volatility": 0.15,
+    "cost_per_side": 0.001,
+    "annual_borrowing_cost": 0.05,
+    "annual_gold_holding_cost": 0,
+    "delay": 0
+  },
+  "borrowing_rate_note": "The legacy 5% funding parameter remains as a detector. Any funding above floating-point tolerance fails cash-only eligibility; zeroing the rate would conceal borrowed cash.",
+  "money_roundoff_tolerance_usd": 1e-07,
+  "exposure_roundoff_tolerance": 1e-12,
+  "evaluation_starts": [
+    2006,
+    2019,
+    2020,
+    2022
+  ],
+  "data_status": {
+    "inspected_history": "2004-11-18 through 2026-10-16; 2006 onward evaluated",
+    "independent_holdout": null,
+    "remaining_dates": "No claim that days after 16 October are unobserved by the researcher; no forward test registered yet."
+  },
+  "audit_plan": [
+    "Reuse all eight existing cap<=1 definitions unchanged; no new parameter search.",
+    "Audit all four ETF start periods and every saved holding/trade row for cash, shorts, exposure, financing and cashflow conservation.",
+    "Keep SPY and gold on identical dates and assumptions, and retain all eligible failures.",
+    "Disclose all known research rounds including adaptive choices; simulation count is not independent hypothesis count.",
+    "Obtain independent adversarial reviews of causality, cash funding and overfitting claims."
+  ],
+  "anti_overfitting_requirements": [
+    "Treat every already inspected period and instrument as development evidence, including later chronology called walk-forward.",
+    "Before a new experiment, register the economic hypothesis, full candidate family, parameters, data universe, execution, costs, primary metric, rejection criteria and review date. Hash and commit that plan before examining outputs.",
+    "Report every run and revision. Changing a rule after seeing results creates a new exploratory round; it cannot repair a failed validation.",
+    "No automated search-until-a-winner stopping rule. If the declared family fails, record failure and require a separately motivated hypothesis for another round.",
+    "Use chronological training and locked validation for learned models; fit scalers/features within training only and purge overlapping labels. Current rules have no trained AI model.",
+    "Require sensitivity to nearby settings, higher costs, execution delay, distinct market regimes and a second source before advancing a candidate. Existing cash-only robustness coverage is incomplete.",
+    "Account for the full search when estimating statistical confidence; do not compute DSR/PBO from only the eight displayed rows. Our complete historical trial count is unknown.",
+    "An independent evaluation needs a genuinely quarantined sample or future data collected after a fixed plan. A short execution rehearsal cannot establish a return advantage.",
+    "No new history-only promotion to live capital from this audit. Failure to beat both recent benchmarks already rejects these candidates for the stated return objective."
+  ],
+  "risk_note": "No borrowing does not imply low drawdown. The prior 25% research screen was not a user-approved loss tolerance.",
+  "execution_limits": [
+    "Idealized simultaneous fractional rebalancing at opening prices; actual orders must sell first and respect settled buying power.",
+    "Historical adjusted OHLC and dividend reinvestment proxy; corporate-action availability and actual broker fills not audited.",
+    "Daily-close drawdown, no tax/FX/minimum commission, no positive cash interest.",
+    "Stateful dip-ladder extra-delay stress absent."
+  ],
+  "excluded": [
+    "Original margined grid and all its controls",
+    "All 16 cap>1 redesign/allocation rules",
+    "Legacy annual selector, because its selection universe includes leverage"
+  ],
+  "sources": [
+    "https://www.davidhbailey.com/dhbpapers/deflated-sharpe.pdf",
+    "https://www.davidhbailey.com/dhbpapers/backtest-prob.pdf"
+  ],
+  "frozen_files": {
+    "research/gold_grid/redesign.py": "f291c9f3b1995c8b7973325be85c5e82165159dad3b728308cb3a7b23ce21938",
+    "research/gold_grid/allocation.py": "1c13d52e561e537f934fa89e5d4baccae58830d78b1db5798fbc1ce3124f80c7",
+    "research/gold_grid/redesign_audit.py": "db11c7b8613dbcdf8b42855cb70d15a8b8d65afd85dc7b132515aa26112ba619",
+    "research/gold_grid/redesign_protocol.json": "c8e35f56ed94cffe40e951c709463a39907babf37e19e406b5ea9249b8917eb3",
+    "research/gold_grid/allocation_protocol.json": "4c8e8f79cd8fc72c02774b863c7f80a2d31b209443f41b94657e4b2a54061188",
+    "data/gold_grid/results/redesign_results.json": "ca73ec3ed96f38039fc1c59a8f216447fc3d43ce61724a6a276c3553d55fc947",
+    "data/gold_grid/results/allocation_results.json": "cd166cfcf3a329b0aa9b0b08828d54d2d9e954037546e8265fd70cb6da61f59b",
+    "data/gold_grid/results/redesign_audit.json": "1d07d88cb45d1b23aff88755b1b3b5670128655af3bbfe6b79c883a9d5032f2b",
+    "data/gold_grid/results/allocation_etf_inputs.csv": "257aa7e3231ce88131669fb2d9bdd422195fff82b2f3ff8d5dc7eeb84c5ba9e5",
+    "data/gold_grid/results/allocation_etf_2006_dip_ladder_target_1x_daily.csv": "126c4a7d8648ca97676e19e066c628bfa952e86a6b205c19ee2f90ce545b48f1",
+    "data/gold_grid/results/allocation_etf_2006_dip_ladder_target_1x_trades.csv": "844cade687fc40e4a9980b6e5aeb224168e540db493b99cf10b137a62a0e3508",
+    "data/gold_grid/results/allocation_etf_2006_dip_ladder_hold_1x_daily.csv": "e00929909b0c0afb99bd0b76e5f86a3054890eb562ef152c315dca5dedf583fb",
+    "data/gold_grid/results/allocation_etf_2006_dip_ladder_hold_1x_trades.csv": "11122b35e1278cf63dc6f913410fa96af1cf87033dbde78b992fe881d8b67931",
+    "data/gold_grid/results/allocation_etf_2006_gold_trend_1x_daily.csv": "5c98999380560eb7da4e7e0f201c46edb6117b5a1c638e75391cb946e81ac7de",
+    "data/gold_grid/results/allocation_etf_2006_gold_trend_1x_trades.csv": "ee733dd52451ac7d9cb0ae2cc11a16a5e4b79d106e1609b3df0658a705c8708b",
+    "data/gold_grid/results/allocation_etf_2006_diversified_trend_1x_daily.csv": "db8abeca112a6999cd92ad62ec515115c44fba60812bd05a3ab8b693a9af9f32",
+    "data/gold_grid/results/allocation_etf_2006_diversified_trend_1x_trades.csv": "9f25c7876b7b1313ed83408e3491deef8e69641d96344b5ca63da3e6a9c160ff",
+    "data/gold_grid/results/allocation_etf_2006_relative_strength_1x_daily.csv": "5f752115feaa7d174368470bc3249a3b63f680e08ca7a2aaa9039f93be63f268",
+    "data/gold_grid/results/allocation_etf_2006_relative_strength_1x_trades.csv": "821cd0ae271cd5f98af9c76afd3bf0ab4843e0c521074aa9fab7c8b124e7c392",
+    "data/gold_grid/results/allocation_etf_2006_SPY_daily.csv": "509239cf5e74ee46a20dd9b85df43aff79f5837176e4d90687601099439c514c",
+    "data/gold_grid/results/allocation_etf_2006_SPY_trades.csv": "3aaea9529f4d818314a00bd88b2bc6aaf99d465c4b506ca881e9e1f59792e955",
+    "data/gold_grid/results/allocation_etf_2006_gold_daily.csv": "c8bcf360ebf4573f38ff90c9251b02dad8b909b3cf363a2fa070a517da7c313e",
+    "data/gold_grid/results/allocation_etf_2006_gold_trades.csv": "08cf37be6f6c957fe2f570dd7dbf7576bc4e492c31b77f01d4d4e77257aa18a8",
+    "data/gold_grid/results/allocation_etf_2006_mix_1x_daily.csv": "21990d4150cc7bfe32a3bf4d1120211027510ededb414cb8d10c383da54c36d7",
+    "data/gold_grid/results/allocation_etf_2006_mix_1x_trades.csv": "28f12d2ce2291a850b00199e353f87fd612b2c8b5ebcdddb42e01d00f6e15b62",
+    "data/gold_grid/results/allocation_etf_2019_dip_ladder_target_1x_daily.csv": "0279ea4e58812d874261c0b61fbef01b28d16021158ab476d948e3d516ad98ae",
+    "data/gold_grid/results/allocation_etf_2019_dip_ladder_target_1x_trades.csv": "7a5e13da6dd2c3a37ba681cf17dc5b3d8027159416287c79286e1cfcb2767429",
+    "data/gold_grid/results/allocation_etf_2019_dip_ladder_hold_1x_daily.csv": "445de77e2e1180504fb19815c86b6c8b4b812585f81470c581f28fa821d49fab",
+    "data/gold_grid/results/allocation_etf_2019_dip_ladder_hold_1x_trades.csv": "942d80d17a885bedc2b58e78bd2b0bdb2685d01af9e6131469231f6139874786",
+    "data/gold_grid/results/allocation_etf_2019_gold_trend_1x_daily.csv": "c74fa4650600808546bca78d3245c2f9fbaf5aacc5ab480878f08d82c8da3420",
+    "data/gold_grid/results/allocation_etf_2019_gold_trend_1x_trades.csv": "2ebfedc40178a11a2d5d1693a79fd92c91b5b41d4a8682bb9717205503723d8b",
+    "data/gold_grid/results/allocation_etf_2019_diversified_trend_1x_daily.csv": "f3606f974465334c83288f9d0d37d7f99919d96b9aabefa74279078d71ee1ab5",
+    "data/gold_grid/results/allocation_etf_2019_diversified_trend_1x_trades.csv": "f057896a1a5440578c11061f463dea46c44303260183969a4d38d9c23ed8f378",
+    "data/gold_grid/results/allocation_etf_2019_relative_strength_1x_daily.csv": "db53525383fef25925f0007940ed8ca9060320979e095b5f3cf0ec5c75a5b595",
+    "data/gold_grid/results/allocation_etf_2019_relative_strength_1x_trades.csv": "d75b67d3c063fbfc68d56809b96ef1d47cb774bcaf6d4302aec5fec6de88858e",
+    "data/gold_grid/results/allocation_etf_2019_SPY_daily.csv": "c2dfef127bfaa31ec20b3d2ae4ca2a819fcf844faa52eb7e12a5376796ea9c0f",
+    "data/gold_grid/results/allocation_etf_2019_SPY_trades.csv": "4712b6ca960ed06d5f50613385b983ca1965aef6a0a29cef1a95dd01e285214c",
+    "data/gold_grid/results/allocation_etf_2019_gold_daily.csv": "fd3eeb44f5fe02128b82df871cb9ad1dd7fb7a1c6eec8adbab84f9c34e5c7e6d",
+    "data/gold_grid/results/allocation_etf_2019_gold_trades.csv": "f572f8e3374a27d506ed25da3dd19cfde79f12bfa1fb839b8929b08a60732bee",
+    "data/gold_grid/results/allocation_etf_2019_mix_1x_daily.csv": "377d9fb88695dc8eb72814ca7a139a8a9bf24a6cadda94d2e5d41863571f876e",
+    "data/gold_grid/results/allocation_etf_2019_mix_1x_trades.csv": "9437edd74f35035de89d993d9d2d0cd8f87b942df3930556a6f08bf83713c40b",
+    "data/gold_grid/results/allocation_etf_2020_dip_ladder_target_1x_daily.csv": "9f85d714d7e2140bf0a6e4166da2a5088a9b1da94f6beec518b7f88effc04dc2",
+    "data/gold_grid/results/allocation_etf_2020_dip_ladder_target_1x_trades.csv": "8463c8d7f3c6ae3e0128926881669e3463b32074e6a9e2e3db1dbc195f2ed46a",
+    "data/gold_grid/results/allocation_etf_2020_dip_ladder_hold_1x_daily.csv": "491ca158b4cb5b4839a61fefda4b046d8916077c0071c0a4c35d840504928e2a",
+    "data/gold_grid/results/allocation_etf_2020_dip_ladder_hold_1x_trades.csv": "d4f5e2cbbfbdf9d94d443a4e033abd3aa4c3bd0d59e376c3f1860ac19a32b2e0",
+    "data/gold_grid/results/allocation_etf_2020_gold_trend_1x_daily.csv": "396ce7c6ded0c924b31bc78a91f682f8bffa26f87809cfb8ac9986bf17cea86f",
+    "data/gold_grid/results/allocation_etf_2020_gold_trend_1x_trades.csv": "03c738e832218180ad7c37a92bc5e4b315c3368e9582e850e5c92b867531aed3",
+    "data/gold_grid/results/allocation_etf_2020_diversified_trend_1x_daily.csv": "b0d8e50bd8ca015d410c48d151aba963be15ce64126e679b34d86f2f6d50ee88",
+    "data/gold_grid/results/allocation_etf_2020_diversified_trend_1x_trades.csv": "b321c5a08a28ecd2e2d557bbde7ceedbabda2f2338bc5ff792284393eb689a5d",
+    "data/gold_grid/results/allocation_etf_2020_relative_strength_1x_daily.csv": "dc87ccf7f8e4eeceef7cda263c6fd6ddb763a987efa4492e85db00e47fadef75",
+    "data/gold_grid/results/allocation_etf_2020_relative_strength_1x_trades.csv": "4a332cce6584d6592a61d5b76e32fa1cf52fd9c811aed6fbfd8f3f33115a2707",
+    "data/gold_grid/results/allocation_etf_2020_SPY_daily.csv": "9bec657af5089d850699caead7e33780979fb070c1d4fc986c155dfce4c3c412",
+    "data/gold_grid/results/allocation_etf_2020_SPY_trades.csv": "a38cbc150fd1fdae0c3845d7470d2d8cb1e7644d20e778b150824d579cf3fab8",
+    "data/gold_grid/results/allocation_etf_2020_gold_daily.csv": "fe196ecad08ec0bf733fde40937593e7b8df56bfcb5a4538a0a937cce040c606",
+    "data/gold_grid/results/allocation_etf_2020_gold_trades.csv": "cd1e33491befdc38f6a7a53ec311fc4b9b88f9ba6b6a05f9e1c090b631a2a3f8",
+    "data/gold_grid/results/allocation_etf_2020_mix_1x_daily.csv": "f5ccb22226ed5c518f7643853cff67cbc7f6d6aa8a37afce19c4cffd4e60e440",
+    "data/gold_grid/results/allocation_etf_2020_mix_1x_trades.csv": "046c7f5af31728def3572c5c66d86102c5edf2f7781913d81ee9e9d0239e0cb0",
+    "data/gold_grid/results/allocation_etf_2022_dip_ladder_target_1x_daily.csv": "90948878b47090084549effadf27291621e4599d2ce910021dd592427e1da430",
+    "data/gold_grid/results/allocation_etf_2022_dip_ladder_target_1x_trades.csv": "ce6d5e019f34ecbc2ae0f1ac5072af00be269f6b58174c2c006db876da1351af",
+    "data/gold_grid/results/allocation_etf_2022_dip_ladder_hold_1x_daily.csv": "cd33e039c22c62abef360476dfa09c544ac0cd9b9b0dd57cad793594b4d7780e",
+    "data/gold_grid/results/allocation_etf_2022_dip_ladder_hold_1x_trades.csv": "ed7a91f7a6310190787cb71607905bee2256f353decb5025262bfb62c749cb0b",
+    "data/gold_grid/results/allocation_etf_2022_gold_trend_1x_daily.csv": "5b3d070eb4ee9b8d3b75cf359da4fd547fbbf1011db4c1f53a5c79dd8115f9c6",
+    "data/gold_grid/results/allocation_etf_2022_gold_trend_1x_trades.csv": "98f97725fe76be5cc8c6412295458946d4c4e429ff93e1b166107274f57d61e0",
+    "data/gold_grid/results/allocation_etf_2022_diversified_trend_1x_daily.csv": "c81c7c825b0be2ed51a375f32960fd7d2baf46490bc14e649b840b9486daebdc",
+    "data/gold_grid/results/allocation_etf_2022_diversified_trend_1x_trades.csv": "bc751f9c81bcf680930b11fedbfc8f1650995e54e42dddf5a9ccb5a08ec5dd3f",
+    "data/gold_grid/results/allocation_etf_2022_relative_strength_1x_daily.csv": "2ab79ba9c47a7565a1884268a368aca0a1feeb4bd9d46a3793131f34bbb3c515",
+    "data/gold_grid/results/allocation_etf_2022_relative_strength_1x_trades.csv": "0032709d19bcf7a5b42c7547c123d6d13564147723bb30434d85c420cad3429e",
+    "data/gold_grid/results/allocation_etf_2022_SPY_daily.csv": "969b899f4d3dd37749a1eb8a300e0961dd977c2c837a659159f2af38562a706a",
+    "data/gold_grid/results/allocation_etf_2022_SPY_trades.csv": "c4f2147bef1a01af9e8953b196d0668faa7d41a1b9c238d6ccd1c4ae5cd9b594",
+    "data/gold_grid/results/allocation_etf_2022_gold_daily.csv": "63cfddfb13ac27f1c2f533a556fe20bd57e2c1aac8ba81050e1e0e1c91581b0b",
+    "data/gold_grid/results/allocation_etf_2022_gold_trades.csv": "dc26deb9e747589f98a255627f406f20d8b5ba0f6111e3740f154fa3140b5e5f",
+    "data/gold_grid/results/allocation_etf_2022_mix_1x_daily.csv": "0c3f314fc223bfa930fb98d443dedffe5ebe762645278d4e12bb158ae0251b31",
+    "data/gold_grid/results/allocation_etf_2022_mix_1x_trades.csv": "1fe3733ad75cd379835429e1cc7de5fea13c97e96fda55b77d484b37a249dd96"
+  }
+}

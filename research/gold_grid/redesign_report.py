@@ -121,19 +121,23 @@ def main():
 <p><a href="redesign_protocol.json">First-round rules</a> · <a href="allocation_protocol.json">Second-round rules</a> · <a href="redesign_results.json">First-round results</a> · <a href="allocation_results.json">ETF comparisons and stresses</a> · <a href="redesign_audit.json">Accounting and funding diagnostics</a> · <a href="redesign-bundle.zip">Code, inputs and results</a></p>
 <footer>Local research · <a href="https://github.com/claudiucelfilip/aurel3">Aurel3 repository</a> · branch <code>research/gold-grid-20261021</code><br>Source: <code>/Users/claudiu/Sites/aurel3-gold-grid/research/gold_grid</code><br>Output: <code>data/gold_grid/results/redesign.html</code></footer></main></div>
 <script>document.querySelectorAll('[data-year]').forEach(button=>button.addEventListener('click',()=>{{const year=button.dataset.year;document.querySelectorAll('[data-year]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.year===year)));document.querySelectorAll('[data-panel]').forEach(p=>p.hidden=p.dataset.panel!==year)}}));</script></body></html>'''
-    (OUT/'redesign.html').write_text(html)
+    notice='<div class="callout"><strong>Historical archive — leveraged strategies are excluded.</strong> This page preserves the earlier study. <a href="redesign.html">Open the current cash-only assessment.</a></div>'
+    html=html.replace('<main>','<main>'+notice)
+    (OUT/'redesign-archive.html').write_text(html)
     for name in ['redesign_protocol.json','allocation_protocol.json']:
         shutil.copy(Path('research/gold_grid')/name,OUT/name)
     snapshot={'redesign':R,'allocation':A,'audit':V}
     Path('research/gold_grid/redesign_snapshot.json').write_text(json.dumps(snapshot,indent=2,allow_nan=False))
+    from cash_only_report import main as current_report
+    current_report()
     with zipfile.ZipFile(OUT/'redesign-bundle.zip','w',zipfile.ZIP_DEFLATED) as bundle:
         for file in Path('research/gold_grid').glob('*'):
             if file.is_file():
                 bundle.write(file,str(file))
-        for pattern in ['redesign*','allocation*']:
-            for file in OUT.glob(pattern):
-                if file.is_file() and file.suffix!='.zip':
-                    bundle.write(file,'results/'+file.name)
+        patterns=['redesign*','allocation*','cash*','CASH_ONLY_FINDINGS.txt','README.txt','*snapshot.json']
+        for file in sorted({f for pattern in patterns for f in OUT.glob(pattern)}):
+            if file.is_file() and file.suffix!='.zip':
+                bundle.write(file,'results/'+file.name)
         for file in (OUT.parent/'etf_archive').glob('*'):
             bundle.write(file,'etf_archive/'+file.name)
     print('Report:',OUT/'redesign.html')
