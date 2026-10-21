@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "strategy": "Our QQQ opening-move implementation, not a reproduction of QuantLab",
+  "frozen_before_simulation": true,
+  "instrument": "QQQ; consolidated SIP 1-minute trades, regular session",
+  "decision": "At 09:35 New York, compare completed 09:30-09:34 candle close with EMA12 of completed regular-session 5-minute closes. Long above, short below; equality no trade.",
+  "entry": "09:35 minute open, adverse cost; one trade per session. Delay stress uses 09:36 open with original signal.",
+  "risk": "0.5% equity planned stop risk, notional capped at 100% equity. Fractional synthetic shares; short availability assumed.",
+  "stop": "Distance max(2*ATR14 of completed five-minute bars, 0.25% of signal close). Initial stop from entry execution price. Trail using completed minute closes, effective following minute. Adverse gaps fill at open, not stale stop.",
+  "exit": "Stop or scheduled market exit at session close minus 5 minutes; calendar includes early closes. No overnight positions.",
+  "filters": {
+    "baseline": "Every eligible signal",
+    "strength": "Opening candle body/range >=0.5 and abs(close-EMA12)/ATR14 >=0.25",
+    "volume": "Opening five-minute volume >= median opening volume from previous 20 sessions",
+    "timeout": "Same entries; exit at 10:05 if latest completed minute close is less than +0.25R from entry",
+    "ml_filter": "Histogram gradient-boosted return regressor; take only predicted net R >0.05. Retrain yearly on previous 3 calendar years; exclude last 5 training sessions; at least 500 baseline trades. No search. max_iter100, max_leaf_nodes7, min_samples_leaf50, l2_regularization10, learning_rate0.05, random_state42."
+  },
+  "ml_features": [
+    "direction",
+    "opening_body_fraction",
+    "ema_distance_atr",
+    "opening_range_atr",
+    "relative_open_volume",
+    "overnight_gap_fraction",
+    "prior_20day_return",
+    "prior_20day_volatility",
+    "prior_close_vs_sma200",
+    "stop_fraction"
+  ],
+  "costs": "Base: 2bp adverse execution per side plus 0.5bp fee per side; short trades charged 2% annualized /252 on entry notional, even intraday. Stress: double execution+fees; separate extra one-minute entry delay. No interest on cash; before tax, FX, subscriptions; fractional and short access unverified.",
+  "windows": {
+    "warmup_training": "2016-2018",
+    "development": "2019-2021",
+    "validation": "2022-2024",
+    "final_evaluation": "2025-2026-10-20"
+  },
+  "selection": "Report every variant. Select at most one filter/exit on development data: highest CAGR among variants with lower max daily drawdown and at least baseline CAGR; otherwise baseline. Freeze selected name before validation/final evaluation output.",
+  "go_no_go": "In 2022 onward and final evaluation separately: selected modification must preserve >=90% of baseline gross winning trade dollars, remove >=25% of baseline gross losing trade dollars on fixed-start-capital trade attribution, reduce max daily drawdown by >=20%, retain baseline net CAGR, and beat SPY CAGR by >=3pp without worse drawdown; positive excess over SPY under both stresses. Report failure without retuning.",
+  "data_quality": "Expected sessions from XNYS calendar. Require all first five minutes and entry bar using information available at entry. Later missing bars never cause a day to be skipped: carry positions across gaps and evaluate stops at next observed open. Require a bar at or after the scheduled exit; fail loudly otherwise. Audit all missing minutes, OHLC, duplicate timestamps, timezone/DST and early closes. Benchmarks retain the full calendar.",
+  "limits": [
+    "Minute bars do not establish tick-level execution or exact intraminute drawdown",
+    "Current historical data may be corrected after the fact",
+    "Existing knowledge of market history means final window is not pristine prospective evidence",
+    "QQQ is a surviving selected ETF; results do not establish CFD/futures performance",
+    "No news or LLM retrospective features",
+    "No live orders or runtime changes"
+  ]
+}

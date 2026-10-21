@@ -1,0 +1,44 @@
+OPENING-MOVE RESEARCH / 21 OCTOBER 2026
+
+Decision: reject this implementation for live use; retain the reusable harness.
+
+Data: consolidated SIP QQQ minute bars, 2016–20 October 2026.
+Initial training/warmup: 2016–2018. Development: 2019–2021.
+Validation: 2022–2024. Final evaluation: 2025–20 October 2026.
+Selected on development alone: ml_filter. No post-result tuning.
+
+2022–20 October 2026, after base costs, before tax and FX:
+Approach                  CAGR       Worst daily-close drawdown   Trades
+Baseline                  -6.39%      -27.54%                      1,204
+Stronger opening move     -0.08%       -9.20%                        579
+Higher opening volume     -2.97%      -14.86%                        594
+Early exit                -6.96%      -29.45%                      1,204
+AI filter                 +0.13%      -10.75%                        458
+SPY buy and hold          +12.01%
+QQQ buy and hold          +13.78%
+
+AI filter CAGR by period:
+Development +4.39%; validation +0.55%; final evaluation -0.55%.
+Final-period SPY CAGR +17.27%.
+2022 onward stress: double costs -4.47%; entry delayed one minute +0.60%.
+
+Fixed-capital gross trade attribution, 2022 onward:
+AI kept 43.75% of baseline winning profit and avoided 62.31% of losing dollars.
+These are profit/loss amounts, not the percentage of trades correctly predicted.
+The model reduced downside, but failed to preserve most of the upside.
+Both recent and final windows fail the predeclared investment gates.
+
+Verified: 13 simulation tests pass, including future-price perturbation.
+24,525 trade cash flows reconcile independently; maximum return discrepancy
+5.22e-16. Thirteen input files have checked SHA256 fingerprints.
+2,715 audited sessions; six have 115 missing minutes, all before 2022.
+Incomplete openings/absent entry bars prevent entry; future gaps do not remove
+trades. Positions carry across gaps and stops use the next observed price.
+
+Assumed: minute-price execution plus fixed costs, fractional sizing, short
+availability and adjusted-price total-return benchmarks. Costs are explicitly
+stress-tested, but neither broker fills nor intraday drawdowns are verified.
+Out of scope: taxes, FX, other instruments, live orders and app deployment.
+This does not establish the performance of the seller's proprietary strategy.
+
+Run and inspect the full report using README.txt. Raw data stays out of Git.
