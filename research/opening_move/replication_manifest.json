@@ -1,0 +1,109 @@
+{
+  "status": "not_replicated",
+  "retrieved_on": "2026-10-21",
+  "source": "https://api-quantlab.com/download/session-open-momentum/backtest",
+  "version_stated_in_readme": "2.2",
+  "readable_source_present": false,
+  "preset_present": false,
+  "trade_history_present": false,
+  "executable_run": false,
+  "same_as_live_logic": "seller statement, not independently verified",
+  "files": [
+    {
+      "name": "quantlab-session-open-momentum-backtest-2026-10-20.zip",
+      "bytes": 74596,
+      "sha256": "88138270cc7f5224fee33fe44a46e16cba98eedd6234866efa2a847b0f539d88"
+    },
+    {
+      "name": "README_BACKTEST.txt",
+      "bytes": 1877,
+      "sha256": "e3c25d84472b182d6592af0c0b52ddec8d2930e9b4ab5637175f325872770530"
+    },
+    {
+      "name": "SessionOpenMomentum_BACKTEST.ex5",
+      "bytes": 73870,
+      "sha256": "9432647deeb05aca6bca0ca116ed8369eb09d83ef3e37f06065178a75671eac7"
+    }
+  ],
+  "public_evidence": {
+    "verdict": "REFUTED: these public sources do not specify an exact implementation.",
+    "observed_at_utc": "2026-10-21T12:03:15.857289+00:00",
+    "method": "Unauthenticated public HTTP GET; English auto-generated WebVTT URL disclosed by public TikTok hydration. Rendered public HTML text for QuantLab pages. No login, download of EA, or locked detail extraction.",
+    "sources": {
+      "video": "https://www.tiktok.com/@thequantbuilder/video/7694316099868855584",
+      "overview": "https://api-quantlab.com/algorithmen/session-open-momentum",
+      "analysis": "https://api-quantlab.com/algorithmen/session-open-momentum/analyse"
+    },
+    "asr_metadata": {
+      "language": "eng-US",
+      "type": "ASR",
+      "format": "webvtt",
+      "sha256": "d7e497a94afd6c8f970bb480938adf569d3b6b0b1774ad216725bde469b0c125",
+      "full_transcript_saved": false
+    },
+    "public_rules": [
+      {
+        "time": "00:17.380\u201300:22.641",
+        "source": "video",
+        "fact": "Wait for the first five-minute candle at the New York open."
+      },
+      {
+        "time": "00:22.740\u201300:26.800",
+        "source": "video",
+        "fact": "Close above EMA12 implies long; below implies short."
+      },
+      {
+        "time": "00:29.700\u201300:36.001",
+        "source": "video",
+        "fact": "No fixed profit target; trailing stop; hold until unspecified exit rules trigger."
+      },
+      {
+        "source": "overview",
+        "fact": "Instrument NAS100; M5; adjustable preset risk 1% per trade."
+      },
+      {
+        "source": "overview",
+        "fact": "Never simultaneous long and short. Overnight positions 45%; weekend positions 12%."
+      },
+      {
+        "source": "overview, analysis",
+        "fact": "Four steps are waiting for New York, direction, wide stop, letting the move run. Step details explicitly require subscription."
+      }
+    ],
+    "claimed_results_not_verified": [
+      {
+        "time": "00:03.100\u201300:08.600; 00:36.100\u201300:50.600",
+        "source": "video",
+        "fact": "Return 982%; 1,448 trades during 2019\u20132026; win rate 57%; profit factor 1.29; max drawdown 19.7%."
+      },
+      {
+        "source": "overview, analysis",
+        "fact": "Current website instead shows +505.8%, PF 1.24, drawdown 26.60%, win rate 56.4%. Public text does not reconcile the two result sets."
+      }
+    ],
+    "unknown_rules": [
+      "Exact initial stop formula and distance.",
+      "Trailing reference price, distance, activation, step size and update frequency.",
+      "Additional exit rules, holding limits and weekend handling.",
+      "EMA input price, historical sessions, initialization and warmup; equality handling.",
+      "Server timezone/DST conversion and precise execution price/order type.",
+      "Existing-position behavior at the next daily signal; re-entry/skip rules.",
+      "Broker NAS100 contract/feed, lot sizing, leverage/margin and costs.",
+      "Exact backtest data, dates, settings and version behind each result set."
+    ],
+    "code_comparison": [
+      {
+        "path": "/Users/claudiu/Sites/aurel3-opening-research/research/opening_move/protocol.json",
+        "lines": "3,5\u201310",
+        "fact": "Explicitly own QQQ implementation. Uses 0.5% planned risk, 100% notional cap, max(2 ATR14, 0.25% price) stop and forced same-day exit. These are not recovered QuantLab rules."
+      },
+      {
+        "path": "/Users/claudiu/Sites/aurel3-opening-research/research/opening_move/engine.py",
+        "lines": "70,73,103\u2013104,113",
+        "fact": "Implements the invented ATR stop, scheduled same-day exit and completed-minute-close trailing."
+      }
+    ],
+    "counterexample": "Two implementations with identical public entry and no fixed target but different wide-stop distances and trailing rules can produce different trades; public sources cannot distinguish them. The local mandatory same-day exit additionally conflicts with reported original overnight holdings.",
+    "limits": "ASR is automatically generated and may contain recognition errors. Chart pixels/video overlays were not audited. Locked subscriber content and executable strategy were not inspected."
+  }
+}

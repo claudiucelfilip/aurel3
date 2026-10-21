@@ -1,6 +1,8 @@
 OPENING-MOVE RESEARCH / 21 OCTOBER 2026
 
 Decision: reject this implementation for live use; retain the reusable harness.
+Scope correction: this is not an exact QuantLab replica. See REPLICATION.txt.
+The original bot's performance remains unevaluated by this experiment.
 
 Data: consolidated SIP QQQ minute bars, 2016–20 October 2026.
 Initial training/warmup: 2016–2018. Development: 2019–2021.

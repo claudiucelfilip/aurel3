@@ -6,6 +6,8 @@ Research only: these scripts make no trading requests and do not alter the app.
 RESULT
 The selected AI filter fails the investment gates. See FINDINGS.txt.
 Do not tune parameters against these evaluation dates and call them unseen.
+This does not evaluate the original QuantLab bot: see REPLICATION.txt and
+replication.html for the verified mismatches and unresolved original rules.
 
 REPLAY (from the repository root, Python 3.12)
 python3 -m venv /tmp/aurel-opening-env

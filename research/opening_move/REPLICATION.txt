@@ -1,0 +1,115 @@
+QUANTLAB REPLICATION AUDIT — 21 OCTOBER 2026
+
+STATUS: NOT REPLICATED. The QQQ experiment is a separate strategy. Its results
+must not be used to accept or reject the original bot's performance claims.
+No replacement implementation or profitability verdict is justified yet.
+
+CONFIRMED ENTRY CONCEPT
+The original video describes the first five-minute candle after New York opens.
+Its close above EMA12 selects long; below selects short. It states no fixed
+profit target, a trailing stop, and other unspecified exit rules.
+Source: https://www.tiktok.com/@thequantbuilder/video/7694316099868855584
+Relevant video timestamps: 00:17.380–00:26.800 and 00:29.700–00:36.001.
+The automatically generated transcript was cross-checked with public site text;
+it does not specify a complete algorithm.
+
+CONFIRMED PRODUCT CHARACTERISTICS
+NAS100, five-minute timeframe, adjustable 1% risk preset. The seller reports
+45% of positions held overnight, 12% over weekends, and no simultaneous
+opposing positions. These are seller statements, not independent replay results.
+Source: https://api-quantlab.com/algorithmen/session-open-momentum
+
+REFERENCE PACKAGE
+Downloaded through the existing signed-in account, without purchase:
+https://api-quantlab.com/download/session-open-momentum/backtest
+Archive: quantlab-session-open-momentum-backtest-2026-10-20.zip
+Members: SessionOpenMomentum_BACKTEST.ex5 and README_BACKTEST.txt only.
+The README identifies trading logic as version 2.2, tester-only, permits new
+entries through 20 October 2026, and manages existing positions to the end.
+It recommends NAS100/M5 in MT5 and supports minute-OHLC or real-tick tests.
+The archive has no .mq5 source, .set preset or exported trade history.
+We inspected the archive/README; the executable has NOT been run.
+The seller's same-live-logic claim has not been independently verified.
+The downloaded code is kept locally, not redistributed in this repository.
+Manifest and hashes: replication_manifest.json.
+
+KNOWN DIFFERENCES IN OUR EXISTING EXPERIMENT
+1. QQQ ETF and regular-session prices replace the NAS100 broker contract/feed.
+2. Every position closes five minutes before the daily close. Multi-day holdings
+   and subsequent signals while occupied are impossible in the daily simulator.
+3. A custom max(2*ATR14, 0.25% price) stop and completed-minute-close trailing
+   were supplied without evidence of vendor equivalence.
+4. Risk is 0.5%, with 100% notional cap and synthetic fractional shares, rather
+   than the published 1% preset and actual CFD contract/lot/margin rules.
+5. EMA input excludes overnight quotes; original EMA history is unspecified.
+6. Eligibility requires research-only 200-day-SMA warmup. The four modification
+   variants, including AI filtering, are our additions.
+
+UNRESOLVED RULES — DO NOT FILL WITH DEFAULTS
+Initial stop: formula, distance units, rounding, spread/reference price.
+Trailing: anchor, activation, distance, step, frequency, stop-update order.
+Exits: all additional triggers, maximum holding time, weekend treatment.
+Next opening signal: skip, add, close or reverse an existing position.
+EMA: price field, full-session vs regular-session history, seeding/warmup,
+     inclusion of opening candle, equality handling and missing bars.
+Timing: broker timezone/DST, exact candle boundary, first executable quote,
+        order type, holidays, missed signal and retry behavior.
+Sizing: balance/equity base, fixed/adaptive risk, lot steps, min/max lot,
+        contract multiplier, tick value, margin and account currency.
+Costs/data: exact broker symbol, bid/ask ticks, commission, financing/swaps,
+            historical cost changes and fill assumptions.
+Version: which EA build, preset and dates produced each advertised result.
+
+VERSION/CLAIM MISMATCH
+The video reports +982%, 1,448 trades in 2019–2026, 57% wins, profit factor
+1.29 and drawdown 19.7%. The current site reports +505.8%, 56.4% wins,
+profit factor 1.24 and drawdown 26.60%. These are different reference claims.
+The archive identifies v2.2, but the video's version/settings are unknown.
+Do not tune our code until its total return matches either headline.
+
+HOW EXACT REPLICATION WILL BE ACCEPTED
+1. Obtain complete rules and freeze the reference executable, preset, broker
+   symbol specification, account settings, tester mode, dates and data hashes.
+2. Run the reference in an isolated MT5 tester with no funded account. Export
+   orders/deals, settings and logs. Record actual tick coverage and any generated
+   replacement ticks. Archive indicator/stop traces where the bot exposes them.
+3. Implement the documented rules in our own simulator on the same input feed.
+   Persistent positions, stops, cash and financing must survive session changes.
+4. Compare every decision and order/deal in chronological order: signal/time,
+   side, entry/exit, quantity, costs, stop updates where observable, and equity.
+   Require no unexplained missing/extra trades. Only export precision and actual
+   contract rounding may create tolerances; do not invent a percentage allowance.
+5. Include long/short, overnight/weekend, next-day-signal, DST, holiday, price-gap
+   and intraminute trail/reversal cases. Stop changes hidden from exports remain
+   explicitly unverified until captured through logs or controlled replay.
+6. Freeze the matching version before testing any downside modification.
+
+Same-broker parity validates that replay, not the seller's historical headline.
+The latter additionally needs the seller's original dataset, dates and costs.
+MT5 real-tick testing limitations:
+https://www.mql5.com/en/docs/runtime/testing
+
+ACCESS AND RUNTIME CHECKS
+Detailed rules and research basis are locked at:
+https://api-quantlab.com/algorithmen/session-open-momentum/analyse
+The signed-in downloads page also requires active access. The public marketing
+site's full-report links resolve to chart images, not trade exports.
+https://www.quantlab-ai.com/
+https://www.quantlab-ai.com/img/som-equity.webp
+https://www.quantlab-ai.com/img/som-montecarlo.webp
+No MT5 installation was found in either Mac Applications folder. The installed
+Parallels command could not connect to its service; no VM or service was changed.
+Reading the binary header cannot recover the missing trading specification.
+
+Paid access page observed 21 October: EUR1 for seven days, then EUR99/month
+from 28 October unless cancelled. No purchase or agreement was submitted.
+https://api-quantlab.com/abo
+It advertises detailed explanations and presets, but their sufficiency for a
+complete independent implementation cannot be verified before access.
+
+VERIFIED / ASSUMED / NOT CHECKED
+Verified: public rules, package contents/version statement, code mismatches,
+          locked access, and available local runtime checks.
+Assumed: none of the missing strategy parameters.
+Not checked: executable behavior, exact replica, reference fills, profitability,
+             original video-to-v2.2 equivalence, or subscriber-only contents.
