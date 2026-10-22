@@ -1,0 +1,9 @@
+{
+  "_note": "OpenFIGI returned a foreign-line or stale code; mapped to the US Yahoo symbol carrying the same company's history. Names with no Yahoo history stay unpriced.",
+  "EXMOC": "XOM", "HONGBP": "HON", "LRCXEUR": "LRCX", "ANETEUR": "ANET", "DWDPEUR": "DD", "OKEEUR": "OKE",
+  "JECUSD": "J", "LBEUR": "BBWI", "99803EUR": "LH", "BLKCHF": "BLK", "SMCIUSD": "SMCI", "UTXZ": "RTX",
+  "CTLEUR": "LUMN", "FLT1EUR": "CPAY", "LEG1*": "LEG", "SLG2EUR": "SLG", "NOVEUR": "NOV", "ARNCCHF": "HWM",
+  "0VVB": "PARA", "9990302D": "APA", "SYMCEUR": "GEN", "MYL": "VTRS", "HFCUSD": "DINO", "AIVEUR": "AIV",
+  "EA*": "EA", "QRVO*": "QRVO", "WBD*": "WBD", "MRO*": "MRO", "HO1": "HOLX", "HN9": "HBI", "SEE1GBP": "SEE",
+  "KEL": "K", "AKX": "ANSS"
+}
