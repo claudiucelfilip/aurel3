@@ -169,5 +169,49 @@
     "grid": "3 signal sets x 2 universes = 6 configs; choice = highest development Sharpe, recorded before holdout.",
     "pass_rules": "H1-H5 as holdout_rules, measured against the French market.",
     "expectation_recorded_before_running": "Research synthesis predicts +1 to +3 pp/yr net long-only; H1 (>=3pp) is expected to fail."
+  },
+  "track_H_reddit_claims": {
+    "recorded_on": "2026-10-22",
+    "source": "Reddit sweep of r/algotrading, r/quant, r/investing, r/Bogleheads, r/swingtrading, r/Daytrading, r/Trading and tactical-allocation threads (notes private, ~1,000 posts). No verified long-only record found; these are the four concrete, untested, testable claims.",
+    "data": "Yahoo adjusted closes 2007-01-01 to 2026-10-16 (data/broad_search/pairs_prices.csv). Cash = SHY. Trades at the close after the signal. Cost 0.10% per side.",
+    "development": "2008-01-01 to 2018-12-31",
+    "holdout": "2019-01-01 to 2026-10-16; halves split 2022-12-31",
+    "families": {
+      "H_qqq_trend": {
+        "claim": "QQQ above its 200-day SMA else cash: 13.8% vs SPY 14.2% since 2010, 17.2% vs 15.2% since 2020 (agent recomputation).",
+        "grid": [
+          "daily 200-day SMA check",
+          "month-end 200-day SMA check",
+          "month-end 10-month SMA"
+        ]
+      },
+      "H_rsi2_pullback": {
+        "claim": "Connors RSI(2): buy when RSI(2)<10 and close>200-day SMA, exit when RSI(2)>70 or close>EMA(5); poster claims 25% CAGR on S&P 500 stocks (survivorship-biased, no SPY comparison).",
+        "grid": [
+          "SPY only",
+          "QQQ only",
+          "9 SPDR sectors equal-split among triggered"
+        ],
+        "note": "Run on ETFs because free stock data cannot give point-in-time S&P 500 membership."
+      },
+      "H_two_down_closes": {
+        "claim": "Buy SPY after two consecutive down closes, hold five sessions; +283% 2000-2026, no SPY comparison given.",
+        "grid": [
+          "hold 5",
+          "hold 3",
+          "hold 10"
+        ]
+      },
+      "H_fxe_uup_filter": {
+        "claim": "Weekly: hold SPY if FXE 4-week return > UUP 4-week return, else cash; ~7.5% CAGR, Sharpe 0.7, DD 23%.",
+        "grid": [
+          "4-week",
+          "8-week",
+          "13-week lookback"
+        ]
+      }
+    },
+    "choice": "Per family, highest development Sharpe, recorded before the holdout. Verdict per family with H1-H5 against SPY.",
+    "expectation_recorded_before_running": "Each family is a timing rule that is out of the market part of the time; the sweep itself found only 2 of 113 such US rules beat buy-and-hold in a placebo study. Expect H1 to fail for all four; the QQQ trend rule may pass on drawdown only."
   }
 }
