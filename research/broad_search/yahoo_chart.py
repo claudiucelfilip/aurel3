@@ -18,7 +18,7 @@ def adj_close(symbol, start='2006-01-01', end='2026-10-17', pause=0.6, tries=5):
                 res = json.loads(r.read())['chart']['result'][0]
             break
         except urllib.error.HTTPError as exc:
-            if exc.code == 404:
+            if exc.code in (400, 404):  # 400: no data for the requested start (fund too young)
                 return pd.Series(dtype=float, name=symbol)
             time.sleep(20 * (attempt + 1))
         except Exception:
