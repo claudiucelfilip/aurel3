@@ -45,5 +45,33 @@
     "development": "First available quarter to 2018-12.",
     "costs": "0.25% per side (small and mid caps).",
     "bias": "Yahoo has no prices for many delisted stocks; such events are counted and dropped, which biases results upward."
+  },
+  "track_E_inverse_reaction_pairs": {
+    "recorded_on": "2026-10-22",
+    "idea": "User proposal: find pairs where asset Y tends to rise after asset X falls (hit rate >= 56%), then buy Y when X falls. Long-only; no shorts or leverage.",
+    "universe": "About 90 unleveraged ETFs with prices before 2007-12-31: US size/style, 9 SPDR sectors plus industry ETFs, single-country and regional equity, Treasury/credit/TIPS bonds, gold/silver/broad commodities/oil/gas/agriculture, currency ETFs, REITs. Volatility ETNs and leveraged/inverse funds excluded. Crypto excluded (no history before 2014). Every ticker may be X and Y; X != Y. List fixed in pairs_universe in pairs.py before results.",
+    "data": "Yahoo adjusted closes 2007-01-01 to 2026-10-16.",
+    "development": "2008-01-01 to 2018-12-31",
+    "holdout": "2019-01-01 to 2026-10-16",
+    "signal": "X period return below threshold at close of period t. Trade Y at the NEXT trading close (one-day execution delay), hold one period. Same-close execution reported only as an optimistic upper bound, never for the verdict.",
+    "grid": {
+      "frequency": [
+        "daily",
+        "weekly (Friday close)"
+      ],
+      "trigger": [
+        "X return < 0",
+        "X return in its bottom 10% of the trailing 252 daily / 52 weekly returns"
+      ],
+      "pairs_kept": 10
+    },
+    "pair_selection": "Development only. Keep pairs with P(Y up | trigger) >= 0.56 and at least 60 triggers; rank by Newey-West t of mean(Y return - SPY return) on trigger periods; take the top 10, at most 2 per Y.",
+    "portfolio": "Default 100% SPY. Each period, equal-weight the Ys whose X triggered (unique Ys, total 100%); otherwise SPY. Cost 0.10% per side on turnover.",
+    "choice": "Highest development Sharpe of the 4 configs, recorded before holdout is computed.",
+    "pass_rules": "H1-H5 from holdout_rules.",
+    "diagnostics": [
+      "Holdout pair persistence: share of selected pairs still >= 56% and beating SPY on triggers, against 1,000 random equally sized pair sets from the same universe (placebo).",
+      "Unconditional base rate: share of up periods for each Y, because a 56% hit rate is ordinary for equities (about 53-56% of days are up)."
+    ]
   }
 }
