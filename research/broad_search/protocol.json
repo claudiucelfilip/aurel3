@@ -15,5 +15,35 @@
     "known_bias": "Dead funds are missing (survivorship) and funds that were not yet 10 years old are excluded; both bias results upward, so a failure is more decisive than a pass.",
     "if_pass": "Report as a candidate whose rule is 'hold this fund'; still requires a prospective tracking period before any money."
   },
-  "later_tracks": "Further tracks (for example insider-purchase events from SEC Form 4, crypto allocation, multi-signal machine learning) are registered here before they run, with a development period ending 2018-12 and an untouched 2019-2026 evaluation."
+  "holdout_rules": {
+    "split": "Development data ends 2018-12-31. Evaluation (holdout) 2019-01-01 to 2026-10-16. In each track, the configuration with the best development Sharpe ratio is chosen before the holdout is computed; all configurations' holdout results are reported afterwards but cannot change the choice.",
+    "H1": "Holdout CAGR at least 3.0 points above SPY after costs.",
+    "H2": "Holdout Newey-West t-statistic (lag 6 months) of monthly excess over SPY at least 2.2 (one-sided 5% split over three tracks).",
+    "H3": "Ahead of SPY in both holdout halves (2019-2022 and 2023-2026-10).",
+    "H4": "Holdout maximum daily-close drawdown no more than 10 points deeper than SPY's.",
+    "H5": "Development CAGR also at least 3.0 points above SPY (same edge before and after the split).",
+    "known_bias": "Yahoo lacks most delisted stocks (track D) and the crypto history is short (track B)."
+  },
+  "track_B_crypto_with_spy": {
+    "assets": "SPY, BTC-USD (Yahoo), cash = BIL (T-bill proxy, ^IRX yield before BIL exists).",
+    "development": "2015-01-01 to 2018-12-31.",
+    "configs": "Bitcoin target weight w in {10%, 25%}, remainder SPY: (a) static, rebalanced monthly; (b) trend-filtered: BTC sleeve held only when BTC close > its N-day average, N in {100, 200}, else that sleeve in cash. 6 configurations.",
+    "execution": "Signals at daily close, trades at the next close. Costs 0.25% per side for BTC, 0.10% for SPY/BIL."
+  },
+  "track_C_ml_etf_rotation": {
+    "universe": "SPY QQQ IWM EFA EEM XLB XLE XLF XLI XLK XLP XLU XLV XLY GLD TLT IEF LQD HYG VNQ DBC, cash BIL (22 risky ETFs, all trading since 2006-02 or earlier).",
+    "features": "Per ETF at each month end: past 1, 3, 6 and 12-month returns, 3-month daily volatility, distance from 10-month average; plus market-wide 10y-3m Treasury spread and Baa-10y credit spread (FRED, lagged one month).",
+    "models": "Ridge regression and gradient-boosted trees predicting next-month return, trained on all data up to the previous month (expanding window, first prediction 2009-01). Hold the top k equally weighted; if the top predicted return is below the T-bill rate, hold cash.",
+    "configs": "model in {ridge, boosted trees} x k in {1, 3}; plus a non-ML control (top 3 by 12-month return) reported but not eligible. 4 eligible configurations.",
+    "development": "2009-01 to 2018-12 predictions.",
+    "execution": "Monthly, trade at month-end close using signals from that close's data minus one month for macro. Costs 0.10% per side."
+  },
+  "track_D_insider_purchases": {
+    "data": "SEC Financial Statement and Notes is not used; SEC Form 3/4/5 insider transaction data sets (quarterly, from the first available quarter). Open-market purchases (transaction code P) by officers or directors.",
+    "signal": "A stock enters when insider purchases filed on a day total at least $100,000 (configs vary the cluster rule). Entry at the next trading day's close after the filing date; equal-weighted positions; exit after the holding period; idle cash in BIL.",
+    "configs": "holding period in {3, 6} months x cluster rule in {any qualifying purchase, at least two distinct insiders within 30 days}. 4 configurations. Price at least $5 on entry. Maximum 50 concurrent positions (oldest-first priority).",
+    "development": "First available quarter to 2018-12.",
+    "costs": "0.25% per side (small and mid caps).",
+    "bias": "Yahoo has no prices for many delisted stocks; such events are counted and dropped, which biases results upward."
+  }
 }
