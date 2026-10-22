@@ -1,0 +1,514 @@
+{
+  "protocol_sha256": "28b400a873487030ee1cf8735e95eb50147141e222214dd424b15cedeb16e95a",
+  "failures": {
+    "QRFT": "SEC notice scheduled liquidation for July 2026. The vendor returned no history. Keep this failed data retrieval in the comparison; do not substitute a surviving fund or zero returns."
+  },
+  "windows": {
+    "common_live": {
+      "AMOM": {
+        "start": "2019-05-22",
+        "end": "2026-10-16",
+        "observations": 1862,
+        "ending_equity": 29831.584487529457,
+        "cagr_net": 0.15909269303094065,
+        "cagr_before_entry_exit": 0.15940587050041444,
+        "total_before_entry_exit": 1.9891307379396386,
+        "annual_arithmetic_before_entry_exit": 0.18127505243565822,
+        "drawdown_net": 0.4003434462414459
+      },
+      "AIEQ": {
+        "start": "2019-05-22",
+        "end": "2026-10-16",
+        "observations": 1862,
+        "ending_equity": 19978.95258204681,
+        "cagr_net": 0.09799575221192613,
+        "cagr_before_entry_exit": 0.09829242178221853,
+        "total_before_entry_exit": 1.0018950485113969,
+        "annual_arithmetic_before_entry_exit": 0.12101619156332831,
+        "drawdown_net": 0.38973544806326466
+      },
+      "SPMO": {
+        "start": "2019-05-22",
+        "end": "2026-10-16",
+        "observations": 1862,
+        "ending_equity": 38520.93244171762,
+        "cagr_net": 0.1998157361423527,
+        "cagr_before_entry_exit": 0.20013991664865638,
+        "total_before_entry_exit": 2.859805142558492,
+        "annual_arithmetic_before_entry_exit": 0.20861686429987852,
+        "drawdown_net": 0.309475367255618
+      },
+      "MTUM": {
+        "start": "2019-05-22",
+        "end": "2026-10-16",
+        "observations": 1862,
+        "ending_equity": 27761.733971638307,
+        "cagr_net": 0.14788856266934292,
+        "cagr_before_entry_exit": 0.1481987128734259,
+        "total_before_entry_exit": 1.781731301862857,
+        "annual_arithmetic_before_entry_exit": 0.16685378957773775,
+        "drawdown_net": 0.340823090319905
+      },
+      "QMOM": {
+        "start": "2019-05-22",
+        "end": "2026-10-16",
+        "observations": 1862,
+        "ending_equity": 24619.909357013737,
+        "cagr_net": 0.1294163202561034,
+        "cagr_before_entry_exit": 0.1297214794097128,
+        "total_before_entry_exit": 1.4669198464835587,
+        "annual_arithmetic_before_entry_exit": 0.16390455957047842,
+        "drawdown_net": 0.3912608479282552
+      },
+      "SPY": {
+        "start": "2019-05-22",
+        "end": "2026-10-16",
+        "observations": 1862,
+        "ending_equity": 29753.88709801932,
+        "cagr_net": 0.1586844474420317,
+        "cagr_before_entry_exit": 0.15899751460684963,
+        "total_before_entry_exit": 1.9813454439556897,
+        "annual_arithmetic_before_entry_exit": 0.16696930620383607,
+        "drawdown_net": 0.33717268745960105
+      },
+      "GLD": {
+        "start": "2019-05-22",
+        "end": "2026-10-16",
+        "observations": 1862,
+        "ending_equity": 31707.149016652893,
+        "cagr_net": 0.16867873658825783,
+        "cagr_before_entry_exit": 0.16899450412915695,
+        "total_before_entry_exit": 2.1770626792462004,
+        "annual_arithmetic_before_entry_exit": 0.1731007802987914,
+        "drawdown_net": 0.26404517857029675
+      }
+    },
+    "since_2022": {
+      "AMOM": {
+        "start": "2021-12-31",
+        "end": "2026-10-16",
+        "observations": 1203,
+        "ending_equity": 15807.086869016612,
+        "cagr_net": 0.10028000245908353,
+        "cagr_before_entry_exit": 0.10073938679521288,
+        "total_before_entry_exit": 0.5838732688574204,
+        "annual_arithmetic_before_entry_exit": 0.12848774998469806,
+        "drawdown_net": 0.3493010115461237
+      },
+      "AIEQ": {
+        "start": "2021-12-31",
+        "end": "2026-10-16",
+        "observations": 1203,
+        "ending_equity": 12025.608000328999,
+        "cagr_net": 0.03924868646632618,
+        "cagr_before_entry_exit": 0.039682589260922496,
+        "total_before_entry_exit": 0.20496832916209473,
+        "annual_arithmetic_before_entry_exit": 0.06399828925390529,
+        "drawdown_net": 0.35919005126418146
+      },
+      "SPMO": {
+        "start": "2021-12-31",
+        "end": "2026-10-16",
+        "observations": 1203,
+        "ending_equity": 23035.292715248062,
+        "cagr_net": 0.19024605200591393,
+        "cagr_before_entry_exit": 0.1907429985933362,
+        "total_before_entry_exit": 1.3081409417380687,
+        "annual_arithmetic_before_entry_exit": 0.19746084975199835,
+        "drawdown_net": 0.22736185240096696
+      },
+      "MTUM": {
+        "start": "2021-12-31",
+        "end": "2026-10-16",
+        "observations": 1203,
+        "ending_equity": 16993.75696362785,
+        "cagr_net": 0.11702961713063287,
+        "cagr_before_entry_exit": 0.11749599469630279,
+        "total_before_entry_exit": 0.7027778499090569,
+        "annual_arithmetic_before_entry_exit": 0.13621264204259093,
+        "drawdown_net": 0.2817110378469778
+      },
+      "QMOM": {
+        "start": "2021-12-31",
+        "end": "2026-10-16",
+        "observations": 1203,
+        "ending_equity": 14832.406458582354,
+        "cagr_net": 0.0857611815662298,
+        "cagr_before_entry_exit": 0.0862145040645701,
+        "total_before_entry_exit": 0.48621009660069414,
+        "annual_arithmetic_before_entry_exit": 0.1122234545267377,
+        "drawdown_net": 0.26458562358985493
+      },
+      "SPY": {
+        "start": "2021-12-31",
+        "end": "2026-10-16",
+        "observations": 1203,
+        "ending_equity": 17087.006731158373,
+        "cagr_net": 0.11830615711008963,
+        "cagr_before_entry_exit": 0.11877306765142892,
+        "total_before_entry_exit": 0.7121214952842372,
+        "annual_arithmetic_before_entry_exit": 0.12762878656943016,
+        "drawdown_net": 0.24496364963219475
+      },
+      "GLD": {
+        "start": "2021-12-31",
+        "end": "2026-10-16",
+        "observations": 1203,
+        "ending_equity": 22300.34733450512,
+        "cagr_net": 0.18221812262347936,
+        "cagr_before_entry_exit": 0.18271171742317338,
+        "total_before_entry_exit": 1.234499267451414,
+        "annual_arithmetic_before_entry_exit": 0.18714752814778657,
+        "drawdown_net": 0.26404517857029675
+      }
+    },
+    "before_2024": {
+      "AMOM": {
+        "start": "2019-05-22",
+        "end": "2023-12-29",
+        "observations": 1161,
+        "ending_equity": 17639.012855647085,
+        "cagr_net": 0.13115581220857253,
+        "cagr_before_entry_exit": 0.1316471850131149,
+        "total_before_entry_exit": 0.7674326194697427,
+        "annual_arithmetic_before_entry_exit": 0.15443440596255292,
+        "drawdown_net": 0.4003434462414459
+      },
+      "AIEQ": {
+        "start": "2019-05-22",
+        "end": "2023-12-29",
+        "observations": 1161,
+        "ending_equity": 14277.524217493936,
+        "cagr_net": 0.08039662445391316,
+        "cagr_before_entry_exit": 0.08086594752474596,
+        "total_before_entry_exit": 0.43061078495609917,
+        "annual_arithmetic_before_entry_exit": 0.11090989169903731,
+        "drawdown_net": 0.38973544806326466
+      },
+      "SPMO": {
+        "start": "2019-05-22",
+        "end": "2023-12-29",
+        "observations": 1161,
+        "ending_equity": 17569.087776831973,
+        "cagr_net": 0.1301805524342703,
+        "cagr_before_entry_exit": 0.13067150158707075,
+        "total_before_entry_exit": 0.7604261125734539,
+        "annual_arithmetic_before_entry_exit": 0.14869893505820095,
+        "drawdown_net": 0.309475367255618
+      },
+      "MTUM": {
+        "start": "2019-05-22",
+        "end": "2023-12-29",
+        "observations": 1161,
+        "ending_equity": 14544.104767276665,
+        "cagr_net": 0.08474545384875332,
+        "cagr_before_entry_exit": 0.0852166660461533,
+        "total_before_entry_exit": 0.4573222094138081,
+        "annual_arithmetic_before_entry_exit": 0.11049470809355154,
+        "drawdown_net": 0.340823090319905
+      },
+      "QMOM": {
+        "start": "2019-05-22",
+        "end": "2023-12-29",
+        "observations": 1161,
+        "ending_equity": 16870.36421378444,
+        "cagr_net": 0.12026450505984632,
+        "cagr_before_entry_exit": 0.12075114669289055,
+        "total_before_entry_exit": 0.6904138716714938,
+        "annual_arithmetic_before_entry_exit": 0.1631544601870013,
+        "drawdown_net": 0.3912608479282552
+      },
+      "SPY": {
+        "start": "2019-05-22",
+        "end": "2023-12-29",
+        "observations": 1161,
+        "ending_equity": 17941.931634459932,
+        "cagr_net": 0.13534605354939688,
+        "cagr_before_entry_exit": 0.1358392465900351,
+        "total_before_entry_exit": 0.7977851417511901,
+        "annual_arithmetic_before_entry_exit": 0.1507650070458039,
+        "drawdown_net": 0.33717268745960105
+      },
+      "GLD": {
+        "start": "2019-05-22",
+        "end": "2023-12-29",
+        "observations": 1161,
+        "ending_equity": 15867.26908851132,
+        "cagr_net": 0.10545098484643023,
+        "cagr_before_entry_exit": 0.1059311915030603,
+        "total_before_entry_exit": 0.5899035392992824,
+        "annual_arithmetic_before_entry_exit": 0.11249752802613115,
+        "drawdown_net": 0.22002168134715538
+      }
+    },
+    "since_2024": {
+      "AMOM": {
+        "start": "2023-12-29",
+        "end": "2026-10-16",
+        "observations": 702,
+        "ending_equity": 16878.48473481235,
+        "cagr_net": 0.20571906942429874,
+        "cagr_before_entry_exit": 0.2065811955769179,
+        "total_before_entry_exit": 0.6912275495042204,
+        "annual_arithmetic_before_entry_exit": 0.22569038754093948,
+        "drawdown_net": 0.3025770298302508
+      },
+      "AIEQ": {
+        "start": "2023-12-29",
+        "end": "2026-10-16",
+        "observations": 702,
+        "ending_equity": 13965.330607136379,
+        "cagr_net": 0.12678093415204517,
+        "cagr_before_entry_exit": 0.12758661711438624,
+        "total_before_entry_exit": 0.39932892269704845,
+        "annual_arithmetic_before_entry_exit": 0.13773988320751882,
+        "drawdown_net": 0.24186794120452915
+      },
+      "SPMO": {
+        "start": "2023-12-29",
+        "end": "2026-10-16",
+        "observations": 702,
+        "ending_equity": 21881.59569242377,
+        "cagr_net": 0.32293946270992135,
+        "cagr_before_entry_exit": 0.32388540504263963,
+        "total_before_entry_exit": 1.1925402690807,
+        "annual_arithmetic_before_entry_exit": 0.3077677885799726,
+        "drawdown_net": 0.20127159658446248
+      },
+      "MTUM": {
+        "start": "2023-12-29",
+        "end": "2026-10-16",
+        "observations": 702,
+        "ending_equity": 19049.8256269663,
+        "cagr_net": 0.2590110435855779,
+        "cagr_before_entry_exit": 0.2599112751358921,
+        "total_before_entry_exit": 0.908796341600927,
+        "annual_arithmetic_before_entry_exit": 0.26011560772560655,
+        "drawdown_net": 0.2099200321203576
+      },
+      "QMOM": {
+        "start": "2023-12-29",
+        "end": "2026-10-16",
+        "observations": 702,
+        "ending_equity": 14564.426954606914,
+        "cagr_net": 0.14382350443402658,
+        "cagr_before_entry_exit": 0.14464137335736038,
+        "total_before_entry_exit": 0.4593584966528048,
+        "annual_arithmetic_before_entry_exit": 0.16514580819363597,
+        "drawdown_net": 0.26458562358985493
+      },
+      "SPY": {
+        "start": "2023-12-29",
+        "end": "2026-10-16",
+        "observations": 702,
+        "ending_equity": 16550.30203945094,
+        "cagr_net": 0.19728763349024092,
+        "cagr_before_entry_exit": 0.19814373090730508,
+        "total_before_entry_exit": 0.6583435777267659,
+        "annual_arithmetic_before_entry_exit": 0.1937838383341033,
+        "drawdown_net": 0.18755237333914387
+      },
+      "GLD": {
+        "start": "2023-12-29",
+        "end": "2026-10-16",
+        "observations": 702,
+        "ending_equity": 19942.81302790682,
+        "cagr_net": 0.2797935321189178,
+        "cagr_before_entry_exit": 0.2807086237865972,
+        "total_before_entry_exit": 0.9982738579514239,
+        "annual_arithmetic_before_entry_exit": 0.27338576266153874,
+        "drawdown_net": 0.26404517857029663
+      }
+    },
+    "paper_window": {
+      "AMOM": {
+        "start": "2023-12-29",
+        "end": "2025-03-31",
+        "observations": 313,
+        "ending_equity": 11308.550697918787,
+        "cagr_net": 0.10304050125538078,
+        "cagr_before_entry_exit": 0.10480123114753837,
+        "total_before_entry_exit": 0.13311904390557627,
+        "annual_arithmetic_before_entry_exit": 0.13473325838448003,
+        "drawdown_net": 0.25483070869975954
+      },
+      "AIEQ": {
+        "start": "2023-12-29",
+        "end": "2025-03-31",
+        "observations": 313,
+        "ending_equity": 10406.735822699613,
+        "cagr_net": 0.03230528005351174,
+        "cagr_before_entry_exit": 0.03395309875314556,
+        "total_before_entry_exit": 0.042757012865096256,
+        "annual_arithmetic_before_entry_exit": 0.05004300367348849,
+        "drawdown_net": 0.1500729199597267
+      },
+      "SPMO": {
+        "start": "2023-12-29",
+        "end": "2025-03-31",
+        "observations": 313,
+        "ending_equity": 14199.7143084275,
+        "cagr_net": 0.32263899846424193,
+        "cagr_before_entry_exit": 0.32475026275460905,
+        "total_before_entry_exit": 0.4228142164900828,
+        "annual_arithmetic_before_entry_exit": 0.30257038446833207,
+        "drawdown_net": 0.13160200190451998
+      },
+      "MTUM": {
+        "start": "2023-12-29",
+        "end": "2025-03-31",
+        "observations": 313,
+        "ending_equity": 12988.625275726748,
+        "cagr_net": 0.23187148455904083,
+        "cagr_before_entry_exit": 0.23383786108256,
+        "total_before_entry_exit": 0.30146285295320063,
+        "annual_arithmetic_before_entry_exit": 0.2331779529657515,
+        "drawdown_net": 0.14537218911480676
+      },
+      "QMOM": {
+        "start": "2023-12-29",
+        "end": "2025-03-31",
+        "observations": 313,
+        "ending_equity": 12056.971925769585,
+        "cagr_net": 0.1608780971664716,
+        "cagr_before_entry_exit": 0.16273115039933606,
+        "total_before_entry_exit": 0.20811100077030575,
+        "annual_arithmetic_before_entry_exit": 0.17793848979665783,
+        "drawdown_net": 0.21646122731915385
+      },
+      "SPY": {
+        "start": "2023-12-29",
+        "end": "2025-03-31",
+        "observations": 313,
+        "ending_equity": 11931.885736211854,
+        "cagr_net": 0.15126329476327682,
+        "cagr_before_entry_exit": 0.1531010003547999,
+        "total_before_entry_exit": 0.19557733953434098,
+        "annual_arithmetic_before_entry_exit": 0.15327314170456544,
+        "drawdown_net": 0.10035404453412955
+      },
+      "GLD": {
+        "start": "2023-12-29",
+        "end": "2025-03-31",
+        "observations": 313,
+        "ending_equity": 15042.334732321982,
+        "cagr_net": 0.38486351936597574,
+        "cagr_before_entry_exit": 0.3870741096320005,
+        "total_before_entry_exit": 0.5072449516570876,
+        "annual_arithmetic_before_entry_exit": 0.3423732553868934,
+        "drawdown_net": 0.0812038977169296
+      }
+    }
+  },
+  "rolling_36_months": {
+    "AMOM": {
+      "windows": 53,
+      "beat_both": 8,
+      "worst_total_return": 0.04037832373589123,
+      "first_end": "2022-05-31",
+      "last_end": "2026-09-30"
+    },
+    "AIEQ": {
+      "windows": 53,
+      "beat_both": 0,
+      "worst_total_return": -0.11212896333828337,
+      "first_end": "2022-05-31",
+      "last_end": "2026-09-30"
+    },
+    "SPMO": {
+      "windows": 53,
+      "beat_both": 30,
+      "worst_total_return": 0.18521533516589406,
+      "first_end": "2022-05-31",
+      "last_end": "2026-09-30"
+    },
+    "MTUM": {
+      "windows": 53,
+      "beat_both": 5,
+      "worst_total_return": -0.014989511307563874,
+      "first_end": "2022-05-31",
+      "last_end": "2026-09-30"
+    },
+    "QMOM": {
+      "windows": 53,
+      "beat_both": 10,
+      "worst_total_return": -0.0857947250271287,
+      "first_end": "2022-05-31",
+      "last_end": "2026-09-30"
+    }
+  },
+  "data_checks": {
+    "AMOM": {
+      "missing_sessions": 0,
+      "null_prices": 0,
+      "nonpositive_prices": 0
+    },
+    "AIEQ": {
+      "missing_sessions": 0,
+      "null_prices": 0,
+      "nonpositive_prices": 0
+    },
+    "SPMO": {
+      "missing_sessions": 0,
+      "null_prices": 0,
+      "nonpositive_prices": 0
+    },
+    "MTUM": {
+      "missing_sessions": 0,
+      "null_prices": 0,
+      "nonpositive_prices": 0
+    },
+    "QMOM": {
+      "missing_sessions": 0,
+      "null_prices": 0,
+      "nonpositive_prices": 0
+    },
+    "SPY": {
+      "missing_sessions": 0,
+      "null_prices": 0,
+      "nonpositive_prices": 0
+    },
+    "GLD": {
+      "missing_sessions": 0,
+      "null_prices": 0,
+      "nonpositive_prices": 0
+    }
+  },
+  "spmo_issuer_nav_crosscheck": {
+    "2019": {
+      "issuer_nav": 0.26,
+      "vendor_market": 0.25927875416233803,
+      "difference_pp": -0.07212458376619768
+    },
+    "2020": {
+      "issuer_nav": 0.2817,
+      "vendor_market": 0.2780014968089828,
+      "difference_pp": -0.36985031910172217
+    },
+    "2021": {
+      "issuer_nav": 0.2268,
+      "vendor_market": 0.22506216266828405,
+      "difference_pp": -0.17378373317159523
+    },
+    "2022": {
+      "issuer_nav": -0.1063,
+      "vendor_market": -0.10450440811649386,
+      "difference_pp": 0.17955918835061424
+    },
+    "2023": {
+      "issuer_nav": 0.1759,
+      "vendor_market": 0.17557757682646935,
+      "difference_pp": -0.03224231735306504
+    },
+    "2024": {
+      "issuer_nav": 0.4581,
+      "vendor_market": 0.4581730736694405,
+      "difference_pp": 0.00730736694404821
+    },
+    "2025": {
+      "issuer_nav": 0.2668,
+      "vendor_market": 0.2658166894041081,
+      "difference_pp": -0.09833105958919064
+    }
+  }
+}

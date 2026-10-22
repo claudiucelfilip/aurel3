@@ -1,0 +1,76 @@
+{
+  "fetched_at": "2026-10-22T07:19:53.373517+00:00",
+  "protocol_sha256": "28b400a873487030ee1cf8735e95eb50147141e222214dd424b15cedeb16e95a",
+  "yfinance_version": "1.5.1",
+  "files": {
+    "AMOM.csv": {
+      "sha256": "a4e0cf58ff2db673fb1e80268422da84f3b3f3dff65085d7a7cb8cd022ad9b44",
+      "source": "Yahoo Finance via yfinance",
+      "ticker": "AMOM",
+      "first": "2026-10-13",
+      "last": "2026-10-16",
+      "rows": 3
+    },
+    "AIEQ.csv": {
+      "sha256": "bdf55a0ee08290836acfcfcef1d1e210d5cf7df3f68ec93f5281cec706bc5ee0",
+      "source": "Yahoo Finance via yfinance",
+      "ticker": "AIEQ",
+      "first": "2017-10-18",
+      "last": "2026-10-16",
+      "rows": 2261
+    },
+    "SPMO.csv": {
+      "sha256": "8f8907643a4d0ab4039dc67c92f6866c056781827ec90047c2047dbccc09d57f",
+      "source": "Yahoo Finance via yfinance",
+      "ticker": "SPMO",
+      "first": "2015-10-12",
+      "last": "2026-10-16",
+      "rows": 2770
+    },
+    "MTUM.csv": {
+      "sha256": "de1a125e88fda69bec7be126fea63c6ae8a6c29af32d2b83e86db80c1572b91b",
+      "source": "Yahoo Finance via yfinance",
+      "ticker": "MTUM",
+      "first": "2013-04-18",
+      "last": "2026-10-16",
+      "rows": 3396
+    },
+    "QMOM.csv": {
+      "sha256": "dbc821e6ffece5ddde62d3601287dbde4cca0d91c95fcf237afcdf9ed07179ac",
+      "source": "Yahoo Finance via yfinance",
+      "ticker": "QMOM",
+      "first": "2015-12-02",
+      "last": "2026-10-16",
+      "rows": 2734
+    },
+    "SPY.csv": {
+      "sha256": "60dbabf9ef40da81727235b1cde5ddc2e0a808946649d5a3c14f4b99ba213178",
+      "source": "Yahoo Finance via yfinance",
+      "ticker": "SPY",
+      "first": "2013-01-02",
+      "last": "2026-10-16",
+      "rows": 3469
+    },
+    "GLD.csv": {
+      "sha256": "e0f0d8339278c9f5d3740317f658bd5c8c2c6cf6c110cebcbbd3e12160f9e45c",
+      "source": "Yahoo Finance via yfinance",
+      "ticker": "GLD",
+      "first": "2013-01-02",
+      "last": "2026-10-16",
+      "rows": 3469
+    },
+    "AIED.csv": {
+      "sha256": "42d69f2e11f44d98b495371def7b0fb7ad4a28a3f96c6289bfdaa9eeeca1d61a",
+      "source": "Yahoo Finance via yfinance",
+      "ticker": "AIED",
+      "predecessor": "AMOM",
+      "first": "2019-05-21",
+      "last": "2026-10-16",
+      "rows": 1863
+    }
+  },
+  "errors": {
+    "QRFT": "No prices returned"
+  },
+  "identity_notes_sha256": "19a8f4b506b4c4c0b41ad917faf3d519c16ff66fc395010a44114d4f275d39e0"
+}

@@ -1,0 +1,18 @@
+{
+  "recorded_on": "2026-10-22",
+  "AMOM": {
+    "history_symbol": "AIED",
+    "reason": "Issuer confirms AMOM became AIED on 2026-10-19. The AIED vendor series carries the predecessor history; the AMOM query returned only three recent rows. The evaluation ends 2026-10-16, before the strategy change.",
+    "source": "https://www.defianceetfs.com/aied/",
+    "limitation": "Historical AMOM results cannot validate the newly added LLM news signal."
+  },
+  "QRFT": {
+    "history_symbol": null,
+    "reason": "SEC notice scheduled liquidation for July 2026. The vendor returned no history. Keep this failed data retrieval in the comparison; do not substitute a surviving fund or zero returns.",
+    "source": "https://www.sec.gov/Archives/edgar/data/1547950/000121390026071873/ea0295872-01_497.htm"
+  },
+  "SPMO": {
+    "source": "https://www.spglobal.com/spdji/en/documents/methodologies/methodology-sp-momentum-indices.pdf",
+    "limitation": "The index changed the 9% maximum from security to company level effective 2026-09-18. Its live history is not a single immutable rule version."
+  }
+}

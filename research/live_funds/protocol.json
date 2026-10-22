@@ -1,0 +1,24 @@
+{
+  "recorded_on": "2026-10-22",
+  "purpose": "Compare live fund histories behind AI and systematic stock-selection claims, with no strategy tuning.",
+  "status": "Exploratory: public performance headlines were already inspected. This is not an independent holdout or a complete census of funds.",
+  "candidates": ["AMOM", "QRFT", "AIEQ", "SPMO", "MTUM", "QMOM"],
+  "benchmarks": ["SPY", "GLD"],
+  "download_start": "2013-01-01",
+  "end_exclusive": "2026-10-17",
+  "comparisons": {
+    "common_live": ["2019-05-22", "2026-10-16"],
+    "since_2022": ["2021-12-31", "2026-10-16"],
+    "before_2024": ["2019-05-22", "2023-12-29"],
+    "since_2024": ["2023-12-29", "2026-10-16"],
+    "paper_window": ["2023-12-29", "2025-03-31"]
+  },
+  "capital_usd": 10000,
+  "entry_cost_fraction": 0.001,
+  "exit_cost_fraction": 0.001,
+  "accounting": "Cash purchase and hold; adjusted-close total-return proxy with dividends reinvested; fund expenses embedded, not deducted twice. Entry cost reduces invested capital and terminal exit cost reduces final proceeds. No borrowing, short positions, leveraged funds, timing overlays, tax or FX model.",
+  "missing_data": "Do not fill price gaps or erase a failed ticker. Report any incomplete interval; do not treat stale prices as investable.",
+  "metrics": ["ending wealth", "CAGR", "daily-close maximum drawdown including entry cost", "calendar returns", "overlapping 36-month comparison against both benchmarks"],
+  "interpretation": "A live track record avoids reconstructing hypothetical historical orders, but choosing funds after seeing their success still creates selection bias. Fund managers and index rules may change. This comparison does not validate a clone, attribute returns to AI, or establish future outperformance.",
+  "next_gate": "A candidate must show a useful advantage across declared intervals without greater drawdown than SPY, survive source reconciliation, and have reproducible rules. None may be promoted automatically based on this screen."
+}
