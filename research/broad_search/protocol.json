@@ -1,0 +1,19 @@
+{
+  "recorded_on": "2026-10-22",
+  "purpose": "Unrestricted search for any automatable, cash-funded strategy that beats SPY. Methods are not limited (AI, quant, active, alternative data, crypto). Limits kept: no borrowing, shorts, leveraged or inverse products; and evidence must not come from the same data used to choose the strategy.",
+  "track_A_live_fund_census": {
+    "universe": "Every US-listed ETF in the Nasdaq Trader symbol directory (file created 2026-10-22) with Yahoo adjusted prices covering 2016-10-14 to 2026-10-16. Excluded and counted: leveraged or inverse funds (name contains 2X, 3X, 1.5X, Ultra, Leveraged, Inverse, Short, Bear, Bull, -1X, Daily), volatility (VIX) products and single-stock funds.",
+    "window": "10 years, 2016-10-14 to 2026-10-16; halves split at 2021-10-15.",
+    "costs": "Fund expenses already in prices; 0.10% on entry and exit.",
+    "pass_rules_all_required": {
+      "A1": "CAGR at least 3.0 percentage points above SPY over 10 years.",
+      "A2": "Selection-aware: the fund's monthly excess-return t-statistic exceeds the 95th percentile of the maximum t across all eligible funds under a null of zero excess (stationary bootstrap, mean block 6 months, 2,000 draws).",
+      "A3": "Ahead of SPY in both 5-year halves.",
+      "A4": "Maximum daily-close drawdown no more than 10 points deeper than SPY's.",
+      "A5": "Fama-French five factors plus momentum alpha at least 2 percentage points a year with t >= 2, so the lead is not just market, size, value, profitability, investment or momentum exposure."
+    },
+    "known_bias": "Dead funds are missing (survivorship) and funds that were not yet 10 years old are excluded; both bias results upward, so a failure is more decisive than a pass.",
+    "if_pass": "Report as a candidate whose rule is 'hold this fund'; still requires a prospective tracking period before any money."
+  },
+  "later_tracks": "Further tracks (for example insider-purchase events from SEC Form 4, crypto allocation, multi-signal machine learning) are registered here before they run, with a development period ending 2018-12 and an untouched 2019-2026 evaluation."
+}
