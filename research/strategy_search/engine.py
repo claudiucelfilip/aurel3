@@ -36,6 +36,7 @@ def market():
 
 def etf_monthly():
     px = pd.read_csv(DATA / 'etf_adj_close.csv', index_col=0, parse_dates=True)
+    px = px.join(pd.read_csv(DATA / 'etf_adj_close_b2.csv', index_col=0, parse_dates=True), how='outer')
     return px.resample('ME').last().pct_change(fill_method=None)
 
 
@@ -153,7 +154,26 @@ def candidates():
     out['C6_global_dual_momentum'] = (dual_momentum(mkt, exus, rf, rf), '2012-01',
                                       etf_eval(dual_momentum(spy, e['EFA'], e['BIL'].fillna(rf.reindex(e.index)), e['AGG']),
                                                spy, gld, 'SPY / EFA / AGG dual momentum'))
+    mom = french('6_Portfolios_ME_Prior_12_2_CSV')
+    out['C7_value_momentum_blend'] = (.5 * bm['BIG HiBM'] + .5 * mom['BIG HiPRIOR'] - .0125 / 12, '2011-08', None)
+    out['C8_small_cap_momentum'] = (mom['SMALL HiPRIOR'] - .025 / 12, '1990-01', etf_eval(e['XSMO'], spy, gld, 'XSMO'))
+    ni = french('Portfolios_Formed_on_NI_CSV')
+    out['C9_net_repurchasers'] = (ni['< 0'] - .005 / 12, '2004-01', etf_eval(e['PKW'], spy, gld, 'PKW'))
+    out['C10_market_trend_filter'] = (trend(mkt, rf), '2006-01',
+                                      etf_eval(trend(spy, e['BIL'].fillna(rf.reindex(e.index))), spy, gld, 'SPY / BIL 10-month trend'))
+    ee = pd.DataFrame({'a': e['IJS'], 'b': e['XSMO']}).dropna()
+    out['C11_small_value_momentum_blend'] = (.5 * bm['SMALL HiBM'] + .5 * mom['SMALL HiPRIOR'] - .0175 / 12, '2011-08',
+                                             etf_eval(.5 * ee['a'] + .5 * ee['b'] - .5 * (ee['a'] - ee['b']).abs() * SIDE, spy, gld, '50% IJS + 50% XSMO'))
     return out, mkt
+
+
+def trend(r, cash):
+    j = pd.DataFrame({'r': r, 'c': cash}).dropna()
+    level = (1 + j['r']).cumprod()
+    on = (level > level.rolling(10).mean()).shift(1)
+    on = on[level.rolling(10).mean().shift(1).notna()].astype(bool)
+    out = j.loc[on.index, 'r'].where(on, j.loc[on.index, 'c'])
+    return out - on.ne(on.shift()).astype(float).iloc[1:].reindex(on.index, fill_value=0) * 2 * SIDE
 
 
 def dual_momentum(us, intl, cash, safe):
