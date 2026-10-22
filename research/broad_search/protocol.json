@@ -73,5 +73,52 @@
       "Holdout pair persistence: share of selected pairs still >= 56% and beating SPY on triggers, against 1,000 random equally sized pair sets from the same universe (placebo).",
       "Unconditional base rate: share of up periods for each Y, because a 56% hit rate is ordinary for equities (about 53-56% of days are up)."
     ]
+  },
+  "track_F_wild_batch": {
+    "recorded_on": "2026-10-22",
+    "purpose": "Four unconventional long-only ideas registered as one batch. Development 2008-01-01 to 2018-12-31, holdout 2019-01-01 to 2026-10-16, pass rules H1-H5. Any winner must be re-checked for survivorship because the stock price set (data/broad_search/insider/prices, built from Form 4 filer tickers alive on Yahoo today) omits most delisted companies.",
+    "F1_earnings_jump_drift": {
+      "idea": "Post-earnings-announcement drift, long only. Earnings dates = 8-K filings with item 2.02 from EDGAR submissions JSON. Signal = stock return on the filing day (close before filing day to close on filing day), minus SPY.",
+      "rule": "Each trading day, stocks whose 8-K 2.02 was filed that day and whose excess return is in the top 20% of all events in the trailing 252 days (or > +5% in the first year) enter at the next close, equal weight, hold 60 trading days; max 50 names, book is 100% invested with the remainder in SPY. Price >= $5 at entry. Cost 0.10% per side.",
+      "grid": [
+        "hold 60 days",
+        "hold 20 days"
+      ],
+      "choice": "higher development Sharpe"
+    },
+    "F2_stock_seasonality": {
+      "idea": "Heston-Sadka: stocks that did well in the same calendar month in the previous years keep doing so.",
+      "rule": "At each month end, rank stocks with >= 3 observations by the average return in the same calendar month over the prior 5 years; buy the top 50 equal weight for the next month. Price >= $5, 2 years of history. Cost 0.10% per side.",
+      "grid": [
+        "top 50",
+        "top 100"
+      ],
+      "choice": "higher development Sharpe"
+    },
+    "F3_etf_self_reversal": {
+      "idea": "Short-term reversal across asset classes: buy what just fell hardest.",
+      "rule": "Universe = the 83 ETFs of track E. Each Friday close, buy the k worst performers over the past week at the next close, equal weight, hold one week. Monthly variant: 1-month return, hold one month.",
+      "grid": [
+        "weekly k=3",
+        "weekly k=5",
+        "monthly k=3",
+        "monthly k=5"
+      ],
+      "choice": "higher development Sharpe"
+    },
+    "F4_berkshire_clone": {
+      "idea": "Copy Berkshire Hathaway stock holdings from its 13F-HR filings, trading only after each filing becomes public.",
+      "rule": "From each 13F-HR filing date (CIK 1067983, infotable XML, available from 2013 Q2), hold the top 10 positions by reported value, weighted by value, bought at the next close after the filing date. Development here is 2013-08 to 2018-12 (shorter than the other tracks, recorded as a known weakness). Cost 0.10% per side.",
+      "grid": [
+        "top 10 value-weighted",
+        "top 10 equal-weight"
+      ],
+      "choice": "higher development Sharpe"
+    },
+    "excluded_for_cause": [
+      "turn-of-month and overnight-only holding (out of the market most days, cannot clear +3pp without leverage)",
+      "social-media attention (no historical data without a paid feed)",
+      "options or volatility selling (leverage/derivatives)"
+    ]
   }
 }
