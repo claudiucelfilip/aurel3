@@ -120,5 +120,54 @@
       "social-media attention (no historical data without a paid feed)",
       "options or volatility selling (leverage/derivatives)"
     ]
+  },
+  "track_G_lewellen_composite": {
+    "recorded_on": "2026-10-22",
+    "idea": "Lewellen (2015, Critical Finance Review) 'The Cross Section of Expected Stock Returns': a composite of 15 slow-moving firm characteristics predicts returns; the large-stock value-weighted top decile earned 1.56%/month 1974-2013. Research synthesis (reports/AI trading strategy edge evidence.md, private) identified it as the only long-only large-cap ML-adjacent result with free data.",
+    "data": "Open Source Asset Pricing (Chen & Zimmermann) value-weighted decile portfolio returns per signal, CRSP-based with delisting returns, 1951-2024-12 (PredictorAltPorts_DecilesVW and PredictorAltPorts_LiqScreen_ME_gt_NYSE20pct). Benchmark: Kenneth French value-weighted market (Mkt-RF + RF); SPY shown where it exists.",
+    "implementation_gap": "OSAP gives one sorted portfolio per signal, not firm-level returns, so the composite is the equal-weighted average of the 15 long-leg (decile 10) portfolios, rebalanced monthly. This is weaker than Lewellen's composite-rank decile (it does not concentrate on stocks good on many characteristics at once). A pass here would be a lower bound; a fail does not fully refute the paper.",
+    "signals": {
+      "3": [
+        "Size",
+        "BM",
+        "Mom12m"
+      ],
+      "7": [
+        "Size",
+        "BM",
+        "Mom12m",
+        "Accruals",
+        "roaq",
+        "AssetGrowth",
+        "ShareIss1Y"
+      ],
+      "15": [
+        "Size",
+        "BM",
+        "Mom12m",
+        "Accruals",
+        "roaq",
+        "AssetGrowth",
+        "ShareIss1Y",
+        "ShareIss5Y",
+        "LRreversal",
+        "Beta",
+        "RealizedVol",
+        "VolMkt",
+        "Leverage",
+        "SP"
+      ],
+      "note": "Dividend yield is not in OSAP (omitted); share turnover proxied by VolMkt. OSAP signs each predictor so decile 10 is the long side."
+    },
+    "universes": [
+      "deciles_vw (all CRSP stocks, value-weighted deciles)",
+      "ex_nyse_p20_me (stocks above the NYSE 20th size percentile)"
+    ],
+    "development": "1974-01 to 2013-12 (the paper sample)",
+    "holdout": "2014-01 to 2024-12; halves split 2018-12-31",
+    "costs": "0.10% per side on an assumed one-sided monthly turnover of the long leg: 5% for annually-rebalanced signals, 25% for monthly ones (Mom12m, roaq, LRreversal, Beta, RealizedVol). Sensitivity at 0x and 2x reported, verdict at 1x.",
+    "grid": "3 signal sets x 2 universes = 6 configs; choice = highest development Sharpe, recorded before holdout.",
+    "pass_rules": "H1-H5 as holdout_rules, measured against the French market.",
+    "expectation_recorded_before_running": "Research synthesis predicts +1 to +3 pp/yr net long-only; H1 (>=3pp) is expected to fail."
   }
 }
