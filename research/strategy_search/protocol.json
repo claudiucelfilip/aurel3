@@ -1,0 +1,60 @@
+{
+  "recorded_on": "2026-10-22",
+  "purpose": "Bounded search for a cash-only strategy that meaningfully beats a US index fund, with rules fixed from published research before testing. User asked to loop until something is found; this protocol keeps the loop honest.",
+  "constraints": "No borrowing, shorts, leveraged funds or derivatives. Long-only, fully cash-funded. Rules taken from the original publication with its headline parameters; no tuning after seeing results.",
+  "trial_budget": "At most 12 candidates in total. Every registered candidate counts, pass or fail, including those added in later batches. Later batches are registered here before they are run.",
+  "validation_window": "Out-of-sample = first month after the end of the original paper's data sample, to 2026-08 (Kenneth French data end). Must be at least 14 years. Earlier data is reported but is in-sample for the idea.",
+  "benchmark": "US market total return (French Mkt-RF + RF). ETF checks also report SPY, GLD and a monthly-rebalanced 50/50 SPY/GLD mix.",
+  "pass_rules_all_required": {
+    "P1": "Net annualized (CAGR) excess over the market >= 3.0 percentage points in the out-of-sample window.",
+    "P2": "Newey-West (12 lags) t-statistic of monthly net excess >= 2.64 out of sample (one-sided 5% with a Bonferroni split over 12 trials).",
+    "P3": "Net CAGR excess >= 0 over 2007-01 to 2026-08, so the effect is not dead in the recent regime.",
+    "P4": "Maximum month-end drawdown no more than 10 percentage points deeper than the market's over the out-of-sample window.",
+    "P5": "Where a liquid ETF implementation exists, its CAGR over its own live history (from first full month, 0.10% per traded side) is at least SPY's. Where none exists the candidate cannot be proposed for implementation."
+  },
+  "outcome": "Passing all five makes a candidate a proposal for a frozen prospective test and later Aurel3 tracking. It does not authorize trading or any live change.",
+  "batch_1": {
+    "C1_industry_momentum": {
+      "source": "Moskowitz & Grinblatt (1999), Do Industries Explain Momentum? Journal of Finance. Data sample ends 1995-07.",
+      "rule": "12 Fama-French value-weighted industries. At each month end rank by total return over the past 6 months; hold the top 3 equally weighted next month.",
+      "oos_start": "1995-08",
+      "costs": "Turnover x 0.10% per side plus 0.15%/yr fund fees (sector-ETF style).",
+      "etf": "Same rule on the 9 original SPDR sector ETFs (XLB XLE XLF XLI XLK XLP XLU XLV XLY) from 1999."
+    },
+    "C2_small_value": {
+      "source": "Fama & French (1992), The Cross-Section of Expected Stock Returns. Sample ends 1990-12.",
+      "rule": "Hold French SMALL HiBM (value-weighted small-cap, high book-to-market) portfolio.",
+      "oos_start": "1991-01",
+      "costs": "1.0%/yr drag (fund fees and small-cap trading).",
+      "etf": "IJS (S&P SmallCap 600 Value)."
+    },
+    "C3_big_profitable": {
+      "source": "Novy-Marx (2013), The Other Side of Value: The Gross Profitability Premium. Sample ends 2010-12.",
+      "rule": "Hold French BIG HiOP (large-cap, high operating profitability).",
+      "oos_start": "2011-01",
+      "costs": "0.5%/yr drag.",
+      "etf": "QUAL (MSCI USA Quality; related but not identical)."
+    },
+    "C4_big_conservative_investment": {
+      "source": "Titman, Wei & Xie (2004), Capital Investments and Stock Returns. Sample ends 1996-12.",
+      "rule": "Hold French BIG LoINV (large-cap, low asset growth).",
+      "oos_start": "1997-01",
+      "costs": "0.5%/yr drag.",
+      "etf": "None liquid and matching; cannot pass P5."
+    },
+    "C5_halloween": {
+      "source": "Bouman & Jacobson (2002), The Halloween Indicator, American Economic Review. Sample ends 1998-08.",
+      "rule": "Hold the market November-April, T-bills May-October.",
+      "oos_start": "1998-09",
+      "costs": "Two switches a year, 0.10% per side.",
+      "etf": "SPY / BIL (BIL from 2007)."
+    },
+    "C6_global_dual_momentum": {
+      "source": "Antonacci (2012/2014), Risk Premia Harvesting Through Dual Momentum. Sample ends 2011-12.",
+      "rule": "Monthly: if US market 12-month return > T-bill 12-month return, hold whichever of US or developed ex-US equities had the higher 12-month return; otherwise hold T-bills (aggregate bonds in the ETF version).",
+      "oos_start": "2012-01",
+      "costs": "Turnover x 0.10% per side.",
+      "etf": "SPY / EFA / AGG."
+    }
+  }
+}
