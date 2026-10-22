@@ -43,7 +43,7 @@
       "etf": "None liquid and matching; cannot pass P5."
     },
     "C5_halloween": {
-      "source": "Bouman & Jacobson (2002), The Halloween Indicator, American Economic Review. Sample ends 1998-08.",
+      "source": "Bouman & Jacobsen (2002), The Halloween Indicator, American Economic Review. Sample ends 1998-08.",
       "rule": "Hold the market November-April, T-bills May-October.",
       "oos_start": "1998-09",
       "costs": "Two switches a year, 0.10% per side.",
@@ -55,6 +55,45 @@
       "oos_start": "2012-01",
       "costs": "Turnover x 0.10% per side.",
       "etf": "SPY / EFA / AGG."
+    }
+  },
+  "batch_1_result": "0 of 6 passed (results committed with batch 2 registration). ETF check fixed to use each ETF's own live history for P5; gold and 50/50 mix reported from GLD's start.",
+  "batch_2": {
+    "registered_after": "Seeing batch 1 results. Chosen for the largest documented long-only premia not yet tested; one budget slot is held back.",
+    "C7_value_momentum_blend": {
+      "source": "Asness, Moskowitz & Pedersen (2013), Value and Momentum Everywhere, Journal of Finance. Sample ends 2011-07.",
+      "rule": "50% French BIG HiBM + 50% BIG HiPRIOR, rebalanced monthly.",
+      "oos_start": "2011-08",
+      "costs": "1.25%/yr drag (momentum turnover on half the portfolio, value on the other half).",
+      "etf": "None matching; cannot pass P5."
+    },
+    "C8_small_cap_momentum": {
+      "source": "Jegadeesh & Titman (1993), Returns to Buying Winners and Selling Losers. Sample ends 1989-12.",
+      "rule": "Hold French SMALL HiPRIOR (small-cap, top 30% by months t-12 to t-2).",
+      "oos_start": "1990-01",
+      "costs": "2.5%/yr drag (monthly small-cap momentum turnover).",
+      "etf": "XSMO (Invesco S&P SmallCap Momentum; earlier index history differs, approximate)."
+    },
+    "C9_net_repurchasers": {
+      "source": "Pontiff & Woodgate (2008), Share Issuance and Cross-sectional Returns, Journal of Finance. Sample ends 2003-12.",
+      "rule": "Hold French value-weighted portfolio of firms with negative net share issuance ('< 0' column).",
+      "oos_start": "2004-01",
+      "costs": "0.5%/yr drag (annual reconstitution).",
+      "etf": "PKW (Invesco BuyBack Achievers)."
+    },
+    "C10_market_trend_filter": {
+      "source": "Faber (2007), A Quantitative Approach to Tactical Asset Allocation. Sample ends 2005-12 (equity sleeve only, US market).",
+      "rule": "Hold the US market when its month-end total-return index is above its 10-month average, else T-bills; signal at month end, trade next month.",
+      "oos_start": "2006-01",
+      "costs": "0.10% per side per switch.",
+      "etf": "SPY / BIL with the same rule (BIL from 2007; T-bill rate before)."
+    },
+    "C11_small_value_momentum_blend": {
+      "source": "Asness, Moskowitz & Pedersen (2013), applied to small caps. Sample ends 2011-07.",
+      "rule": "50% SMALL HiBM + 50% SMALL HiPRIOR, rebalanced monthly.",
+      "oos_start": "2011-08",
+      "costs": "1.75%/yr drag.",
+      "etf": "50% IJS + 50% XSMO, monthly rebalanced."
     }
   }
 }
