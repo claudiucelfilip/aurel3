@@ -258,5 +258,40 @@
       }
     },
     "note": "Spin-off additions (new tickers) have no pre-effective price history and drop out of I2 automatically."
+  },
+  "track_J_crypto_drawdown_control": {
+    "recorded_on": "2026-10-23",
+    "source": "User question: can crypto's drift be captured while capping drawdowns with trend/volatility measures (aurel2-crypto claims 93% CAGR 2021-26 on a 5-coin universe chosen with hindsight; Track B's 25% BTC sleeve was the only near-miss, +6.9pp t 1.17).",
+    "data": "BTC-USD from 2014-09-17 and ETH-USD from 2017-11-09 (Yahoo), cash = BIL. Only the two coins that existed before the development period end, to avoid universe selection bias. Costs 0.25% per side crypto, 0.10% BIL. Signals at daily close, trades next close.",
+    "development": "2015-01-01 to 2018-12-31",
+    "holdout": "2019-01-01 to 2026-10-16; halves split 2022-12-31. Choice by development Sharpe.",
+    "families": {
+      "J1_btc_trend": {
+        "rule": "100% BTC when close > N-day SMA else BIL.",
+        "grid": [
+          "N100",
+          "N200",
+          "N140 (20-week)"
+        ]
+      },
+      "J2_aurel2_crypto_rules_btc_eth": {
+        "rule": "aurel2-crypto momentum on {BTC, ETH}: weekly, hold the coin with the higher L-day return if positive else BIL; daily exit to BIL when all negative; 10% trailing stop then BIL until next weekly signal.",
+        "grid": [
+          "L28",
+          "L56",
+          "L90"
+        ]
+      },
+      "J3_btc_vol_target": {
+        "rule": "BTC weight = min(1, target_vol / realised 30-day vol), remainder BIL, rebalanced weekly; plus 200-day trend gate (weight 0 below SMA).",
+        "grid": [
+          "target30",
+          "target50",
+          "target30_trend",
+          "target50_trend"
+        ]
+      }
+    },
+    "note": "Crypto full-sample numbers depend on Bitcoin's past drift; the halves test (H3) is the key check for whether the edge is a 2019-21 artefact."
   }
 }
