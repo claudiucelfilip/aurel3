@@ -213,5 +213,50 @@
     },
     "choice": "Per family, highest development Sharpe, recorded before the holdout. Verdict per family with H1-H5 against SPY.",
     "expectation_recorded_before_running": "Each family is a timing rule that is out of the market part of the time; the sweep itself found only 2 of 113 such US rules beat buy-and-hold in a placebo study. Expect H1 to fail for all four; the QQQ trend rule may pass on drawdown only."
+  },
+  "track_I_predictable_flows": {
+    "recorded_on": "2026-10-23",
+    "source": "Round-2 research (private notes): anticipating forced/mechanical flows. Greenwood & Sammon put the S&P 500 addition premium at 0.8% total for 2010-2020 and say it now accrues after hours; turn-of-month effect documented but ~0.8%/yr pre-cost. Registered to measure what a daily-close, long-only buyer actually gets, plus the long-only mirror (buying deletions after forced selling).",
+    "data": "SPY and SHY adjusted closes 1993-2026-10-16 (Yahoo); 3-month T-bill DTB3 (FRED) as cash before SHY; S&P 500 change list from Wikipedia 'List of S&P 500 companies' revision 1368287955 (2026-08-10), complete enough from 2011 (~20 rows/yr); added/removed stock prices from Yahoo (delisted names missing: survivorship bias flagged, biases I3 upward).",
+    "execution": "All trades at the daily close after the information is public. Announcement dates are not in the list; S&P announces at least one trading day before the effective date, so entries at effective-1 and effective-2 closes are post-announcement by construction. effective-3 and earlier may precede the announcement and are reported only as a labelled upper bound, never chosen.",
+    "cost": "0.10% per side.",
+    "development": "I1: 1994-01-01 to 2018-12-31. I2/I3: 2011-01-01 to 2018-12-31.",
+    "holdout": "2019-01-01 to 2026-10-16; halves split 2022-12-31. Choice by development Sharpe within each family before holdout is computed.",
+    "families": {
+      "I1_turn_of_month": {
+        "claim": "SPY return concentrates around month turn (dash-for-cash).",
+        "rule": "Hold SPY only on the last L and first F trading days of each month, else cash.",
+        "grid": [
+          "L1F3",
+          "L3F3",
+          "L4F5",
+          "L2F2"
+        ]
+      },
+      "I2_sp500_additions": {
+        "claim": "Index funds must buy additions on the effective date; buy ahead and sell to them.",
+        "rule": "Portfolio is SPY; at the close k trading days before an addition's effective date, switch to the added stock(s) equal-weight; return to SPY at effective-date close (or h days after). Multiple events overlap equal-weight.",
+        "grid": [
+          "k1_exit0",
+          "k2_exit0",
+          "k1_exit5",
+          "k2_exit5"
+        ],
+        "upper_bound_only": [
+          "k3_exit0",
+          "k5_exit0"
+        ]
+      },
+      "I3_sp500_deletions": {
+        "claim": "Deleted stocks are dumped by index funds and partly rebound.",
+        "rule": "Portfolio is SPY; at a deletion's effective close, switch an equal-weight sleeve into the removed stock; hold N trading days then back to SPY. Exclude removals due to acquisition, merger, bankruptcy or spin-off (reason text).",
+        "grid": [
+          "N20",
+          "N60",
+          "N120"
+        ]
+      }
+    },
+    "note": "Spin-off additions (new tickers) have no pre-effective price history and drop out of I2 automatically."
   }
 }
