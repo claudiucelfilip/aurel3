@@ -293,5 +293,41 @@
       }
     },
     "note": "Crypto full-sample numbers depend on Bitcoin's past drift; the halves test (H3) is the key check for whether the edge is a 2019-21 artefact."
+  },
+  "track_K_intraday_orb": {
+    "registered_on": "2026-10-26",
+    "claim": "TikTok day-trading clips relayed by Sherlock 2026-10-26: 'Noise Band' (opening-range breakout on the NY open, ride to close, 'strategy 27 of 50 survived') and 'Session Momentum' (first 5-min Nasdaq candle above/below 12 EMA, trail stop; claims 508% in 6 years, 1,448 trades, 57% win). Both are leveraged futures/CFD, both directions. We test only the long-only, unleveraged, cash-account version on QQQ.",
+    "data": "QQQ 1-minute bars, Alpaca IEX feed, regular hours only, from the earliest available (~2016) to 2026-10-23; QQQ/SPY/BIL daily bars for benchmarks. Fetched inside the aurel2 paper container on Dumbo so no key is handled.",
+    "costs": "Base 1bp per side (QQQ spread + slippage, zero commission); sensitivity 2bp and 5bp. Stop fills at the stop price minus slippage. Cash earns BIL when flat (reported both ways).",
+    "development": "first available to 2020-12-31",
+    "holdout": "2021-01-01 to 2026-10-23; halves split 2023-12-31. Variant chosen by development Sharpe only.",
+    "hurdle": "holdout CAGR net of costs >= SPY buy-and-hold + 3pp, with drawdown not worse than SPY.",
+    "families": {
+      "K1_orb_long": {
+        "rule": "Opening range = first R minutes from 09:30 ET. Buy when price trades above range high before 12:00 ET; stop at range low; exit at 15:55 close. Flat overnight.",
+        "grid": [
+          "R5",
+          "R15",
+          "R30"
+        ]
+      },
+      "K2_session_momentum_long": {
+        "rule": "Buy at 09:35 close if the first 5-min candle closes above the 12-period EMA of 5-min closes; trailing stop = 1x or 2x the first candle range; exit at 15:55.",
+        "grid": [
+          "trail1",
+          "trail2"
+        ]
+      },
+      "K3_orb_trend_gate": {
+        "rule": "K1 only on days the open is above the 20-day SMA of daily closes.",
+        "grid": [
+          "R5",
+          "R15",
+          "R30"
+        ]
+      }
+    },
+    "pre_registered_expectation": "Small positive gross, under the hurdle net. Long-only removes half the trades and the bear-market half of the claimed return; ~250 round trips a year make 1-2bp of friction decisive.",
+    "note": "'27 of 50 survived' is multiple testing. Single family reported with all grid cells; no cell is dropped after seeing holdout."
   }
 }
