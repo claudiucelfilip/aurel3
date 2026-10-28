@@ -331,5 +331,18 @@
     "note": "'27 of 50 survived' is multiple testing. Single family reported with all grid cells; no cell is dropped after seeing holdout.",
     "data_amendment_2026-10-26": "Alpaca IEX minute history for QQQ starts 2020-07-27 (nothing before). Windows re-cut before any backtest ran: development 2020-07-27 to 2022-12-31; holdout 2023-01-01 to 2026-10-23, halves split 2024-12-31.",
     "result_2026-10-26": "FAIL all 8 cells. Best holdout cell (K1 R30) 9.8%/yr at 1bp vs SPY 18.4%; even at 0bp 13.0%. Dev-Sharpe pick (K3 R5 +trend) holds out at 1.3%/yr. 6-8bp gross/trade, 1-2bp friction halves it. See research/broad_search/orb/RESULTS.md."
+  },
+  "adhoc_checks_2026_10_28": {
+    "note": "Descriptive checks on public index/ETF returns, not strategy tracks (no rule fitted, no dev/holdout). Recorded so failed ideas stay on file.",
+    "midterm_window": {
+      "claim": "TikTok 'the 9 months after midterms' (Sherlock brief 28ef0984): hold stocks Oct 1 of a midterm year through Jun 30.",
+      "data": "SPY adjusted monthly 1993-2026 (data/broad_search/flows/SPY.csv), midterms 1994-2022.",
+      "result": "All 8 windows positive, 23.8%/yr annualised in-window vs 8.2% other months; but in-window-only with cash otherwise compounds 3.9%/yr vs 10.8% buy-and-hold. Cannot beat SPY long-only unleveraged; 8 samples. FAIL."
+    },
+    "factor_etfs": {
+      "claim": "QuantFinanceToGo 'Quantitative Finance from Scratch' parts 24-29: momentum, value, size, quality, low-volatility factors.",
+      "data": "yfinance adjusted closes 2011-2026-10-27 for MTUM USMV SPLV VLUE IWD QUAL SIZE IWM vs SPY; script research/broad_search/factors/factor_etfs.py.",
+      "result": "Since 2013-07 no long-only factor ETF beats SPY by more than 1.1pp (MTUM, t 0.50); low-vol -3 to -5pp. FAIL 3pp hurdle. See research/broad_search/factors/RESULTS.md."
+    }
   }
 }
