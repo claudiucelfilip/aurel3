@@ -343,6 +343,11 @@
       "claim": "QuantFinanceToGo 'Quantitative Finance from Scratch' parts 24-29: momentum, value, size, quality, low-volatility factors.",
       "data": "yfinance adjusted closes 2011-2026-10-27 for MTUM USMV SPLV VLUE IWD QUAL SIZE IWM vs SPY; script research/broad_search/factors/factor_etfs.py.",
       "result": "Since 2013-07 no long-only factor ETF beats SPY by more than 1.1pp (MTUM, t 0.50); low-vol -3 to -5pp. FAIL 3pp hurdle. See research/broad_search/factors/RESULTS.md."
+    },
+    "options_overlays": {
+      "claim": "User asked (2026-10-28) whether an automated options strategy, no leverage, could beat SPY; derivatives exclusion lifted for this check.",
+      "data": "CBOE strategy indices BXM BXMD BXY PUT CLL PPUT CMBO (cdn.cboe.com history CSVs, 1986/1991/2002/2008-2026-10-27, gross) vs ^SP500TR; options-income ETFs JEPI XYLD DIVO SVOL QYLD JEPQ (yfinance adjusted). Scripts research/broad_search/options/.",
+      "result": "All trail the index in every window: best BXMD -0.5pp full history gross, -3.9 since 2010, -4.8 since 2019; PUT -1.7/-5.9/-7.1; income ETFs -2.4 to -10.4pp net. Overlays cut volatility, not add return. FAIL 3pp hurdle. See research/broad_search/options/RESULTS.md."
     }
   }
 }
